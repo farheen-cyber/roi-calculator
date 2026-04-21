@@ -299,7 +299,7 @@ body.state-overview #res-status { display: none !important; }
         <div class="r-h">LIVE ESTIMATE</div>
         <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
       </div>
-      <div class="r-s" id="res-status">Using platform benchmarks</div>
+      <div class="r-s" id="res-status" style="display:none"></div>
 
       <div class="chart-wrap">
         <div class="chart-h">ANNUAL COST COMPARISON</div>
@@ -495,8 +495,8 @@ function doCalc(){
   
   var diff=annCost-elAnn, isSpend=diff>=0, absDiff=Math.abs(diff), roi=elAnn>0?Math.round(absDiff/elAnn*10)/10:0;
 
-  document.getElementById('res-status').innerText = userInputStarted?"Based on your inputs":"Using sample data";
-  // Only show res-status on input form (not on overview)
+  // Always show "Based on your inputs" when in input form
+  document.getElementById('res-status').innerText = "Based on your inputs";
   document.getElementById('res-status').style.display = (flow === 'input') ? 'block' : 'none';
 
   var max = Math.max(annCost, elAnn, 1);
@@ -562,8 +562,16 @@ EquityList = ${sym}${fN(Math.round(stakeholders*1200*FX[geo_op]))} platform + ${
   `;
 }
 
-function openAssumptions(){ document.getElementById('results-view').classList.add('hidden'); document.getElementById('assumptions-view').classList.remove('hidden'); }
-function closeAssumptions(){ document.getElementById('assumptions-view').classList.add('hidden'); document.getElementById('results-view').classList.remove('hidden'); }
+function openAssumptions(){
+  document.getElementById('results-view').classList.add('hidden');
+  document.getElementById('assumptions-view').classList.remove('hidden');
+  document.getElementById('audit-log-link').style.display = 'none';  // Hide View Assumptions button
+}
+function closeAssumptions(){
+  document.getElementById('assumptions-view').classList.add('hidden');
+  document.getElementById('results-view').classList.remove('hidden');
+  document.getElementById('audit-log-link').style.display = 'inline';  // Show View Assumptions button again
+}
 
 function onMethChange(){
   var m=document.getElementById('i-meth').value;
@@ -575,27 +583,37 @@ function fN(n){ return n.toLocaleString(); }
 function fK(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return Math.round(n/1e3).toLocaleString()+'k'; return String(Math.round(n)); }
 
 const sectionObs = new IntersectionObserver((entries) => {
-  // Get all sections that are in viewport (even partially)
-  const visible = entries.filter(e => e.isIntersecting);
-  if (!visible.length) return;
+  // Find the section closest to viewport center
+  let closestSection = null;
+  let maxRatio = -1;
 
-  // Find section with highest intersection ratio (closest to center viewport)
-  let active = visible[0];
-  for (let entry of visible) {
-    if (entry.intersectionRatio > active.intersectionRatio) {
-      active = entry;
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+      maxRatio = entry.intersectionRatio;
+      closestSection = entry.target;
     }
+  });
+
+  // If no section found in viewport, use the one closest to top
+  if (!closestSection) {
+    entries.forEach(entry => {
+      const rect = entry.target.getBoundingClientRect();
+      // Use closest section to viewport (smallest distance)
+      if (!closestSection || Math.abs(rect.top) < Math.abs(closestSection.getBoundingClientRect().top)) {
+        closestSection = entry.target;
+      }
+    });
   }
 
-  // Update active state
+  // Update active state for all sections
   document.querySelectorAll('.sec').forEach(s => {
-    if (s === active.target) {
+    if (s === closestSection) {
       s.classList.remove('dim');
     } else {
       s.classList.add('dim');
     }
   });
-}, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], rootMargin: "-25% 0px -25% 0px" });
+}, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1], rootMargin: "-20% 0px -20% 0px" });
 
 window.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('state-overview');
