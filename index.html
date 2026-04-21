@@ -9,15 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0b0b0f;
-  --bg-r: #0d0d12;
-  --t1: #ffffff;
-  --t2: rgba(255,255,255,0.65);
-  --t3: rgba(255,255,255,0.4);
+  --bg: #ffffff;
+  --bg-r: #f5f5f7;
+  --t1: #000000;
+  --t2: rgba(0,0,0,0.65);
+  --t3: rgba(0,0,0,0.4);
   --accent: #5f17ea;
   --accent-l: #7a3df5;
-  --bd: rgba(255,255,255,0.08); 
-  --bd-field: rgba(255,255,255,0.18);
+  --bd: rgba(0,0,0,0.08);
+  --bd-field: rgba(0,0,0,0.18);
   --ok: #22c55e;
   --red: #ef4444;
   --mono: 'JetBrains Mono', monospace;
@@ -40,13 +40,16 @@ body {
   display: grid;
   grid-template-columns: 60fr 40fr;
   min-height: 100vh;
+  max-height: calc(100vh - 80px);
+  height: auto;
   position: relative;
   z-index: 1;
 }
 
-.col-l { padding: 0 8vw; border-right: 1px solid var(--bd); position: relative; }
+.col-l { padding: 0 8vw; border-right: 1px solid var(--bd); position: relative; overflow-y: auto; max-height: calc(100vh - 80px); scrollbar-width: none; }
+.col-l::-webkit-scrollbar { display: none; }
 #overview-state { padding-top: 0 !important; padding-bottom: 0 !important; padding: 20px 0 !important; }
-.col-r { position: sticky; top: 0; height: 100vh; padding: 80px 48px; background: var(--bg-r); overflow-y: auto; scrollbar-width: none; border-left: 1px solid var(--bd); }
+.col-r { position: sticky; top: 0; height: auto; max-height: calc(100vh - 80px); padding: 80px 48px; background: var(--bg-r); overflow-y: auto; scrollbar-width: none; border-left: 1px solid var(--bd); }
 .col-r::-webkit-scrollbar { display: none; }
 
 @media (max-width: 1024px) {
@@ -63,7 +66,7 @@ body {
     border-top: 1px solid var(--bd);
     padding: 12px 16px;
     z-index: 1000;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   }
   .summary-row {
     display: grid;
@@ -104,7 +107,7 @@ body {
 .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px !important; margin-bottom: 18px !important; }
 .method-card {
   padding: 18px !important;
-  background: #111116;
+  background: #f9f9fb;
   border: 1px solid var(--bd);
   cursor: pointer;
   position: relative;
@@ -169,7 +172,7 @@ body {
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .bar-val { font-family: var(--mono); font-size: 11px; color: #fff; opacity: 0; transition: opacity 0.3s; }
 .bar-rect { width: 100%; height: 0; transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.bar-rect.you { background: #333; }
+.bar-rect.you { background: #e5e5e7; }
 .bar-rect.el { background: var(--accent); }
 .bar-lbl { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
 
@@ -206,7 +209,7 @@ body {
 .editable:hover { border-color: var(--ok); }
 .editable:focus { border-bottom-color: var(--ok); box-shadow: 0 2px 0 var(--ok); }
 .editable.editing { border-bottom: none; cursor: default; }
-.edit-in { background: #1a1a20; border: 1px solid var(--ok); color: #fff; font-family: var(--mono); font-size: 11px; padding: 2px 6px; outline: none; width: 60px; }
+.edit-in { background: #f0f0f2; border: 1px solid var(--ok); color: #000; font-family: var(--mono); font-size: 11px; padding: 2px 6px; outline: none; width: 60px; }
 .reset-btn { font-size: 9px; color: var(--accent); text-transform: uppercase; cursor: pointer; text-decoration: underline; margin-left: 8px; }
 
 .ap-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -304,9 +307,9 @@ body.state-overview #res-status { display: none !important; }
         <h2 class="sec-h">Equity Structure</h2>
         <p class="sec-p">Stakeholder volume scales your cap table reconciliation and grant overhead.</p>
         <div class="fg">
-          <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onblur="val(this)"><div class="err-msg">Field required</div></div>
-          <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onblur="valAndEnableNext(this, 'i-gr')"><div class="err-msg">Field required</div></div>
-          <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()" onblur="val(this)"><div class="err-msg">Field required</div></div>
+          <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="val(this)"><div class="err-msg">Field required</div></div>
+          <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="valAndEnableNext(this, 'i-gr')"><div class="err-msg">Field required</div></div>
+          <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="val(this)"><div class="err-msg">Field required</div></div>
         </div>
       </div>
 
@@ -488,12 +491,42 @@ function validateInputs(){
   const oh = parseInt(document.getElementById('i-oh').value) || 0;
   const gr = parseInt(document.getElementById('i-gr').value) || 0;
 
-  // Validate ranges per PRD
-  if(sh < 1 || sh > 1000) return false;  // Shareholders: 1-1,000
-  if(oh < 1 || oh > 2000) return false;  // Option Holders: 1-2,000
-  if(gr < 1 || gr > 500) return false;   // Equity grants/year: 1-500
+  const errors = {};
 
-  return true;
+  // Validate ranges per PRD
+  if(sh < 1 || sh > 1000) errors.sh = 'Shareholders: 1–1,000';
+  if(oh < 1 || oh > 2000) errors.oh = 'Option Holders: 1–2,000';
+  if(gr < 1 || gr > 500) errors.gr = 'Equity Grants: 1–500';
+
+  return { valid: Object.keys(errors).length === 0, errors };
+}
+
+function displayFieldErrors(validationResult){
+  const fieldMap = { sh: 'i-sh', oh: 'i-oh', gr: 'i-gr' };
+
+  Object.entries(fieldMap).forEach(([key, fieldId]) => {
+    const el = document.getElementById(fieldId);
+    const fi = el.parentElement;
+    const errMsg = fi.querySelector('.err-msg');
+
+    if(validationResult.errors[key]){
+      // Show error
+      fi.classList.add('err-bg');
+      if(errMsg) {
+        errMsg.innerText = validationResult.errors[key];
+        errMsg.style.display = 'block';
+      }
+    } else {
+      // Clear error
+      fi.classList.remove('err-bg');
+      if(errMsg) errMsg.style.display = 'none';
+    }
+  });
+}
+
+function validateAndDisplayErrors(){
+  const result = validateInputs();
+  displayFieldErrors(result);
 }
 
 function toggleE(id, start){
@@ -529,9 +562,11 @@ function doCalc(){
     indicator.style.background=valid?'#22c55e':'#ef4444';
   } else { indicator.style.display='none'; }
 
-  if(flow==='input' && (!valid || !validateInputs())) {
-    const isInvalid = !validateInputs();
-    const errorMsg = isInvalid ? 'Invalid: Check ranges (SH: 1-1k, OH: 1-2k, Grants: 1-500)' : 'Complete all fields to calculate';
+  const validationResult = validateInputs();
+  displayFieldErrors(validationResult);
+
+  if(flow==='input' && (!valid || !validationResult.valid)) {
+    const errorMsg = !validationResult.valid ? 'Invalid input - check field errors above' : 'Complete all fields to calculate';
     document.getElementById('res-status').innerText = errorMsg;
     document.getElementById('res-status').style.display = 'block';
     document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
