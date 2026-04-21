@@ -7,229 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0b0b0f;
-  --bg-r: #0d0d12;
-  --t1: #ffffff;
-  --t2: rgba(255,255,255,0.65);
-  --t3: rgba(255,255,255,0.4);
-  --accent: #5f17ea;
-  --accent-l: #7a3df5;
-  --bd: rgba(255,255,255,0.08);
-  --bd-field: rgba(255,255,255,0.18);
-  --ok: #22c55e;
-  --red: #ef4444;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--t1);
-  line-height: 1.4;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-.hidden { display: none !important; }
-
-/* 2-Column Grid */
-.main {
-  display: grid;
-  grid-template-columns: 60fr 40fr;
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
-
-.col-l { padding: 0 8vw; border-right: 1px solid var(--bd); position: relative; }
-#overview-state { padding-top: 0 !important; padding-bottom: 0 !important; padding: 20px 0 !important; }
-.col-r { position: sticky; top: 0; height: 100vh; padding: 80px 48px; background: var(--bg-r); overflow-y: auto; scrollbar-width: none; border-left: 1px solid var(--bd); }
-.col-r::-webkit-scrollbar { display: none; }
-
-@media (max-width: 1024px) {
-  .main { grid-template-columns: 1fr; padding-bottom: 140px; }
-  .col-l { padding: 48px 24px; border-right: none; }
-  .col-r { position: static; height: auto; padding: 48px 24px; border-top: 1px solid var(--bd); }
-
-  #mobile-summary {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg);
-    border-top: 1px solid var(--bd);
-    padding: 12px 16px;
-    z-index: 1000;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
-  }
-  .summary-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 12px;
-  }
-  .summary-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .summary-label {
-    font-size: 11px;
-    color: var(--t3);
-    text-transform: uppercase;
-  }
-  .summary-value {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--t1);
-  }
-  .summary-value.accent {
-    color: var(--accent-l);
-  }
-  #mobile-summary .btn {
-    width: 100%;
-  }
-}
-
-/* Hero */
-.hero-h { font-size: 48px !important; margin-bottom: 12px !important; line-height: 1.1 !important; font-weight: 300; letter-spacing: -0.04em; }
-.hero-h em { font-style: normal; opacity: 0.3; }
-.hero-p { font-size: 14px !important; margin-bottom: 24px !important; max-width: 100% !important; color: var(--t2); }
-
-/* Input Method Cards */
-.method-label { font-family: var(--mono); font-size: 10px !important; color: var(--t3); letter-spacing: 0.15em; margin-bottom: 14px !important; text-transform: uppercase; }
-.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px !important; margin-bottom: 18px !important; }
-.method-card {
-  padding: 18px !important;
-  background: #111116;
-  border: 1px solid var(--bd);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.method-card h3 { font-size: 15px !important; font-weight: 500; margin-bottom: 6px !important; pointer-events: none; }
-.method-card p { font-size: 12px !important; color: var(--t2); line-height: 1.4 !important; flex-grow: 1; pointer-events: none; }
-.method-card .spotlight {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.method-card:hover .spotlight { opacity: 0; }
-
-@media (max-width: 768px) { .method-grid { grid-template-columns: 1fr; } }
-
-/* Logos */
-.logos-h { margin-bottom: 10px !important; font-family: var(--mono); font-size: 9px !important; text-transform: uppercase; letter-spacing: 0.1em; color: var(--t3); }
-.logo-row { display: flex; gap: 10px !important; flex-wrap: wrap; opacity: 0.4; margin-bottom: 0 !important; }
-.logo-box { width: 56px !important; height: 22px !important; border: 1px solid var(--bd); display: flex; align-items: center; justify-content: center; font-size: 8px !important; color: var(--t3); font-weight: 700; text-transform: uppercase; }
-
-/* Input Mode Form */
-.back-btn { font-family: var(--mono); font-size: 10px; color: var(--t3); text-transform: uppercase; cursor: pointer; margin-bottom: 48px; display: inline-flex; align-items: center; gap: 8px; }
-.back-btn:hover { color: #fff; }
-
-.sec { border-top: 1px solid var(--bd); padding: 56px 0; transition: opacity 0.3s; }
-.sec.dim { opacity: 0.3; }
-.sec-n { font-family: var(--mono); font-size: 13px; color: var(--t2); margin-bottom: 12px; display: block; font-weight: 600; letter-spacing: 0.1em; }
-.sec-h { font-size: 18px; font-weight: 500; color: var(--t1); margin-bottom: 8px; }
-.sec-p { font-size: 12px; color: var(--t3); margin-bottom: 32px; }
-
-.fg { display: grid; gap: 32px; }
-.fi { position: relative; }
-.fi label { display: block; font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-.fi input, .fi select {
-  width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--bd-field); padding: 10px 0;
-  color: #fff; font-size: 17px; outline: none; font-family: var(--sans); height: 40px; transition: border-color 0.2s;
-}
-.fi select { -webkit-appearance: none; cursor: pointer; border-radius: 0; }
-.fi input:focus, .fi select:focus { border-bottom-color: var(--accent); }
-.fi.err-bg input, .fi.err-bg select { border-bottom-color: var(--red); }
-.fi .err-msg { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
-.field-hint { font-size:10px; color:var(--t3); margin-top:6px; line-height:1.4; }
-
-/* Buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 0 32px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
-.btn-p { background: var(--accent); color: #fff; margin-top: 24px; text-transform: none; }
-.btn-p:hover { background: var(--accent-l); }
-
-/* Right Panel Elements */
-.r-h { font-family: var(--mono); font-size: 11px; color: var(--t2); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 8px; font-weight: 600; }
-.r-s { font-size: 13px; color: var(--t2); margin-bottom: 40px; }
-
-/* Bar Chart */
-.chart-wrap { margin-bottom: 48px; border-bottom: 1px solid var(--bd); padding-bottom: 24px; }
-.chart-h { font-family: var(--mono); font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px; }
-.bars { display: flex; align-items: flex-end; gap: 32px; height: 120px; padding-top: 10px; }
-.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.bar-val { font-family: var(--mono); font-size: 11px; color: #fff; opacity: 0; transition: opacity 0.3s; }
-.bar-rect { width: 100%; height: 0; transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.bar-rect.you { background: #333; }
-.bar-rect.el { background: var(--accent); }
-.bar-lbl { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
-
-.hero-metric { margin-bottom: 56px; }
-.hm-label { font-size: 13px; color: var(--t2); margin-bottom: 8px; }
-.hm-val { font-size: 48px; font-weight: 400; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
-.hm-val.green { color: var(--ok); }
-.hm-val.red { color: var(--red); }
-
-.r-group { margin-bottom: 40px; }
-.r-group-h { font-family: var(--mono); font-size: 11px; color: var(--t2); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--bd); padding-bottom: 12px; margin-bottom: 12px; font-weight: 600; }
-.r-group-p { font-size: 11px; color: var(--t3); margin-bottom: 16px; margin-top: -4px; line-height: 1.4; }
-
-.r-row { display: flex; justify-content: space-between; padding: 10px 0; }
-.r-lbl { font-size: 14px; color: var(--t2); }
-.r-val { font-size: 16px; font-weight: 500; font-family: var(--mono); color: #fff; }
-.r-val.green { color: var(--ok); }
-.trigger-link { font-family: var(--mono); font-size: 10px; color: var(--accent); cursor: pointer; text-transform: uppercase; margin-top: 12px; display: inline-block; }
-
-/* Assumptions Pane */
-.ap-pane { display: flex; flex-direction: column; gap: 48px; }
-.ap-hdr { display: flex; justify-content: space-between; align-items: baseline; }
-.ap-title { font-size: 18px; font-weight: 500; }
-.ap-close { font-family: var(--mono); font-size: 10px; color: var(--t3); cursor: pointer; text-transform: uppercase; }
-.ap-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--bd); border-bottom: 1px solid var(--bd); }
-.ap-col { padding: 32px 16px; border-right: 1px solid var(--bd); }
-.ap-col:last-child { border-right: none; }
-.ap-sec-h { font-family: var(--mono); font-size: 9px; color: var(--t3); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.1em; }
-.ap-text { font-size: 12px; color: var(--t2); line-height: 1.6; }
-.ap-formula { font-family: var(--mono); font-size: 11px; color: #fff; background: rgba(255,255,255,0.03); padding: 16px; border-left: 2px solid var(--accent); white-space: pre-wrap; line-height: 1.8; }
-
-/* Editable Items */
-.editable { display: inline-flex; align-items: baseline; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); cursor: pointer; color: var(--ok); transition: border-color 0.2s; outline: none; }
-.editable:hover { border-color: var(--ok); }
-.editable:focus { border-bottom-color: var(--ok); box-shadow: 0 2px 0 var(--ok); }
-.editable.editing { border-bottom: none; cursor: default; }
-.edit-in { background: #1a1a20; border: 1px solid var(--ok); color: #fff; font-family: var(--mono); font-size: 11px; padding: 2px 6px; outline: none; width: 60px; }
-.reset-btn { font-size: 9px; color: var(--accent); text-transform: uppercase; cursor: pointer; text-decoration: underline; margin-left: 8px; }
-
-.ap-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
-.ap-tbl th { text-align: left; padding: 12px 4px; border-bottom: 1px solid var(--bd); color: var(--t3); text-transform: uppercase; }
-.ap-tbl td { padding: 12px 4px; border-bottom: 1px solid var(--bd); color: var(--t2); }
-.ap-tbl tr.active td { color: #fff; border-bottom-color: var(--accent); }
-
-/* Global State Transitions */
-#overview-state, #input-state { opacity: 1; transform: translateY(0); transition: opacity 0.3s, transform 0.3s; }
-#overview-state.hidden, #input-state.hidden { opacity: 0; pointer-events: none; }
-body.state-overview #res-status { display: none !important; }
-
-/* Layout Container */
-.main { max-width: 100%; }
-.col-l-content { max-width: 720px; margin: 0 auto; }
-
-/* Sticky CTA Area */
-.cta-overlay { position: absolute; top: 80px; right: 48px; display: flex; align-items: center; gap: 24px; z-index: 10; }
-.cta-link { font-family: var(--mono); font-size: 10px; color: #fff; background: rgba(95,23,234,0.3); border: 1px solid var(--accent); padding: 6px 12px; cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: all 0.2s; }
-.cta-link:hover { background: var(--accent); color: #fff; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Skip Links for keyboard navigation -->
+<nav aria-label="Skip links" style="position:absolute;top:-40px;left:0;z-index:9999">
+  <a href="#sec-1" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--accent);color:white;padding:8px;text-decoration:none;font-size:14px">Skip to main form</a>
+  <a href="#r-body" class="skip-link" style="position:absolute;top:-40px;left:80px;background:var(--accent);color:white;padding:8px;text-decoration:none;font-size:14px">Skip to results</a>
+</nav>
+
+<style>
+.skip-link:focus { position:fixed;top:0;z-index:9999 }
+</style>
 
 <div class="main">
   <!-- LEFT COLUMN -->
@@ -276,24 +66,62 @@ body.state-overview #res-status { display: none !important; }
 
       <div class="sec active" id="sec-1">
         <span class="sec-n">01</span>
-        <h2 class="sec-h">Company Profile</h2>
-        <p class="sec-p">Geography determines compliance requirements and salary benchmarks.</p>
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend class="sec-h">Company Profile</legend>
+          <p class="sec-p">Geography determines compliance requirements and salary benchmarks.</p>
+        </fieldset>
         <div class="fg">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
             <div class="fi">
-              <label>Country of Incorporation * <span title="Determines compliance requirements and statutory reporting obligations" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
-              <select id="i-geo-inc" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+              <label for="i-geo-inc">Country of Incorporation * <span title="Determines compliance requirements and statutory reporting obligations" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
+              <div class="custom-select-wrapper">
+                <select id="i-geo-inc" class="custom-select" aria-label="Country of Incorporation" aria-required="true" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+                <div class="select-display">
+                  <span class="select-label">India</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="india" aria-selected="false">India</li>
+                  <li role="option" data-value="us" aria-selected="false">United States</li>
+                  <li role="option" data-value="singapore" aria-selected="false">Singapore</li>
+                  <li role="option" data-value="uk" aria-selected="false">United Kingdom</li>
+                </ul>
+              </div>
               <div class="err-msg">Field required</div>
             </div>
             <div class="fi">
-              <label>Country of Operation * <span title="Determines hourly rates, currency, and EquityList pricing" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
-              <select id="i-geo-op" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+              <label for="i-geo-op">Country of Operation * <span title="Determines hourly rates, currency, and EquityList pricing" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
+              <div class="custom-select-wrapper">
+                <select id="i-geo-op" class="custom-select" aria-label="Country of Operation" aria-required="true" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+                <div class="select-display">
+                  <span class="select-label">India</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="india" aria-selected="false">India</li>
+                  <li role="option" data-value="us" aria-selected="false">United States</li>
+                  <li role="option" data-value="singapore" aria-selected="false">Singapore</li>
+                  <li role="option" data-value="uk" aria-selected="false">United Kingdom</li>
+                </ul>
+              </div>
               <div class="err-msg">Field required</div>
             </div>
           </div>
           <div class="fi">
-            <label>Current Stage <span style="color:var(--t3);font-size:9px">(optional)</span></label>
-            <select id="i-st" onchange="lc()"><option value="seed">Seed</option><option value="series-ab" selected>Series A / B</option><option value="series-c">Series C+</option><option value="public">Public / Pre-IPO</option></select>
+            <label for="i-st">Current Stage <span style="color:var(--t3);font-size:9px">(optional)</span></label>
+            <div class="custom-select-wrapper">
+              <select id="i-st" class="custom-select" aria-label="Company current stage (optional)" onchange="lc()"><option value="seed">Seed</option><option value="series-ab" selected>Series A / B</option><option value="series-c">Series C+</option><option value="public">Public / Pre-IPO</option></select>
+              <div class="select-display">
+                <span class="select-label">Series A / B</span>
+                <span class="select-chevron">▼</span>
+              </div>
+              <ul class="select-dropdown" role="listbox">
+                <li role="option" data-value="seed" aria-selected="false">Seed</li>
+                <li role="option" data-value="series-ab" aria-selected="false">Series A / B</li>
+                <li role="option" data-value="series-c" aria-selected="false">Series C+</li>
+                <li role="option" data-value="public" aria-selected="false">Public / Pre-IPO</li>
+              </ul>
+            </div>
           </div>
           <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name" oninput="lc()"><div class="err-msg">Field required</div></div>
         </div>
@@ -301,8 +129,10 @@ body.state-overview #res-status { display: none !important; }
 
       <div class="sec dim" id="sec-2">
         <span class="sec-n">02 — EQUITY STRUCTURE</span>
-        <h2 class="sec-h">Equity Structure</h2>
-        <p class="sec-p">Stakeholder volume scales your cap table reconciliation and grant overhead.</p>
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend class="sec-h">Equity Structure</legend>
+          <p class="sec-p">Stakeholder volume scales your cap table reconciliation and grant overhead.</p>
+        </fieldset>
         <div class="fg">
           <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="val(this)"><div class="err-msg">Field required</div></div>
           <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="valAndEnableNext(this, 'i-gr')"><div class="err-msg">Field required</div></div>
@@ -312,15 +142,46 @@ body.state-overview #res-status { display: none !important; }
 
       <div class="sec dim" id="sec-3">
         <span class="sec-n">03 — CURRENT OPERATIONS</span>
-        <h2 class="sec-h">Current Operations</h2>
-        <p class="sec-p">Who executes the work and what tools they use currently.</p>
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend class="sec-h">Current Operations</legend>
+          <p class="sec-p">Who executes the work and what tools they use currently.</p>
+        </fieldset>
         <div class="fg">
-          <div class="fi"><label>Managed by *</label><select id="i-per" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select></div>
-          <div class="fi"><label>Administrative Method *</label><select id="i-meth" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select></div>
+          <div class="fi">
+            <label for="i-per">Managed by *</label>
+            <div class="custom-select-wrapper">
+              <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
+              <div class="select-display">
+                <span class="select-label">Finance / CFO</span>
+                <span class="select-chevron">▼</span>
+              </div>
+              <ul class="select-dropdown" role="listbox">
+                <li role="option" data-value="founder" aria-selected="false">Founder / CEO</li>
+                <li role="option" data-value="finance" aria-selected="false">Finance / CFO</li>
+                <li role="option" data-value="hr" aria-selected="false">HR Lead</li>
+                <li role="option" data-value="cs" aria-selected="false">Legal / Company Sec</li>
+              </ul>
+            </div>
+          </div>
+          <div class="fi">
+            <label for="i-meth">Administrative Method *</label>
+            <div class="custom-select-wrapper">
+              <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select>
+              <div class="select-display">
+                <span class="select-label">In-house (Spreadsheets)</span>
+                <span class="select-chevron">▼</span>
+              </div>
+              <ul class="select-dropdown" role="listbox">
+                <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
+                <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
+                <li role="option" data-value="existing-tool" aria-selected="false">Existing Tool</li>
+              </ul>
+            </div>
+          </div>
           <div class="fi hidden" id="tool-cost-wrap">
-            <label>Annual Tool Cost</label>
-            <input type="number" id="i-tc" placeholder="e.g. 50000" oninput="lc()">
-            <div class="field-hint">Your existing tool handles most execution, but your team still oversees and verifies everything. We add this cost to your residual internal oversight time (10% of manual effort) to show your true total cost of operations.</div>
+            <label for="i-tc">Annual Tool Cost</label>
+            <input type="number" id="i-tc" placeholder="e.g. 50000" aria-describedby="tc-hint" oninput="lc()">
+            <div id="tc-hint" class="field-hint">Your existing tool handles most execution, but your team still oversees and verifies everything. We add this cost to your residual internal oversight time (10% of manual effort) to show your true total cost of operations.</div>
           </div>
         </div>
       </div>
@@ -338,19 +199,19 @@ body.state-overview #res-status { display: none !important; }
         </div>
         <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none;font-size:10px;padding:4px 8px;border:1px solid var(--accent);cursor:pointer">VIEW</span>
       </div>
-      <div class="r-s" id="res-status" style="display:none"></div>
+      <div class="r-s" id="res-status" style="display:none" aria-live="polite" aria-atomic="true"></div>
 
       <div class="chart-wrap">
         <div class="chart-h">ANNUAL COST COMPARISON</div>
         <div class="bars">
-          <div class="bar-col"><div class="bar-val" id="v-b1"></div><div class="bar-rect you" id="b1"></div><div class="bar-lbl">You today</div></div>
-          <div class="bar-col"><div class="bar-val" id="v-b2"></div><div class="bar-rect el" id="b2"></div><div class="bar-lbl">EquityList</div></div>
+          <div class="bar-col"><div class="bar-val" id="v-b1" aria-label="Your annual cost"></div><div class="bar-rect you" id="b1"></div><div class="bar-lbl">You today</div></div>
+          <div class="bar-col"><div class="bar-val" id="v-b2" aria-label="EquityList annual cost"></div><div class="bar-rect el" id="b2"></div><div class="bar-lbl">EquityList</div></div>
         </div>
       </div>
 
-      <div id="r-body"></div>
+      <div id="r-body" aria-live="assertive" aria-atomic="true"></div>
     </div>
-    <div id="assumptions-view" class="hidden"></div>
+    <div id="assumptions-view" class="hidden" role="dialog" aria-label="ROI Audit Log" aria-modal="true"></div>
   </div>
 </div>
 
@@ -368,386 +229,6 @@ body.state-overview #res-status { display: none !important; }
   <button class="btn btn-p" onclick="window.open('https://www.equitylist.co/contact', '_blank')" style="width: 100%;">📅 Book a demo →</button>
 </div>
 
-<script>
-var flow='overview', calcDone=false, updateTimer=null;
-var overrides={rate:null, grHr:null, compHr:null};
-var initialMethod=null, userInputStarted=false;
-
-var CUR={us:'$',india:'\u20B9',singapore:'S$',uk:'\u00A3'};
-var RATES={
-  india:{
-    founder:{p10:131,p50:1442,p90:4808},
-    finance:{p10:401,p50:1923,p90:3846},
-    hr:{p10:322,p50:1442,p90:2404},
-    cs:{p10:147,p50:297,p90:962}
-  },
-  us:{
-    founder:{p10:40,p50:85,p90:166},
-    finance:{p10:43,p50:74,p90:118},
-    hr:{p10:32,p50:49,p90:74},
-    cs:{p10:46,p50:67,p90:97}
-  },
-  singapore:{
-    founder:{p10:13,p50:114,p90:280},
-    finance:{p10:46,p50:117,p90:187},
-    hr:{p10:21,p50:75,p90:138},
-    cs:{p10:29,p50:59,p90:105}
-  },
-  uk:{
-    founder:{p10:18,p50:35,p90:80},
-    finance:{p10:27,p50:49,p90:83},
-    hr:{p10:26,p50:38,p90:55},
-    cs:{p10:12,p50:22,p90:41}
-  }
-};
-var RATES_META={
-  india:{
-    founder:{src:'PayScale India CEO'},
-    finance:{src:'PayScale India CFO'},
-    hr:{src:'PayScale India HR Director'},
-    cs:{src:'PayScale India Corporate Secretary'}
-  },
-  us:{
-    founder:{src:'PayScale US CEO'},
-    finance:{src:'PayScale US CFO'},
-    hr:{src:'PayScale US HR Director'},
-    cs:{src:'PayScale US Corporate Counsel'}
-  },
-  singapore:{
-    founder:{src:'PayScale SG CEO'},
-    finance:{src:'PayScale SG CFO'},
-    hr:{src:'PayScale SG HR Director'},
-    cs:{src:'PayScale SG Legal Counsel'}
-  },
-  uk:{
-    founder:{src:'PayScale UK CEO'},
-    finance:{src:'PayScale UK CFO'},
-    hr:{src:'PayScale UK HR Director'},
-    cs:{src:'PayScale UK Corporate Secretary'}
-  }
-};
-var COMPLIANCE={india:72,us:68,singapore:54,uk:54};
-var EXT={us:18000,india:180000,singapore:15000,uk:12000};
-var FX={india:1,us:0.01205,singapore:0.01613,uk:0.00943};
-
-function track(e){
-  var rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty('--x', (e.clientX - rect.left) + 'px');
-  e.currentTarget.style.setProperty('--y', (e.clientY - rect.top) + 'px');
-}
-
-function goInput(){
-  flow='input';
-  userInputStarted=false;
-  initialMethod=document.getElementById('i-meth').value;
-  document.body.classList.remove('state-overview');
-  document.getElementById('res-status').style.display = 'block';
-  document.getElementById('overview-state').classList.add('hidden');
-  document.getElementById('input-state').classList.remove('hidden');
-  window.scrollTo({top: 0, behavior: 'smooth'});
-  document.getElementById('i-geo-inc').focus();
-  doCalc();
-}
-
-function goOverview(){
-  flow='overview';
-  document.body.classList.add('state-overview');
-  document.getElementById('res-status').style.display = 'none';
-  document.getElementById('input-state').classList.add('hidden');
-  document.getElementById('overview-state').classList.remove('hidden');
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
-
-function onF(files){ if(files.length){ document.getElementById('up-info').classList.remove('hidden'); setTimeout(goInput, 600); } }
-
-function val(el){
-  var fi = el.parentElement;
-  var errMsg = fi.querySelector('.err-msg');
-  if(!el.value) { 
-    fi.classList.add('err-bg');
-    if(errMsg) { errMsg.innerText='Field required'; errMsg.style.display='block'; }
-  } else {
-    fi.classList.remove('err-bg');
-    if(errMsg) errMsg.style.display='none';
-  }
-}
-
-function valAndEnableNext(el, n){
-  val(el);
-  var next=document.getElementById(n);
-  if(!next) return;
-  var wrap=next.parentElement;
-  if(!el.value) { wrap.style.opacity='0.5'; next.disabled=true; } 
-  else { wrap.style.opacity='1'; next.disabled=false; }
-}
-
-function lc(){ if(updateTimer) clearTimeout(updateTimer); updateTimer = setTimeout(doCalc, 100); }
-
-function validateInputs(){
-  const sh = parseInt(document.getElementById('i-sh').value) || 0;
-  const oh = parseInt(document.getElementById('i-oh').value) || 0;
-  const gr = parseInt(document.getElementById('i-gr').value) || 0;
-
-  const errors = {};
-
-  // Validate ranges per PRD
-  if(sh < 1 || sh > 1000) errors.sh = 'Shareholders: 1–1,000';
-  if(oh < 1 || oh > 2000) errors.oh = 'Option Holders: 1–2,000';
-  if(gr < 1 || gr > 500) errors.gr = 'Equity Grants: 1–500';
-
-  return { valid: Object.keys(errors).length === 0, errors };
-}
-
-function displayFieldErrors(validationResult){
-  const fieldMap = { sh: 'i-sh', oh: 'i-oh', gr: 'i-gr' };
-
-  Object.entries(fieldMap).forEach(([key, fieldId]) => {
-    const el = document.getElementById(fieldId);
-    const fi = el.parentElement;
-    const errMsg = fi.querySelector('.err-msg');
-
-    if(validationResult.errors[key]){
-      // Show error
-      fi.classList.add('err-bg');
-      if(errMsg) {
-        errMsg.innerText = validationResult.errors[key];
-        errMsg.style.display = 'block';
-      }
-    } else {
-      // Clear error
-      fi.classList.remove('err-bg');
-      if(errMsg) errMsg.style.display = 'none';
-    }
-  });
-}
-
-function validateAndDisplayErrors(){
-  const result = validateInputs();
-  displayFieldErrors(result);
-}
-
-function toggleE(id, start){
-  var el = document.getElementById(id);
-  el.classList.add('editing');
-  el.innerHTML = `<input type="number" class="edit-in" id="in-${id}" value="${start}" onblur="saveE('${id}')" onkeydown="if(event.key==='Enter')this.blur()">`;
-  document.getElementById(`in-${id}`).focus();
-}
-function saveE(id){
-  var v = parseFloat(document.getElementById(`in-${id}`).value);
-  if(id==='e-rate') overrides.rate = v;
-  if(id==='e-grhr') overrides.grHr = v;
-  if(id==='e-comphr') overrides.compHr = v;
-  doCalc();
-}
-function resetO(k){ overrides[k]=null; doCalc(); }
-
-function doCalc(){
-  var geo_inc=document.getElementById('i-geo-inc').value, geo_op=document.getElementById('i-geo-op').value;
-  var shEl=document.getElementById('i-sh'), ohEl=document.getElementById('i-oh'), grEl=document.getElementById('i-gr');
-  var sh=parseInt(shEl.value)||0, oh=parseInt(ohEl.value)||0, gr=parseInt(grEl.value)||0, per=document.getElementById('i-per').value, meth=document.getElementById('i-meth').value;
-  
-  var valid = shEl.value && ohEl.value && grEl.value;
-  var indicator = document.getElementById('live-indicator');
-  
-  if(flow==='input') {
-    var hasUserInput = (sh!==30 || oh!==15 || gr!==10 || geo_inc!=='india' || geo_op!=='india' || per!=='finance' || meth!==initialMethod);
-    userInputStarted = userInputStarted || hasUserInput;
-  }
-
-  if(flow==='input' && userInputStarted) {
-    indicator.style.display='inline-block';
-    indicator.style.background=valid?'#22c55e':'#ef4444';
-  } else { indicator.style.display='none'; }
-
-  const validationResult = validateInputs();
-  displayFieldErrors(validationResult);
-
-  if(flow==='input' && (!valid || !validationResult.valid)) {
-    const errorMsg = !validationResult.valid ? 'Invalid input - check field errors above' : 'Complete all fields to calculate';
-    document.getElementById('res-status').innerText = errorMsg;
-    document.getElementById('res-status').style.display = 'block';
-    document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
-    // Clear chart when invalid
-    document.getElementById('b1').style.height = '0';
-    document.getElementById('b2').style.height = '0';
-    document.getElementById('v-b1').innerText = '';
-    document.getElementById('v-b2').innerText = '';
-    document.getElementById('mobile-summary').style.display = 'none';
-    return;
-  }
-
-  var stakeholders=Math.min(sh+oh, 10000), tier=stakeholders<=10?'p10':stakeholders<=50?'p50':'p90';
-  var tierLabel=tier==='p10'?'10th percentile':tier==='p50'?'median':'90th percentile';
-  var sym=CUR[geo_op], rate=overrides.rate||RATES[geo_op][per][tier], mult={'in-house':1,'outsourced':0.4,'existing-tool':0.1}[meth];
-  var grHr=overrides.grHr||1.5, compHr=overrides.compHr||COMPLIANCE[geo_inc];
-
-  var grHrs=gr*grHr, grCost=grHrs*mult*rate;
-  var cpRaw=compHr, cpCost=cpRaw*mult*rate;
-  var ctRaw=(3 + Math.max(0, (sh-20)/50)*2)*12; var ctHrs=ctRaw*mult; var ctCost=ctHrs*rate;
-  var toolCost=(meth==='existing-tool')?parseFloat(document.getElementById('i-tc').value)||0:0;
-  var extCost=(meth==='outsourced')?EXT[geo_op]:toolCost;
-  var annCost=grCost+cpCost+ctCost+extCost;
-  
-  var manualHTotal=grHrs+cpRaw+ctRaw;
-  var internalHTotal=(grHrs*mult+cpRaw*mult+ctHrs);
-  var timeSavedPct=manualHTotal>0?Math.round((manualHTotal-internalHTotal)/manualHTotal*100):0;
-  var elOverhead=manualHTotal*0.1*rate;
-  var elAnn=stakeholders*1200*FX[geo_op]+elOverhead;
-  
-  var diff=annCost-elAnn, isSpend=diff>=0, absDiff=Math.abs(diff), roi=elAnn>0?Math.round(absDiff/elAnn*10)/10:0;
-
-  // Always show "Based on your inputs" when in input form
-  document.getElementById('res-status').innerText = "Based on your inputs";
-  document.getElementById('res-status').style.display = (flow === 'input') ? 'block' : 'none';
-
-  var max = Math.max(annCost, elAnn, 1);
-  setTimeout(() => {
-    document.getElementById('b1').style.height = (annCost/max*100) + 'px';
-    document.getElementById('b2').style.height = (elAnn/max*100) + 'px';
-    document.getElementById('v-b1').innerText = sym+fK(annCost);
-    document.getElementById('v-b2').innerText = sym+fK(elAnn);
-    document.getElementById('v-b1').style.opacity = '1';
-    document.getElementById('v-b2').style.opacity = '1';
-  }, 10);
-
-  var ctaHtml = '';
-  if (isSpend) {
-    // EL is cheaper
-    ctaHtml = `<button onclick="window.open('https://www.equitylist.co/contact', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">📅 Book a demo →</button>`;
-  } else {
-    // EL is more expensive or break-even
-    ctaHtml = `
-      <div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-top:24px">
-        <div style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px">
-          <strong>At your stage, manual processes are manageable.</strong> But as you scale, spreadsheets become error-prone and time-consuming:
-          <ul style="margin:8px 0 0 16px;color:var(--t3);font-size:11px">
-            <li>Missed vesting calculations & compliance deadlines</li>
-            <li>Hours wasted on grant drafting and reconciliation</li>
-            <li>Cap table inconsistencies across stakeholders</li>
-          </ul>
-        </div>
-        <div style="font-size:11px;color:var(--t3)">We'll reach out around 25 stakeholders when automation becomes critical.</div>
-      </div>
-      <button onclick="window.open('https://www.equitylist.co/newsletter', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none;margin-top:16px">📧 Notify me when to switch →</button>
-    `;
-  }
-
-  document.getElementById('r-body').innerHTML = `
-    <div class="hero-metric"><div class="hm-label">Your Current Annual Spend</div><div class="hm-val">${sym}${fN(Math.round(annCost))}</div></div>
-    <div class="r-group"><div class="r-group-h">Cost Comparison</div><div class="r-row"><span>You today</span><span class="r-val">${sym}${fN(Math.round(annCost))}</span></div><div class="r-row"><span>EquityList *</span><span class="r-val">${sym}${fN(Math.round(elAnn))}</span></div></div>
-    <div class="r-group"><div class="r-group-h">Efficiency</div><div class="r-row"><span>Internal Effort</span><span class="r-val">${Math.round(internalHTotal)} hrs/yr</span></div><div class="r-row"><span>Time Saved</span><span class="r-val green">~${timeSavedPct}%</span></div></div>
-    <div class="r-group"><div class="r-group-h">Economics</div><div class="r-row"><span>Rate (${tierLabel})</span><span class="r-val">${sym}${rate}/hr</span></div><div class="r-row"><span>Direct ROI</span><span class="r-val">${roi}x</span></div></div>
-    ${ctaHtml}
-  `;
-
-  // Show/hide audit log link based on flow
-  document.getElementById('audit-log-link').style.display = flow === 'input' ? 'inline' : 'none';
-
-  document.getElementById('assumptions-view').innerHTML = `
-    <div class="ap-pane">
-      <div class="ap-hdr"><span class="ap-title">ROI Audit Log</span><span class="ap-close" onclick="closeAssumptions()">DONE [X]</span></div>
-      <div class="ap-grid-3">
-        <div class="ap-col"><div class="ap-sec-h">Your Profile</div><div class="ap-text"><b>Inc:</b> ${geo_inc.toUpperCase()}<br><b>Op:</b> ${geo_op.toUpperCase()}<br><b>Method:</b> ${meth}</div></div>
-        <div class="ap-col"><div class="ap-sec-h">Compliance</div><div class="ap-text">Manual baseline: <span class="editable" id="e-comphr" onclick="toggleE('e-comphr', ${compHr})">${compHr}h/yr</span></div></div>
-        <div class="ap-col"><div class="ap-sec-h">Scope</div><div class="ap-text">Statutory registers, tax reporting, and grant drafting.</div></div>
-      </div>
-      <div><div class="ap-sec-h">Calculations</div><div class="ap-formula">
-Manual baseline = ${(manualHTotal/12).toFixed(1)} hrs/mo
-Hourly Rate = ${sym}<span class="editable" id="e-rate" onclick="toggleE('e-rate', ${rate})">${rate}</span>/hr [PayScale ${tierLabel}]
-EquityList = ${sym}${fN(Math.round(stakeholders*1200*FX[geo_op]))} platform + ${sym}${fN(Math.round(elOverhead))} oversight
-      </div></div>
-      <table class="ap-tbl"><thead><tr><th>Persona</th><th>10th %</th><th>Median</th><th>90th %</th><th>Source</th></tr></thead><tbody>
-        ${['founder','finance','hr','cs'].map(p=>{var r=RATES[geo_op][p];return`<tr class="${p===per?'active':''}"><td>${p.toUpperCase()}</td><td>${sym}${r.p10}</td><td>${sym}${r.p50}</td><td>${sym}${r.p90}</td><td style="font-size:9px">${RATES_META[geo_op][p].src}</td></tr>`}).join('')}
-      </tbody></table>
-    </div>
-  `;
-
-  // Update mobile summary bar (only visible on viewports <= 1024px)
-  document.getElementById('mob-spend').innerText = sym + fN(Math.round(annCost));
-  document.getElementById('mob-roi').innerText = roi + 'x';
-  const shouldShowMobileSummary = (flow === 'input') && (window.innerWidth <= 1024);
-  document.getElementById('mobile-summary').style.display = shouldShowMobileSummary ? 'block' : 'none';
-}
-
-function openAssumptions(){
-  document.getElementById('results-view').classList.add('hidden');
-  document.getElementById('assumptions-view').classList.remove('hidden');
-  document.getElementById('audit-log-link').style.display = 'none';  // Hide View Assumptions button
-  document.getElementById('mobile-summary').style.display = 'none';  // Hide mobile summary bar
-}
-function closeAssumptions(){
-  document.getElementById('assumptions-view').classList.add('hidden');
-  document.getElementById('results-view').classList.remove('hidden');
-  document.getElementById('audit-log-link').style.display = 'inline';  // Show View Assumptions button again
-  const shouldShowMobileSummary = (flow === 'input') && (window.innerWidth <= 1024);
-  document.getElementById('mobile-summary').style.display = shouldShowMobileSummary ? 'block' : 'none';  // Show mobile summary if in input mode and on small screen
-}
-
-function onMethChange(){
-  var m=document.getElementById('i-meth').value;
-  document.getElementById('tool-cost-wrap').classList.toggle('hidden',m!=='existing-tool');
-  lc();
-}
-
-function fN(n){ return n.toLocaleString(); }
-function fK(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return Math.round(n/1e3).toLocaleString()+'k'; return String(Math.round(n)); }
-
-const sectionObs = new IntersectionObserver((entries) => {
-  // Find the section closest to viewport center
-  let closestSection = null;
-  let maxRatio = -1;
-
-  entries.forEach(entry => {
-    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-      maxRatio = entry.intersectionRatio;
-      closestSection = entry.target;
-    }
-  });
-
-  // If no section found in viewport, use the one closest to top
-  if (!closestSection) {
-    entries.forEach(entry => {
-      const rect = entry.target.getBoundingClientRect();
-      // Use closest section to viewport (smallest distance)
-      if (!closestSection || Math.abs(rect.top) < Math.abs(closestSection.getBoundingClientRect().top)) {
-        closestSection = entry.target;
-      }
-    });
-  }
-
-  // Update active state for all sections
-  document.querySelectorAll('.sec').forEach(s => {
-    if (s === closestSection) {
-      s.classList.remove('dim');
-    } else {
-      s.classList.add('dim');
-    }
-  });
-}, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1], rootMargin: "-20% 0px -20% 0px" });
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.classList.add('state-overview');
-
-  // Initialize Section 01 as active
-  const sec1 = document.getElementById('sec-1');
-  if (sec1) sec1.classList.remove('dim');
-
-  // Observe all sections
-  document.querySelectorAll('.sec').forEach(s => sectionObs.observe(s));
-
-  // Click/focus handlers for field interaction
-  document.querySelectorAll('.fi input, .fi select').forEach(f => {
-    const focus = () => {
-      const targetSec = f.closest('.sec');
-      document.querySelectorAll('.sec').forEach(s => s.classList.toggle('dim', s !== targetSec));
-    };
-    f.addEventListener('focus', focus);
-    f.addEventListener('click', focus);
-  });
-
-  doCalc();
-  fetch('https://open.er-api.com/v6/latest/INR').then(r=>r.json()).then(d=>{if(d.rates){FX.us=d.rates.USD;FX.singapore=d.rates.SGD;FX.uk=d.rates.GBP;doCalc();}}).catch(e=>console.warn('FX update failed'));
-});
-</script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
