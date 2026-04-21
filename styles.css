@@ -375,7 +375,7 @@ body {
   border: none;
   border-bottom: 1px solid var(--bd-field);
   padding: 10px 0;
-  color: #fff;
+  color: var(--t1);
   font-size: 17px;
   outline: none;
   font-family: var(--sans);
