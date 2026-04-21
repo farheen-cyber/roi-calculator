@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Read(//Users/farheenshaikh/Documents/roi-calculator/**)",
+      "Bash(npx --version)",
+      "Bash(node -e ':*)",
+      "Bash(npm install:*)",
+      "Read(//Users/farheenshaikh/**)",
+      "Read(//Users/farheenshaikh/Documents/**)",
+      "Bash(ls /Users/farheenshaikh/Documents/roi-calculator/.env*)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__switch_browser",
+      "WebSearch",
+      "WebFetch(domain:www.payscale.com)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(awk '/<div class=\"main\">/,/<\\\\/div>/{if\\(/<\\\\/div>/\\)exit} END{print NR}' /Users/farheenshaikh/Documents/roi-calculator/roi-calculator.html)",
+      "Bash(grep -n '^</div>$' /Users/farheenshaikh/Documents/roi-calculator/roi-calculator.html)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
