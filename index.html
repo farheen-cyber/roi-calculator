@@ -291,13 +291,13 @@ body.state-overview #res-status { display: none !important; }
 
   <!-- RIGHT COLUMN -->
   <div class="col-r" id="right-col">
-    <div class="cta-overlay">
-      <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none">View assumptions</span>
-    </div>
     <div id="results-view">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <div class="r-h">LIVE ESTIMATE</div>
-        <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="r-h">LIVE ESTIMATE</div>
+          <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
+        </div>
+        <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none;font-size:10px;padding:4px 8px;border:1px solid var(--accent);cursor:pointer">VIEW</span>
       </div>
       <div class="r-s" id="res-status" style="display:none"></div>
 
@@ -430,6 +430,20 @@ function valAndEnableNext(el, n){
 
 function lc(){ if(updateTimer) clearTimeout(updateTimer); updateTimer = setTimeout(doCalc, 100); }
 
+function validateInputs(){
+  const sh = parseInt(document.getElementById('i-sh').value) || 0;
+  const oh = parseInt(document.getElementById('i-oh').value) || 0;
+  const gr = parseInt(document.getElementById('i-gr').value) || 0;
+  const total = sh + oh;
+
+  if(sh < 0 || oh < 0 || gr < 0) return false;  // Negative not allowed
+  if(sh === 0 && oh === 0) return false;  // At least 1 shareholder
+  if(gr < 0 || gr > 100) return false;  // Equity % must be 0-100
+  if(total > 10000) return false;  // Cap at 10,000 total shareholders
+
+  return true;
+}
+
 function toggleE(id, start){
   var el = document.getElementById(id);
   el.classList.add('editing');
@@ -463,8 +477,10 @@ function doCalc(){
     indicator.style.background=valid?'#22c55e':'#ef4444';
   } else { indicator.style.display='none'; }
 
-  if(flow==='input' && !valid) {
-    document.getElementById('res-status').innerText = 'Complete all fields to calculate';
+  if(flow==='input' && (!valid || !validateInputs())) {
+    const isInvalid = !validateInputs();
+    const errorMsg = isInvalid ? 'Invalid: Stakeholders max 10,000 or missing fields' : 'Complete all fields to calculate';
+    document.getElementById('res-status').innerText = errorMsg;
     document.getElementById('res-status').style.display = 'block';
     document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
     // Clear chart when invalid
@@ -472,10 +488,11 @@ function doCalc(){
     document.getElementById('b2').style.height = '0';
     document.getElementById('v-b1').innerText = '';
     document.getElementById('v-b2').innerText = '';
+    document.getElementById('mobile-summary').style.display = 'none';
     return;
   }
 
-  var stakeholders=sh+oh, tier=stakeholders<=10?'p10':stakeholders<=50?'p50':'p90';
+  var stakeholders=Math.min(sh+oh, 10000), tier=stakeholders<=10?'p10':stakeholders<=50?'p50':'p90';
   var tierLabel=tier==='p10'?'10th percentile':tier==='p50'?'median':'90th percentile';
   var sym=CUR[geo_op], rate=overrides.rate||RATES[geo_op][per][tier], mult={'in-house':1,'outsourced':0.4,'existing-tool':0.1}[meth];
   var grHr=overrides.grHr||1.5, compHr=overrides.compHr||COMPLIANCE[geo_inc];
