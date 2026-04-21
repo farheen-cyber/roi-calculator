@@ -124,7 +124,7 @@ body {
 }
 
 #overview-state {
-  padding: var(--sp-5) 0;
+  padding: 20px 0;
   max-height: 640px;
 }
 
@@ -136,7 +136,7 @@ body {
 .col-r {
   position: relative;
   height: calc(100vh - 128px);
-  padding: var(--sp-5) 40px;
+  padding: 20px 40px;
   background: var(--bg-r);
   overflow-y: hidden;
   scrollbar-width: none;
@@ -162,7 +162,7 @@ body {
     padding-bottom: 140px;
   }
   .col-l {
-    padding: var(--sp-7) var(--sp-5);
+    padding: 48px 24px;
     border-right: none;
     max-height: none;
     overflow-y: visible;
@@ -209,13 +209,13 @@ body {
     gap: 4px;
   }
   .summary-label {
-    font-size: var(--fs-xs);
+    font-size: 11px;
     color: var(--t3);
     text-transform: uppercase;
   }
   .summary-value {
-    font-size: var(--fs-h3);
-    font-weight: var(--fw-semibold);
+    font-size: 18px;
+    font-weight: 600;
     color: var(--t1);
   }
   .summary-value.accent {
@@ -250,7 +250,7 @@ body {
 /* Input Method Cards */
 .method-label {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   letter-spacing: 0.15em;
   margin-bottom: 14px;
@@ -265,7 +265,7 @@ body {
 }
 
 .method-card {
-  padding: var(--sp-4);
+  padding: 18px;
   background: var(--bg-r);
   border: 1px solid var(--bd);
   cursor: pointer;
@@ -276,14 +276,14 @@ body {
 }
 
 .method-card h3 {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-medium);
+  font-size: 15px;
+  font-weight: 500;
   margin-bottom: 6px;
   pointer-events: none;
 }
 
 .method-card p {
-  font-size: var(--fs-sm);
+  font-size: 12px;
   color: var(--t2);
   line-height: 1.4;
   flex-grow: 1;
@@ -315,7 +315,7 @@ body {
 .logos-h {
   margin-bottom: 10px;
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--t3);
@@ -336,16 +336,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--fs-2xs);
+  font-size: 8px;
   color: var(--t3);
-  font-weight: var(--fw-semibold);
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 /* Input Mode Form */
 .back-btn {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   text-transform: uppercase;
   cursor: pointer;
@@ -361,7 +361,7 @@ body {
 
 .sec {
   border-top: 1px solid var(--bd);
-  padding: var(--sp-7) 0;
+  padding: 56px 0;
   transition: opacity 0.3s;
 }
 
@@ -371,11 +371,11 @@ body {
 
 .sec-n {
   font-family: var(--mono);
-  font-size: var(--fs-sm);
+  font-size: 13px;
   color: var(--t2);
   margin-bottom: 12px;
   display: block;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
   letter-spacing: 0.1em;
 }
 
@@ -419,7 +419,7 @@ body {
   border-bottom: 1px solid var(--bd-field);
   padding: var(--sp-2) 0;
   color: var(--t1);
-  font-size: var(--fs-body);
+  font-size: 17px;
   outline: none;
   font-family: var(--sans);
   height: 40px;
@@ -443,14 +443,14 @@ body {
 }
 
 .fi .err-msg {
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--red);
   margin-top: 4px;
   display: none;
 }
 
 .field-hint {
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   margin-top: 6px;
   line-height: 1.4;
@@ -463,8 +463,8 @@ body {
   justify-content: center;
   height: 50px;
   padding: 0 32px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   border: none;
 }
@@ -483,16 +483,16 @@ body {
 /* Right Panel Elements */
 .r-h {
   font-family: var(--mono);
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--t2);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   margin-bottom: 8px;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
 }
 
 .r-s {
-  font-size: var(--fs-sm);
+  font-size: 13px;
   color: var(--t2);
   margin-bottom: 40px;
 }
@@ -506,7 +506,7 @@ body {
 
 .chart-h {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -552,7 +552,7 @@ body {
 }
 
 .bar-lbl {
-  font-size: var(--fs-2xs);
+  font-size: 9px;
   color: var(--t3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -564,14 +564,14 @@ body {
 }
 
 .hm-label {
-  font-size: var(--fs-sm);
+  font-size: 13px;
   color: var(--t2);
   margin-bottom: 4px;
 }
 
 .hm-val {
-  font-size: var(--fs-display);
-  font-weight: var(--fw-regular);
+  font-size: 48px;
+  font-weight: 400;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
@@ -590,18 +590,18 @@ body {
 
 .r-group-h {
   font-family: var(--mono);
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--t2);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   border-bottom: 1px solid var(--bd);
   padding-bottom: 8px;
   margin-bottom: 8px;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
 }
 
 .r-group-p {
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--t3);
   margin-bottom: 8px;
   margin-top: -4px;
@@ -611,16 +611,16 @@ body {
 .r-row {
   display: flex;
   justify-content: space-between;
-  padding: var(--sp-2) 0;
+  padding: 10px 0;
 }
 
 .r-lbl {
-  font-size: var(--fs-sm);
+  font-size: 14px;
   color: var(--t2);
 }
 
 .r-val {
-  font-size: var(--fs-body);
+  font-size: 16px;
   font-weight: var(--fw-medium);
   font-family: var(--mono);
   color: var(--t1);
@@ -632,7 +632,7 @@ body {
 
 .trigger-link {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--accent);
   cursor: pointer;
   text-transform: uppercase;
@@ -654,13 +654,13 @@ body {
 }
 
 .ap-title {
-  font-size: var(--fs-h3);
-  font-weight: var(--fw-medium);
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .ap-close {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   cursor: pointer;
   text-transform: uppercase;
@@ -674,7 +674,7 @@ body {
 }
 
 .ap-col {
-  padding: var(--sp-6) var(--sp-4);
+  padding: 32px 16px;
   border-right: 1px solid var(--bd);
 }
 
@@ -684,7 +684,7 @@ body {
 
 .ap-sec-h {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 9px;
   color: var(--t3);
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -692,7 +692,7 @@ body {
 }
 
 .ap-text {
-  font-size: var(--fs-sm);
+  font-size: 12px;
   color: var(--t2);
   line-height: 1.6;
 }
@@ -746,7 +746,7 @@ body {
 }
 
 .reset-btn {
-  font-size: var(--fs-2xs);
+  font-size: 9px;
   color: var(--accent);
   text-transform: uppercase;
   cursor: pointer;
@@ -757,19 +757,19 @@ body {
 .ap-tbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-xs);
+  font-size: 11px;
 }
 
 .ap-tbl th {
   text-align: left;
-  padding: var(--sp-3) var(--sp-1);
+  padding: 12px 4px;
   border-bottom: 1px solid var(--bd);
   color: var(--t3);
   text-transform: uppercase;
 }
 
 .ap-tbl td {
-  padding: var(--sp-3) var(--sp-1);
+  padding: 12px 4px;
   border-bottom: 1px solid var(--bd);
   color: var(--t2);
 }
@@ -847,12 +847,12 @@ body.state-overview #res-status {
 /* Custom select display (button) */
 .select-display {
   border-bottom: 1px solid var(--bd-field);
-  padding: var(--sp-2) 0;
+  padding: 10px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  font-size: var(--fs-body);
+  font-size: 17px;
   color: #fff;
   user-select: none;
   transition: border-color 0.2s;
@@ -867,7 +867,7 @@ body.state-overview #res-status {
 }
 
 .select-chevron {
-  font-size: var(--fs-sm);
+  font-size: 12px;
   color: var(--t2);
   transition: transform 0.2s;
   margin-left: 8px;
@@ -912,11 +912,11 @@ body.state-overview #res-status {
 }
 
 .select-dropdown li {
-  padding: var(--sp-3);
+  padding: 12px 12px;
   cursor: pointer;
   transition: background-color 0.15s;
   color: var(--t2);
-  font-size: var(--fs-body);
+  font-size: 15px;
 }
 
 .select-dropdown li:hover,
@@ -958,13 +958,13 @@ body.state-overview #res-status {
   right: 0;
   background: var(--bg-r);
   border-bottom: 1px solid var(--bd);
-  padding: var(--sp-3) var(--sp-7);
+  padding: 12px 48px;
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  font-size: var(--fs-sm);
+  font-size: 13px;
   color: var(--t2);
 }
 
@@ -977,7 +977,7 @@ body.state-overview #res-status {
 .announcement-link {
   color: var(--accent);
   text-decoration: none;
-  font-weight: var(--fw-medium);
+  font-weight: 500;
 }
 
 .announcement-link:hover {
@@ -989,7 +989,7 @@ body.state-overview #res-status {
   border: none;
   color: var(--t3);
   cursor: pointer;
-  font-size: var(--fs-body);
+  font-size: 16px;
   padding: 0;
   flex-shrink: 0;
 }
@@ -1011,7 +1011,7 @@ body.state-overview #res-status {
 
 .navbar-container {
   max-width: 100%;
-  padding: 0 var(--sp-7);
+  padding: 0 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1025,8 +1025,8 @@ body.state-overview #res-status {
 }
 
 .navbar-logo {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
+  font-size: 16px;
+  font-weight: 600;
   color: var(--t1);
   text-decoration: none;
   letter-spacing: -0.01em;
@@ -1043,7 +1043,7 @@ body.state-overview #res-status {
 }
 
 .navbar-link {
-  font-size: var(--fs-sm);
+  font-size: 14px;
   color: var(--t1);
   text-decoration: none;
   transition: color 0.2s;
@@ -1060,7 +1060,7 @@ body.state-overview #res-status {
 }
 
 .navbar-signin {
-  font-size: var(--fs-sm);
+  font-size: 14px;
   color: var(--t1);
   text-decoration: none;
   transition: color 0.2s;
@@ -1073,11 +1073,11 @@ body.state-overview #res-status {
 .navbar-cta {
   background: var(--accent);
   color: white;
-  padding: var(--sp-2) var(--sp-5);
+  padding: 10px 20px;
   border-radius: 4px;
   text-decoration: none;
-  font-weight: var(--fw-medium);
-  font-size: var(--fs-sm);
+  font-weight: 500;
+  font-size: 14px;
   transition: background 0.2s;
 }
 
@@ -1087,7 +1087,7 @@ body.state-overview #res-status {
 
 /* Stepper Form */
 .stepper-header {
-  padding: var(--sp-5) 0 var(--sp-6) 0;
+  padding: 24px 0 32px 0;
   border-bottom: 1px solid var(--bd);
   margin-bottom: 32px;
   display: flex;
@@ -1099,13 +1099,13 @@ body.state-overview #res-status {
   background: none;
   border: none;
   font-family: var(--mono);
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--t3);
   cursor: pointer;
   padding: 0;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
   transition: color 0.2s;
 }
 
@@ -1115,11 +1115,11 @@ body.state-overview #res-status {
 
 .step-indicator {
   font-family: var(--mono);
-  font-size: var(--fs-xs);
+  font-size: 11px;
   color: var(--t2);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: var(--fw-semibold);
+  font-weight: 600;
 }
 
 .stepper-content {
@@ -1154,8 +1154,8 @@ body.state-overview #res-status {
   justify-content: center;
   height: 50px;
   padding: 0 32px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -1194,7 +1194,7 @@ body.state-overview #res-status {
 
 .cost-table-h {
   font-family: var(--mono);
-  font-size: var(--fs-2xs);
+  font-size: 10px;
   color: var(--t3);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -1204,14 +1204,14 @@ body.state-overview #res-status {
 .cost-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-sm);
+  font-size: 14px;
 }
 
 .cost-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--sp-3) 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--bd);
 }
 
@@ -1222,12 +1222,12 @@ body.state-overview #res-status {
 
 .cost-label {
   color: var(--t2);
-  font-size: var(--fs-sm);
+  font-size: 14px;
 }
 
 .cost-value {
   font-family: var(--mono);
-  font-size: var(--fs-body);
+  font-size: 16px;
   font-weight: var(--fw-medium);
   color: var(--t1);
   font-variant-numeric: tabular-nums;
@@ -1235,5 +1235,5 @@ body.state-overview #res-status {
 
 .cost-row.savings .cost-value {
   color: var(--ok);
-  font-size: var(--fs-h3);
+  font-size: 18px;
 }
