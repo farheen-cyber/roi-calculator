@@ -439,6 +439,19 @@ function saveE(id){
 }
 function resetO(k){ overrides[k]=null; doCalc(); }
 
+function validateInputs(){
+  const sh = parseInt(document.getElementById('i-sh').value) || 0;
+  const oh = parseInt(document.getElementById('i-oh').value) || 0;
+  const gr = parseInt(document.getElementById('i-gr').value) || 0;
+
+  // Check for invalid values
+  if(sh < 0 || oh < 0 || gr < 0) return false;  // Negative not allowed
+  if(sh === 0 && oh === 0) return false;  // At least 1 shareholder
+  if(gr < 0 || gr > 100) return false;  // Equity % must be 0-100
+
+  return true;
+}
+
 function doCalc(){
   var geo_inc=document.getElementById('i-geo-inc').value, geo_op=document.getElementById('i-geo-op').value;
   var shEl=document.getElementById('i-sh'), ohEl=document.getElementById('i-oh'), grEl=document.getElementById('i-gr');
@@ -457,13 +470,15 @@ function doCalc(){
     indicator.style.background=valid?'#22c55e':'#ef4444';
   } else { indicator.style.display='none'; }
 
-  if(flow==='input' && !valid) {
-    document.getElementById('res-status').innerText = 'Complete all fields to calculate';
+  if(flow==='input' && (!valid || !validateInputs())) {
+    const isInvalid = !validateInputs();
+    const errorMsg = isInvalid ? 'Invalid input: Check stakeholder count (1-10,000) and equity %' : 'Complete all fields to calculate';
+    document.getElementById('res-status').innerText = errorMsg;
     document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
     return;
   }
 
-  var stakeholders=sh+oh, tier=stakeholders<=10?'p10':stakeholders<=50?'p50':'p90';
+  var stakeholders = Math.min(sh + oh, 10000), tier = stakeholders <= 10 ? 'p10' : stakeholders <= 50 ? 'p50' : 'p90';
   var tierLabel=tier==='p10'?'10th percentile':tier==='p50'?'median':'90th percentile';
   var sym=CUR[geo_op], rate=overrides.rate||RATES[geo_op][per][tier], mult={'in-house':1,'outsourced':0.4,'existing-tool':0.1}[meth];
   var grHr=overrides.grHr||1.5, compHr=overrides.compHr||COMPLIANCE[geo_inc];
