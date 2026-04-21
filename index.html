@@ -158,7 +158,19 @@ body {
   width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--bd-field); padding: 10px 0;
   color: #fff; font-size: 17px; outline: none; font-family: var(--sans); height: 40px; transition: border-color 0.2s;
 }
-.fi select { -webkit-appearance: none; cursor: pointer; border-radius: 0; }
+.fi select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 0;
+  padding-right: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235f17ea' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px 8px;
+}
+.fi select::-ms-expand { display: none; }
 .fi input:focus, .fi select:focus { border-bottom-color: var(--accent); }
 .fi.err-bg input, .fi.err-bg select { border-bottom-color: var(--red); }
 .fi .err-msg { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
