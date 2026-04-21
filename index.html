@@ -50,9 +50,48 @@ body {
 .col-r::-webkit-scrollbar { display: none; }
 
 @media (max-width: 1024px) {
-  .main { grid-template-columns: 1fr; }
+  .main { grid-template-columns: 1fr; padding-bottom: 140px; }
   .col-l { padding: 48px 24px; border-right: none; }
   .col-r { position: static; height: auto; padding: 48px 24px; border-top: 1px solid var(--bd); }
+
+  #mobile-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--bd);
+    padding: 12px 16px;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+  }
+  .summary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .summary-label {
+    font-size: 11px;
+    color: var(--t3);
+    text-transform: uppercase;
+  }
+  .summary-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--t1);
+  }
+  .summary-value.accent {
+    color: var(--accent-l);
+  }
+  #mobile-summary .btn {
+    width: 100%;
+  }
 }
 
 /* Hero */
@@ -313,6 +352,20 @@ body.state-overview #res-status { display: none !important; }
     </div>
     <div id="assumptions-view" class="hidden"></div>
   </div>
+</div>
+
+<div id="mobile-summary" class="mobile-summary" style="display:none;">
+  <div class="summary-row">
+    <div class="summary-item">
+      <span class="summary-label">Your Annual Spend</span>
+      <span class="summary-value" id="mob-spend">—</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">EquityList ROI</span>
+      <span class="summary-value accent" id="mob-roi">—</span>
+    </div>
+  </div>
+  <button class="btn btn-p" onclick="window.open('https://www.equitylist.co/contact', '_blank')" style="width: 100%;">📅 Book a demo →</button>
 </div>
 
 <script>
@@ -577,17 +630,26 @@ EquityList = ${sym}${fN(Math.round(stakeholders*1200*FX[geo_op]))} platform + ${
       </tbody></table>
     </div>
   `;
+
+  // Update mobile summary bar (only visible on viewports <= 1024px)
+  document.getElementById('mob-spend').innerText = sym + fN(Math.round(annCost));
+  document.getElementById('mob-roi').innerText = roi + 'x';
+  const shouldShowMobileSummary = (flow === 'input') && (window.innerWidth <= 1024);
+  document.getElementById('mobile-summary').style.display = shouldShowMobileSummary ? 'block' : 'none';
 }
 
 function openAssumptions(){
   document.getElementById('results-view').classList.add('hidden');
   document.getElementById('assumptions-view').classList.remove('hidden');
   document.getElementById('audit-log-link').style.display = 'none';  // Hide View Assumptions button
+  document.getElementById('mobile-summary').style.display = 'none';  // Hide mobile summary bar
 }
 function closeAssumptions(){
   document.getElementById('assumptions-view').classList.add('hidden');
   document.getElementById('results-view').classList.remove('hidden');
   document.getElementById('audit-log-link').style.display = 'inline';  // Show View Assumptions button again
+  const shouldShowMobileSummary = (flow === 'input') && (window.innerWidth <= 1024);
+  document.getElementById('mobile-summary').style.display = shouldShowMobileSummary ? 'block' : 'none';  // Show mobile summary if in input mode and on small screen
 }
 
 function onMethChange(){
