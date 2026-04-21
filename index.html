@@ -171,15 +171,24 @@ body {
   background-size: 12px 8px;
 }
 .fi select::-ms-expand { display: none; }
-.fi input:focus, .fi select:focus { border-bottom-color: var(--accent); }
+.fi input:focus, .fi select:focus {
+  border-bottom-color: var(--accent-l);
+  box-shadow: 0 2px 0 var(--accent-l);
+}
+.fi input:focus-visible, .fi select:focus-visible {
+  outline: 2px solid var(--accent-l);
+  outline-offset: 2px;
+}
 .fi.err-bg input, .fi.err-bg select { border-bottom-color: var(--red); }
 .fi .err-msg { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
 .field-hint { font-size:10px; color:var(--t3); margin-top:6px; line-height:1.4; }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 0 32px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .btn-p { background: var(--accent); color: #fff; margin-top: 24px; text-transform: none; }
 .btn-p:hover { background: var(--accent-l); }
+.btn-p:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
 /* Right Panel Elements */
 .r-h { font-family: var(--mono); font-size: 11px; color: var(--t2); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 8px; font-weight: 600; }
@@ -227,9 +236,11 @@ body {
 /* Editable Items */
 .editable { display: inline-flex; align-items: baseline; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); cursor: pointer; color: var(--ok); transition: border-color 0.2s; outline: none; }
 .editable:hover { border-color: var(--ok); }
-.editable:focus { border-bottom-color: var(--ok); box-shadow: 0 2px 0 var(--ok); }
+.editable:focus { border-bottom-color: var(--ok); box-shadow: 0 2px 0 var(--ok); outline: none; }
+.editable:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
 .editable.editing { border-bottom: none; cursor: default; }
-.edit-in { background: #1a1a20; border: 1px solid var(--ok); color: #fff; font-family: var(--mono); font-size: 11px; padding: 2px 6px; outline: none; width: 60px; }
+.edit-in { background: #1a1a20; border: 2px solid var(--ok); color: #fff; font-family: var(--mono); font-size: 11px; padding: 4px 8px; outline: none; width: 60px; border-radius: 2px; }
+.edit-in:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
 .reset-btn { font-size: 9px; color: var(--accent); text-transform: uppercase; cursor: pointer; text-decoration: underline; margin-left: 8px; }
 
 .ap-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -295,12 +306,12 @@ body {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
             <div class="fi">
               <label>Country of Incorporation * <span title="Determines compliance requirements and statutory reporting obligations" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
-              <select id="i-geo-inc" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+              <select id="i-geo-inc" onchange="lc()" onblur="val(this)" aria-label="Country of Incorporation" aria-required="true"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
               <div class="err-msg">Field required</div>
             </div>
             <div class="fi">
               <label>Country of Operation * <span title="Determines hourly rates, currency, and EquityList pricing" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
-              <select id="i-geo-op" onchange="lc()" onblur="val(this)"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+              <select id="i-geo-op" onchange="lc()" onblur="val(this)" aria-label="Country of Operation" aria-required="true"><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
               <div class="err-msg">Field required</div>
             </div>
           </div>
@@ -317,9 +328,9 @@ body {
         <h2 class="sec-h">Equity Structure</h2>
         <p class="sec-p">Stakeholder volume scales your cap table reconciliation and grant overhead.</p>
         <div class="fg">
-          <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onblur="val(this)"><div class="err-msg">Field required</div></div>
-          <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onblur="valAndEnableNext(this, 'i-gr')"><div class="err-msg">Field required</div></div>
-          <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()" onblur="val(this)"><div class="err-msg">Field required</div></div>
+          <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onblur="val(this)" aria-label="Shareholders (Common)" aria-required="true"><div class="err-msg">Field required</div></div>
+          <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onblur="valAndEnableNext(this, 'i-gr')" aria-label="Option Holders" aria-required="true"><div class="err-msg">Field required</div></div>
+          <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()" onblur="val(this)" aria-label="Equity grants per Year" aria-required="true"><div class="err-msg">Field required</div></div>
         </div>
       </div>
 
@@ -328,8 +339,8 @@ body {
         <h2 class="sec-h">Current Operations</h2>
         <p class="sec-p">Who executes the work and what tools they use currently.</p>
         <div class="fg">
-          <div class="fi"><label>Managed by *</label><select id="i-per" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select></div>
-          <div class="fi"><label>Administrative Method *</label><select id="i-meth" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select></div>
+          <div class="fi"><label>Managed by *</label><select id="i-per" onchange="lc()" aria-label="Managed by" aria-required="true"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select></div>
+          <div class="fi"><label>Administrative Method *</label><select id="i-meth" onchange="onMethChange()" aria-label="Administrative Method" aria-required="true"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select></div>
           <div class="fi hidden" id="tool-cost-wrap">
             <label>Annual Tool Cost</label>
             <input type="number" id="i-tc" placeholder="e.g. 50000" oninput="lc()">
