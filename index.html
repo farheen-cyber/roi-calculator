@@ -487,12 +487,11 @@ function validateInputs(){
   const sh = parseInt(document.getElementById('i-sh').value) || 0;
   const oh = parseInt(document.getElementById('i-oh').value) || 0;
   const gr = parseInt(document.getElementById('i-gr').value) || 0;
-  const total = sh + oh;
 
-  if(sh < 0 || oh < 0 || gr < 0) return false;  // Negative not allowed
-  if(sh === 0 && oh === 0) return false;  // At least 1 shareholder
-  if(gr < 0 || gr > 100) return false;  // Equity % must be 0-100
-  if(total > 10000) return false;  // Cap at 10,000 total shareholders
+  // Validate ranges per PRD
+  if(sh < 1 || sh > 1000) return false;  // Shareholders: 1-1,000
+  if(oh < 1 || oh > 2000) return false;  // Option Holders: 1-2,000
+  if(gr < 1 || gr > 500) return false;   // Equity grants/year: 1-500
 
   return true;
 }
@@ -532,7 +531,7 @@ function doCalc(){
 
   if(flow==='input' && (!valid || !validateInputs())) {
     const isInvalid = !validateInputs();
-    const errorMsg = isInvalid ? 'Invalid: Stakeholders max 10,000 or missing fields' : 'Complete all fields to calculate';
+    const errorMsg = isInvalid ? 'Invalid: Check ranges (SH: 1-1k, OH: 1-2k, Grants: 1-500)' : 'Complete all fields to calculate';
     document.getElementById('res-status').innerText = errorMsg;
     document.getElementById('res-status').style.display = 'block';
     document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
