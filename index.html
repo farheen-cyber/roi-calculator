@@ -79,11 +79,10 @@ body {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at var(--x) var(--y), rgba(255,255,255,0.15), rgba(255,255,255,0.12), rgba(95,23,234,0.08), transparent 60%);
   opacity: 0;
   transition: opacity 0.3s;
 }
-.method-card:hover .spotlight { opacity: 1; }
+.method-card:hover .spotlight { opacity: 0; }
 
 @media (max-width: 768px) { .method-grid { grid-template-columns: 1fr; } }
 
@@ -179,7 +178,16 @@ body {
 /* Global State Transitions */
 #overview-state, #input-state { opacity: 1; transform: translateY(0); transition: opacity 0.3s, transform 0.3s; }
 #overview-state.hidden, #input-state.hidden { opacity: 0; pointer-events: none; }
-#overview-state #res-status { display: none; }
+body.state-overview #res-status { display: none !important; }
+
+/* Layout Container */
+.main { max-width: 100%; }
+.col-l-content { max-width: 720px; margin: 0 auto; }
+
+/* Sticky CTA Area */
+.cta-overlay { position: absolute; top: 80px; right: 48px; display: flex; align-items: center; gap: 24px; z-index: 10; }
+.cta-link { font-family: var(--mono); font-size: 10px; color: var(--accent); cursor: pointer; text-transform: uppercase; white-space: nowrap; }
+.cta-link:hover { color: var(--accent-l); }
 </style>
 </head>
 <body>
@@ -187,6 +195,7 @@ body {
 <div class="main">
   <!-- LEFT COLUMN -->
   <div class="col-l">
+    <div class="col-l-content">
     
     <!-- STATE: OVERVIEW -->
     <div id="overview-state">
@@ -277,10 +286,14 @@ body {
         </div>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- RIGHT COLUMN -->
   <div class="col-r" id="right-col">
+    <div class="cta-overlay">
+      <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none">View assumptions</span>
+    </div>
     <div id="results-view">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <div class="r-h">LIVE ESTIMATE</div>
@@ -374,6 +387,8 @@ function goInput(){
   flow='input';
   userInputStarted=false;
   initialMethod=document.getElementById('i-meth').value;
+  document.body.classList.remove('state-overview');
+  document.getElementById('res-status').style.display = 'block';
   document.getElementById('overview-state').classList.add('hidden');
   document.getElementById('input-state').classList.remove('hidden');
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -383,6 +398,8 @@ function goInput(){
 
 function goOverview(){
   flow='overview';
+  document.body.classList.add('state-overview');
+  document.getElementById('res-status').style.display = 'none';
   document.getElementById('input-state').classList.add('hidden');
   document.getElementById('overview-state').classList.remove('hidden');
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -484,13 +501,38 @@ function doCalc(){
     document.getElementById('v-b2').style.opacity = '1';
   }, 10);
 
+  var ctaHtml = '';
+  if (isSpend) {
+    // EL is cheaper
+    ctaHtml = `<a href="https://equitylist.co/book-demo" class="cta-btn btn-p" style="width:100%;text-align:center;text-decoration:none">📅 Book a demo →</a>`;
+  } else {
+    // EL is more expensive or break-even
+    ctaHtml = `
+      <div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-top:24px">
+        <div style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px">
+          <strong>At your stage, manual processes are manageable.</strong> But as you scale, spreadsheets become error-prone and time-consuming:
+          <ul style="margin:8px 0 0 16px;color:var(--t3);font-size:11px">
+            <li>Missed vesting calculations & compliance deadlines</li>
+            <li>Hours wasted on grant drafting and reconciliation</li>
+            <li>Cap table inconsistencies across stakeholders</li>
+          </ul>
+        </div>
+        <div style="font-size:11px;color:var(--t3)">We'll reach out around 25 stakeholders when automation becomes critical.</div>
+      </div>
+      <a href="https://equitylist.co/newsletter" class="btn btn-p" style="width:100%;text-align:center;text-decoration:none;margin-top:16px">📧 Notify me when to switch →</a>
+    `;
+  }
+
   document.getElementById('r-body').innerHTML = `
     <div class="hero-metric"><div class="hm-label">Your Current Annual Spend</div><div class="hm-val">${sym}${fN(Math.round(annCost))}</div></div>
     <div class="r-group"><div class="r-group-h">Cost Comparison</div><div class="r-row"><span>You today</span><span class="r-val">${sym}${fN(Math.round(annCost))}</span></div><div class="r-row"><span>EquityList *</span><span class="r-val">${sym}${fN(Math.round(elAnn))}</span></div></div>
     <div class="r-group"><div class="r-group-h">Efficiency</div><div class="r-row"><span>Internal Effort</span><span class="r-val">${Math.round(internalHTotal)} hrs/yr</span></div><div class="r-row"><span>Time Saved</span><span class="r-val green">~${timeSavedPct}%</span></div></div>
-    <div class="r-group"><div class="r-group-h">Economics</div><div class="r-row"><span>Rate (${tierLabel})</span><span class="r-val">${sym}${rate}/hr</span></div><div class="r-row"><span>Direct ROI</span><span class="r-val">${roi}x</span></div><div class="trigger-link" onclick="openAssumptions()">Audit Calculation Log</div></div>
-    <a href="https://equitylist.co/book-demo" class="cta-btn btn-p" style="width:100%;text-align:center;text-decoration:none">📅 Book Audit & Export Report</a>
+    <div class="r-group"><div class="r-group-h">Economics</div><div class="r-row"><span>Rate (${tierLabel})</span><span class="r-val">${sym}${rate}/hr</span></div><div class="r-row"><span>Direct ROI</span><span class="r-val">${roi}x</span></div></div>
+    ${ctaHtml}
   `;
+
+  // Show/hide audit log link based on flow
+  document.getElementById('audit-log-link').style.display = flow === 'input' ? 'inline' : 'none';
 
   document.getElementById('assumptions-view').innerHTML = `
     <div class="ap-pane">
@@ -525,24 +567,36 @@ function fN(n){ return n.toLocaleString(); }
 function fK(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return Math.round(n/1e3).toLocaleString()+'k'; return String(Math.round(n)); }
 
 const sectionObs = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-      document.querySelectorAll('.sec').forEach(s => s.classList.add('dim'));
-      entry.target.classList.remove('dim');
-    }
-  });
-}, { threshold: [0.1, 0.5, 0.8], rootMargin: "-10% 0px -10% 0px" });
+  const visible = entries.filter(e => e.isIntersecting);
+  if (!visible.length) return;
+
+  // Find section with highest intersection ratio (closest to center)
+  const active = visible.reduce((a, b) => (a.intersectionRatio > b.intersectionRatio ? a : b));
+
+  // Dim all, unset the active one
+  document.querySelectorAll('.sec').forEach(s => s.classList.toggle('dim', s !== active.target));
+}, { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: "-30% 0px -30% 0px" });
 
 window.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('state-overview');
+
+  // Initialize Section 01 as active
+  const sec1 = document.getElementById('sec-1');
+  if (sec1) sec1.classList.remove('dim');
+
+  // Observe all sections
   document.querySelectorAll('.sec').forEach(s => sectionObs.observe(s));
+
+  // Click/focus handlers for field interaction
   document.querySelectorAll('.fi input, .fi select').forEach(f => {
     const focus = () => {
-      document.querySelectorAll('.sec').forEach(s => s.classList.add('dim'));
-      f.closest('.sec').classList.remove('dim');
+      const targetSec = f.closest('.sec');
+      document.querySelectorAll('.sec').forEach(s => s.classList.toggle('dim', s !== targetSec));
     };
     f.addEventListener('focus', focus);
     f.addEventListener('click', focus);
   });
+
   doCalc();
   fetch('https://open.er-api.com/v6/latest/INR').then(r=>r.json()).then(d=>{if(d.rates){FX.us=d.rates.USD;FX.singapore=d.rates.SGD;FX.uk=d.rates.GBP;doCalc();}}).catch(e=>console.warn('FX update failed'));
 });
