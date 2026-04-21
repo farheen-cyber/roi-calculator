@@ -10,6 +10,42 @@ var overrides = { rate: null, grHr: null, compHr: null };
 var initialMethod = null;
 var userInputStarted = false;
 
+// Stepper state
+var currentStep = 1;
+var formStateData = {};
+
+// ==================== THEME MANAGEMENT ====================
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDarkMode = html.classList.contains('dark-theme');
+  const btn = document.getElementById('theme-toggle');
+
+  if (isDarkMode) {
+    html.classList.remove('dark-theme');
+    btn.innerText = 'Dark';
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.classList.add('dark-theme');
+    btn.innerText = 'Light';
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+
+  if (saved === 'dark') {
+    html.classList.add('dark-theme');
+    btn.innerText = 'Light';
+  } else {
+    html.classList.remove('dark-theme');
+    btn.innerText = 'Dark';
+  }
+}
+
 // ==================== VALIDATION FUNCTIONS ====================
 
 function validateInputs() {
@@ -66,6 +102,13 @@ function goInput() {
   document.getElementById('overview-state').classList.add('hidden');
   document.getElementById('input-state').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Initialize stepper
+  currentStep = 1;
+  formStateData = {};
+  updateStepVisibility();
+  loadStepState();
+
   document.getElementById('i-geo-inc').focus();
   doCalc();
 }
@@ -77,6 +120,93 @@ function goOverview() {
   document.getElementById('input-state').classList.add('hidden');
   document.getElementById('overview-state').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== STEPPER NAVIGATION ====================
+
+function saveStepState() {
+  // Save all form values to formStateData
+  const inputs = document.querySelectorAll('#input-state input, #input-state select');
+  inputs.forEach(input => {
+    formStateData[input.id] = input.value;
+  });
+}
+
+function loadStepState() {
+  // Restore all form values from formStateData
+  Object.entries(formStateData).forEach(([id, value]) => {
+    const input = document.getElementById(id);
+    if (input) input.value = value;
+  });
+  // Reinitialize SelectField components to match restored values
+  document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+    const select = wrapper.querySelector('.custom-select');
+    const display = wrapper.querySelector('.select-display .select-label');
+    if (select && display) {
+      const selectedOption = select.options[select.selectedIndex];
+      display.textContent = selectedOption ? selectedOption.text : '';
+    }
+  });
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    const geoInc = document.getElementById('i-geo-inc').value;
+    const geoOp = document.getElementById('i-geo-op').value;
+    return geoInc && geoOp; // Both countries required
+  }
+  if (step === 2) {
+    const sh = document.getElementById('i-sh').value;
+    const oh = document.getElementById('i-oh').value;
+    const gr = document.getElementById('i-gr').value;
+    return sh && oh && gr; // All three required
+  }
+  if (step === 3) {
+    const per = document.getElementById('i-per').value;
+    return per; // Managed by required
+  }
+  return true;
+}
+
+function updateStepVisibility() {
+  document.querySelectorAll('#input-state .sec').forEach((sec, idx) => {
+    if (idx + 1 === currentStep) {
+      sec.classList.add('active');
+      sec.classList.remove('hidden');
+      sec.classList.remove('dim');
+    } else {
+      sec.classList.remove('active');
+      sec.classList.add('hidden');
+    }
+  });
+
+  // Update step indicator
+  document.getElementById('current-step').textContent = currentStep;
+
+  // Update button states
+  document.getElementById('btn-back').disabled = currentStep === 1;
+  document.getElementById('btn-next').disabled = !validateStep(currentStep);
+}
+
+function stepNext() {
+  if (!validateStep(currentStep)) return;
+  saveStepState();
+  if (currentStep < 3) {
+    currentStep++;
+    updateStepVisibility();
+    loadStepState();
+    doCalc();
+  }
+}
+
+function stepBack() {
+  if (currentStep > 1) {
+    saveStepState();
+    currentStep--;
+    updateStepVisibility();
+    loadStepState();
+    doCalc();
+  }
 }
 
 // ==================== FILE UPLOAD ====================
@@ -217,11 +347,10 @@ function doCalc() {
     document.getElementById('res-status').style.display = 'block';
     document.getElementById('r-body').innerHTML =
       '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
-    // Clear chart when invalid
-    document.getElementById('b1').style.height = '0';
-    document.getElementById('b2').style.height = '0';
-    document.getElementById('v-b1').innerText = '';
-    document.getElementById('v-b2').innerText = '';
+    // Clear cost table when invalid
+    document.getElementById('cost-you').textContent = '$0';
+    document.getElementById('cost-el').textContent = '$0';
+    document.getElementById('cost-savings').textContent = '$0';
     document.getElementById('mobile-summary').style.display = 'none';
     return;
   }
@@ -245,16 +374,13 @@ function doCalc() {
   document.getElementById('res-status').innerText = 'Based on your inputs';
   document.getElementById('res-status').style.display = flow === 'input' ? 'block' : 'none';
 
-  // Render chart
-  var max = Math.max(roiData.annCost, roiData.elAnn, 1);
-  setTimeout(() => {
-    document.getElementById('b1').style.height = (roiData.annCost / max) * 100 + 'px';
-    document.getElementById('b2').style.height = (roiData.elAnn / max) * 100 + 'px';
-    document.getElementById('v-b1').innerText = sym + fK(roiData.annCost);
-    document.getElementById('v-b2').innerText = sym + fK(roiData.elAnn);
-    document.getElementById('v-b1').style.opacity = '1';
-    document.getElementById('v-b2').style.opacity = '1';
-  }, 10);
+  // Render cost comparison table
+  const savings = roiData.annCost - roiData.elAnn;
+  const savingsColor = savings > 0 ? 'var(--ok)' : 'var(--red)';
+  document.getElementById('cost-you').textContent = sym + fN(roiData.annCost);
+  document.getElementById('cost-el').textContent = sym + fN(roiData.elAnn);
+  document.getElementById('cost-savings').textContent = sym + fN(Math.abs(savings));
+  document.getElementById('cost-savings').style.color = savingsColor;
 
   var ctaHtml = '';
   if (roiData.isSpend) {
@@ -280,9 +406,10 @@ function doCalc() {
 
   document.getElementById('r-body').innerHTML = `
     <div class="hero-metric"><div class="hm-label">Your Current Annual Spend</div><div class="hm-val">${sym}${fN(roiData.annCost)}</div></div>
-    <div class="r-group"><div class="r-group-h">Cost Comparison</div><div class="r-row"><span>You today</span><span class="r-val">${sym}${fN(roiData.annCost)}</span></div><div class="r-row"><span>EquityList *</span><span class="r-val">${sym}${fN(roiData.elAnn)}</span></div></div>
     <div class="r-group"><div class="r-group-h">Efficiency</div><div class="r-row"><span>Internal Effort</span><span class="r-val">${Math.round(roiData.internalHTotal)} hrs/yr</span></div><div class="r-row"><span>Time Saved</span><span class="r-val green">~${roiData.timeSavedPct}%</span></div></div>
-    <div class="r-group"><div class="r-group-h">Economics</div><div class="r-row"><span>Rate (${roiData.tierLabel})</span><span class="r-val">${sym}${roiData.rate}/hr</span></div><div class="r-row"><span>Direct ROI</span><span class="r-val">${roiData.roi}x</span></div></div>
+    <div style="font-size:11px;color:var(--t3);margin:24px 0;padding:16px;background:rgba(95,23,234,0.05);border-left:2px solid var(--accent);line-height:1.6">
+      <strong>EquityList pricing is directional</strong> based on ${roiData.tierLabel} hourly rates. Actual pricing tailored to your company size and use case.
+    </div>
     ${ctaHtml}
   `;
 
@@ -375,6 +502,9 @@ const sectionObs = new IntersectionObserver(
 // ==================== INITIALIZATION ====================
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Initialize theme from localStorage
+  initTheme();
+
   document.body.classList.add('state-overview');
 
   // Initialize custom select components
@@ -443,3 +573,6 @@ window.onMethChange = onMethChange;
 window.openAssumptions = openAssumptions;
 window.closeAssumptions = closeAssumptions;
 window.doCalc = doCalc;
+window.stepNext = stepNext;
+window.stepBack = stepBack;
+window.toggleTheme = toggleTheme;

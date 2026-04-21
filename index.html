@@ -11,6 +11,38 @@
 </head>
 <body>
 
+<!-- Announcement Bar -->
+<div class="navbar-announcement">
+  <div class="announcement-content">
+    <span><strong>[NEW]</strong> ESOP Advisory Is Now Live on EquityList.</span>
+    <a href="https://www.equitylist.co/blog-post/esop-advisory-launch" class="announcement-link">Learn more →</a>
+  </div>
+  <button class="announcement-close" onclick="this.parentElement.style.display='none'">✕</button>
+</div>
+
+<!-- Main Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-left">
+      <a href="https://www.equitylist.co/" class="navbar-logo">
+        <span>EquityList</span>
+      </a>
+      <div class="navbar-menu">
+        <a href="https://www.equitylist.co/products" class="navbar-link">Products</a>
+        <a href="https://www.equitylist.co/solutions" class="navbar-link">Solutions</a>
+        <a href="https://www.equitylist.co/customers" class="navbar-link">Customers</a>
+        <a href="https://www.equitylist.co/pricing" class="navbar-link">Pricing</a>
+        <a href="https://www.equitylist.co/resources" class="navbar-link">Resources</a>
+        <a href="https://www.equitylist.co/company" class="navbar-link">Company</a>
+      </div>
+    </div>
+    <div class="navbar-right">
+      <a href="https://app.equitylist.co/login" class="navbar-signin">Sign in</a>
+      <a href="https://www.equitylist.co/contact" class="navbar-cta">Get started</a>
+    </div>
+  </div>
+</nav>
+
 <!-- Skip Links for keyboard navigation -->
 <nav aria-label="Skip links" style="position:absolute;top:-40px;left:0;z-index:9999">
   <a href="#sec-1" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--accent);color:white;padding:8px;text-decoration:none;font-size:14px">Skip to main form</a>
@@ -62,8 +94,14 @@
 
     <!-- STATE: INPUT FORM -->
     <div id="input-state" class="hidden">
-      <div class="back-btn" onclick="goOverview()">← Back</div>
+      <!-- Stepper Header -->
+      <div class="stepper-header">
+        <button class="back-home-btn" onclick="goOverview()" aria-label="Back to home">← Back</button>
+        <div class="step-indicator">Step <span id="current-step">1</span> of 3</div>
+      </div>
 
+      <!-- Stepper Content -->
+      <div class="stepper-content">
       <div class="sec active" id="sec-1">
         <span class="sec-n">01</span>
         <fieldset style="border:none;padding:0;margin:0">
@@ -185,6 +223,13 @@
           </div>
         </div>
       </div>
+
+      <!-- Stepper Navigation -->
+      <div class="stepper-nav">
+        <button class="btn-nav btn-back" id="btn-back" onclick="stepBack()" disabled>← Back</button>
+        <button class="btn-nav btn-next" id="btn-next" onclick="stepNext()">Next →</button>
+      </div>
+      </div>
     </div>
     </div>
   </div>
@@ -193,20 +238,36 @@
   <div class="col-r" id="right-col">
     <div id="results-view">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="r-h">LIVE ESTIMATE</div>
-          <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="r-h">LIVE ESTIMATE</div>
+            <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none;font-size:10px;padding:4px 8px;border:1px solid var(--accent);cursor:pointer">VIEW ASSUMPTIONS</span>
+            <button id="theme-toggle" onclick="toggleTheme()" style="font-size:10px;padding:4px 8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;text-transform:uppercase">Dark</button>
+          </div>
         </div>
-        <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none;font-size:10px;padding:4px 8px;border:1px solid var(--accent);cursor:pointer">VIEW</span>
       </div>
       <div class="r-s" id="res-status" style="display:none" aria-live="polite" aria-atomic="true"></div>
 
-      <div class="chart-wrap">
-        <div class="chart-h">ANNUAL COST COMPARISON</div>
-        <div class="bars">
-          <div class="bar-col"><div class="bar-val" id="v-b1" aria-label="Your annual cost"></div><div class="bar-rect you" id="b1"></div><div class="bar-lbl">You today</div></div>
-          <div class="bar-col"><div class="bar-val" id="v-b2" aria-label="EquityList annual cost"></div><div class="bar-rect el" id="b2"></div><div class="bar-lbl">EquityList</div></div>
-        </div>
+      <!-- Cost Comparison Table -->
+      <div class="cost-table-wrap">
+        <div class="cost-table-h">ANNUAL COST COMPARISON</div>
+        <table class="cost-table">
+          <tr class="cost-row">
+            <td class="cost-label">You today</td>
+            <td class="cost-value" id="cost-you">$0</td>
+          </tr>
+          <tr class="cost-row">
+            <td class="cost-label">EquityList</td>
+            <td class="cost-value" id="cost-el">$0</td>
+          </tr>
+          <tr class="cost-row savings">
+            <td class="cost-label">Savings</td>
+            <td class="cost-value savings-val" id="cost-savings">$0</td>
+          </tr>
+        </table>
       </div>
 
       <div id="r-body" aria-live="assertive" aria-atomic="true"></div>
@@ -226,7 +287,7 @@
       <span class="summary-value accent" id="mob-roi">—</span>
     </div>
   </div>
-  <button class="btn btn-p" onclick="window.open('https://www.equitylist.co/contact', '_blank')" style="width: 100%;">📅 Book a demo →</button>
+  <button class="btn btn-p" onclick="window.open('https://www.equitylist.co/contact', '_blank')" style="width: 100%;margin-bottom:32px;">📅 Book a demo →</button>
 </div>
 
 <script type="module" src="app.js"></script>
