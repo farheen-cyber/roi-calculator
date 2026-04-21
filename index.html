@@ -98,6 +98,44 @@ body {
   .fi input, .fi select { font-size: 16px; }
 }
 
+@media (max-width: 1024px) {
+  #mobile-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--bd);
+    padding: 12px 16px;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+  }
+  .summary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .summary-label {
+    font-size: 11px;
+    color: var(--t3);
+    text-transform: uppercase;
+  }
+  .summary-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--t1);
+  }
+  .summary-value.accent {
+    color: var(--accent-l);
+  }
+}
+
 /* Logos */
 .logos-h { margin-bottom: 10px !important; font-family: var(--mono); font-size: 9px !important; text-transform: uppercase; letter-spacing: 0.1em; color: var(--t3); }
 .logo-row { display: flex; gap: 10px !important; flex-wrap: wrap; opacity: 0.4; margin-bottom: 0 !important; }
@@ -309,6 +347,19 @@ body {
 
       <div id="r-body"></div>
     </div>
+    <div id="mobile-summary" class="mobile-summary" style="display:none;">
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-label">Your Annual Spend</span>
+          <span class="summary-value" id="mob-spend">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">EquityList ROI</span>
+          <span class="summary-value accent" id="mob-roi">—</span>
+        </div>
+      </div>
+      <button class="btn btn-p" onclick="window.open('https://www.equitylist.co/contact', '_blank')" style="width: 100%;">📅 Book a demo →</button>
+    </div>
     <div id="assumptions-view" class="hidden"></div>
   </div>
 </div>
@@ -510,6 +561,11 @@ function doCalc(){
     document.getElementById('v-b2').style.opacity = '1';
   }, 10);
 
+  // Update mobile summary bar
+  document.getElementById('mob-spend').innerText = sym + fN(Math.round(annCost));
+  document.getElementById('mob-roi').innerText = roi + 'x';
+  document.getElementById('mobile-summary').style.display = (flow === 'input') ? 'block' : 'none';
+
   document.getElementById('r-body').innerHTML = `
     <div class="hero-metric"><div class="hm-label">Your Current Annual Spend</div><div class="hm-val">${sym}${fN(Math.round(annCost))}</div></div>
     <div class="r-group"><div class="r-group-h">Cost Comparison</div><div class="r-row"><span>You today</span><span class="r-val">${sym}${fN(Math.round(annCost))}</span></div><div class="r-row"><span>EquityList *</span><span class="r-val">${sym}${fN(Math.round(elAnn))}</span></div></div>
@@ -538,8 +594,16 @@ EquityList = ${sym}${fN(Math.round(stakeholders*1200*FX[geo_op]))} platform + ${
   `;
 }
 
-function openAssumptions(){ document.getElementById('results-view').classList.add('hidden'); document.getElementById('assumptions-view').classList.remove('hidden'); }
-function closeAssumptions(){ document.getElementById('assumptions-view').classList.add('hidden'); document.getElementById('results-view').classList.remove('hidden'); }
+function openAssumptions(){
+  document.getElementById('results-view').classList.add('hidden');
+  document.getElementById('assumptions-view').classList.remove('hidden');
+  document.getElementById('mobile-summary').style.display = 'none';  // Hide mobile summary when viewing assumptions
+}
+function closeAssumptions(){
+  document.getElementById('assumptions-view').classList.add('hidden');
+  document.getElementById('results-view').classList.remove('hidden');
+  document.getElementById('mobile-summary').style.display = (flow === 'input') ? 'block' : 'none';  // Show mobile summary again
+}
 
 function onMethChange(){
   var m=document.getElementById('i-meth').value;
