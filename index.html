@@ -186,8 +186,8 @@ body.state-overview #res-status { display: none !important; }
 
 /* Sticky CTA Area */
 .cta-overlay { position: absolute; top: 80px; right: 48px; display: flex; align-items: center; gap: 24px; z-index: 10; }
-.cta-link { font-family: var(--mono); font-size: 10px; color: var(--accent); cursor: pointer; text-transform: uppercase; white-space: nowrap; }
-.cta-link:hover { color: var(--accent-l); }
+.cta-link { font-family: var(--mono); font-size: 10px; color: #fff; background: rgba(95,23,234,0.3); border: 1px solid var(--accent); padding: 6px 12px; cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: all 0.2s; }
+.cta-link:hover { background: var(--accent); color: #fff; }
 </style>
 </head>
 <body>
@@ -465,7 +465,13 @@ function doCalc(){
 
   if(flow==='input' && !valid) {
     document.getElementById('res-status').innerText = 'Complete all fields to calculate';
+    document.getElementById('res-status').style.display = 'block';
     document.getElementById('r-body').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
+    // Clear chart when invalid
+    document.getElementById('b1').style.height = '0';
+    document.getElementById('b2').style.height = '0';
+    document.getElementById('v-b1').innerText = '';
+    document.getElementById('v-b2').innerText = '';
     return;
   }
 
@@ -490,6 +496,8 @@ function doCalc(){
   var diff=annCost-elAnn, isSpend=diff>=0, absDiff=Math.abs(diff), roi=elAnn>0?Math.round(absDiff/elAnn*10)/10:0;
 
   document.getElementById('res-status').innerText = userInputStarted?"Based on your inputs":"Using sample data";
+  // Only show res-status on input form (not on overview)
+  document.getElementById('res-status').style.display = (flow === 'input') ? 'block' : 'none';
 
   var max = Math.max(annCost, elAnn, 1);
   setTimeout(() => {
@@ -504,7 +512,7 @@ function doCalc(){
   var ctaHtml = '';
   if (isSpend) {
     // EL is cheaper
-    ctaHtml = `<a href="https://equitylist.co/book-demo" class="cta-btn btn-p" style="width:100%;text-align:center;text-decoration:none">📅 Book a demo →</a>`;
+    ctaHtml = `<button onclick="window.open('https://www.equitylist.co/contact', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">📅 Book a demo →</button>`;
   } else {
     // EL is more expensive or break-even
     ctaHtml = `
@@ -519,7 +527,7 @@ function doCalc(){
         </div>
         <div style="font-size:11px;color:var(--t3)">We'll reach out around 25 stakeholders when automation becomes critical.</div>
       </div>
-      <a href="https://equitylist.co/newsletter" class="btn btn-p" style="width:100%;text-align:center;text-decoration:none;margin-top:16px">📧 Notify me when to switch →</a>
+      <button onclick="window.open('https://www.equitylist.co/newsletter', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none;margin-top:16px">📧 Notify me when to switch →</button>
     `;
   }
 
@@ -567,15 +575,27 @@ function fN(n){ return n.toLocaleString(); }
 function fK(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1e3)return Math.round(n/1e3).toLocaleString()+'k'; return String(Math.round(n)); }
 
 const sectionObs = new IntersectionObserver((entries) => {
+  // Get all sections that are in viewport (even partially)
   const visible = entries.filter(e => e.isIntersecting);
   if (!visible.length) return;
 
-  // Find section with highest intersection ratio (closest to center)
-  const active = visible.reduce((a, b) => (a.intersectionRatio > b.intersectionRatio ? a : b));
+  // Find section with highest intersection ratio (closest to center viewport)
+  let active = visible[0];
+  for (let entry of visible) {
+    if (entry.intersectionRatio > active.intersectionRatio) {
+      active = entry;
+    }
+  }
 
-  // Dim all, unset the active one
-  document.querySelectorAll('.sec').forEach(s => s.classList.toggle('dim', s !== active.target));
-}, { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: "-30% 0px -30% 0px" });
+  // Update active state
+  document.querySelectorAll('.sec').forEach(s => {
+    if (s === active.target) {
+      s.classList.remove('dim');
+    } else {
+      s.classList.add('dim');
+    }
+  });
+}, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], rootMargin: "-25% 0px -25% 0px" });
 
 window.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('state-overview');
