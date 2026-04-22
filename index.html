@@ -58,11 +58,12 @@
   <div class="col-l">
     <div class="col-l-content">
     
-    <!-- STATE: OVERVIEW -->
-    <div id="overview-state">
-      <h1 class="hero-h">How much is managing equity on <em>spreadsheets</em> costing you?</h1>
-      <p class="hero-p">Based on industry benchmarks and real company data — see precisely how much time and capital is wasted on manual administration.</p>
+    <!-- HERO SECTION (always visible) -->
+    <h1 class="hero-h">How much is managing equity on <em>spreadsheets</em> costing you?</h1>
+    <p class="hero-p">Based on industry benchmarks and real company data — see precisely how much time and capital is wasted on manual administration.</p>
 
+    <!-- STATE: OVERVIEW (hidden with form) -->
+    <div id="overview-state">
       <div class="method-label">INPUT METHOD</div>
       <div class="method-grid">
         <div class="method-card" onmousemove="track(event)" onclick="goInput()">
@@ -103,9 +104,8 @@
       <!-- Stepper Content -->
       <div class="stepper-content">
       <div class="sec active" id="sec-1">
-        <span class="sec-n">01</span>
+        <span class="sec-n">01 — COMPANY PROFILE</span>
         <fieldset style="border:none;padding:0;margin:0">
-          <legend class="sec-h">Company Profile</legend>
           <p class="sec-p">Geography determines compliance requirements and salary benchmarks.</p>
         </fieldset>
         <div class="fg">
@@ -145,75 +145,79 @@
               <div class="err-msg">Field required</div>
             </div>
           </div>
-          <div class="fi">
-            <label for="i-st">Current Stage <span style="color:var(--t3);font-size:9px">(optional)</span></label>
-            <div class="custom-select-wrapper">
-              <select id="i-st" class="custom-select" aria-label="Company current stage (optional)" onchange="lc()"><option value="seed">Seed</option><option value="series-ab" selected>Series A / B</option><option value="series-c">Series C+</option><option value="public">Public / Pre-IPO</option></select>
-              <div class="select-display">
-                <span class="select-label">Series A / B</span>
-                <span class="select-chevron">▼</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+            <div class="fi">
+              <label for="i-st">Current Stage <span style="color:var(--t3);font-size:9px">(optional)</span></label>
+              <div class="custom-select-wrapper">
+                <select id="i-st" class="custom-select" aria-label="Company current stage (optional)" onchange="lc()"><option value="seed">Seed</option><option value="series-ab" selected>Series A / B</option><option value="series-c">Series C+</option><option value="public">Public / Pre-IPO</option></select>
+                <div class="select-display">
+                  <span class="select-label">Series A / B</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="seed" aria-selected="false">Seed</li>
+                  <li role="option" data-value="series-ab" aria-selected="false">Series A / B</li>
+                  <li role="option" data-value="series-c" aria-selected="false">Series C+</li>
+                  <li role="option" data-value="public" aria-selected="false">Public / Pre-IPO</li>
+                </ul>
               </div>
-              <ul class="select-dropdown" role="listbox">
-                <li role="option" data-value="seed" aria-selected="false">Seed</li>
-                <li role="option" data-value="series-ab" aria-selected="false">Series A / B</li>
-                <li role="option" data-value="series-c" aria-selected="false">Series C+</li>
-                <li role="option" data-value="public" aria-selected="false">Public / Pre-IPO</li>
-              </ul>
             </div>
+            <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name" oninput="lc()"><div class="err-msg">Field required</div></div>
           </div>
-          <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name" oninput="lc()"><div class="err-msg">Field required</div></div>
         </div>
       </div>
 
       <div class="sec dim" id="sec-2">
         <span class="sec-n">02 — EQUITY STRUCTURE</span>
         <fieldset style="border:none;padding:0;margin:0">
-          <legend class="sec-h">Equity Structure</legend>
           <p class="sec-p">Stakeholder volume scales your cap table reconciliation and grant overhead.</p>
         </fieldset>
         <div class="fg">
-          <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="val(this)"><div class="err-msg">Field required</div></div>
-          <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="valAndEnableNext(this, 'i-gr')"><div class="err-msg">Field required</div></div>
-          <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()" onchange="validateAndDisplayErrors()" onblur="val(this)"><div class="err-msg">Field required</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+            <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
+            <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
+          </div>
         </div>
       </div>
 
       <div class="sec dim" id="sec-3">
         <span class="sec-n">03 — CURRENT OPERATIONS</span>
         <fieldset style="border:none;padding:0;margin:0">
-          <legend class="sec-h">Current Operations</legend>
           <p class="sec-p">Who executes the work and what tools they use currently.</p>
         </fieldset>
         <div class="fg">
-          <div class="fi">
-            <label for="i-per">Managed by *</label>
-            <div class="custom-select-wrapper">
-              <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
-              <div class="select-display">
-                <span class="select-label">Finance / CFO</span>
-                <span class="select-chevron">▼</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+            <div class="fi">
+              <label for="i-per">Managed by *</label>
+              <div class="custom-select-wrapper">
+                <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
+                <div class="select-display">
+                  <span class="select-label">Finance / CFO</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="founder" aria-selected="false">Founder / CEO</li>
+                  <li role="option" data-value="finance" aria-selected="false">Finance / CFO</li>
+                  <li role="option" data-value="hr" aria-selected="false">HR Lead</li>
+                  <li role="option" data-value="cs" aria-selected="false">Legal / Company Sec</li>
+                </ul>
               </div>
-              <ul class="select-dropdown" role="listbox">
-                <li role="option" data-value="founder" aria-selected="false">Founder / CEO</li>
-                <li role="option" data-value="finance" aria-selected="false">Finance / CFO</li>
-                <li role="option" data-value="hr" aria-selected="false">HR Lead</li>
-                <li role="option" data-value="cs" aria-selected="false">Legal / Company Sec</li>
-              </ul>
             </div>
-          </div>
-          <div class="fi">
-            <label for="i-meth">Administrative Method *</label>
-            <div class="custom-select-wrapper">
-              <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select>
-              <div class="select-display">
-                <span class="select-label">In-house (Spreadsheets)</span>
-                <span class="select-chevron">▼</span>
+            <div class="fi">
+              <label for="i-meth">Administrative Method *</label>
+              <div class="custom-select-wrapper">
+                <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select>
+                <div class="select-display">
+                  <span class="select-label">In-house (Spreadsheets)</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
+                  <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
+                  <li role="option" data-value="existing-tool" aria-selected="false">Existing Tool</li>
+                </ul>
               </div>
-              <ul class="select-dropdown" role="listbox">
-                <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
-                <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
-                <li role="option" data-value="existing-tool" aria-selected="false">Existing Tool</li>
-              </ul>
             </div>
           </div>
           <div class="fi hidden" id="tool-cost-wrap">
@@ -241,38 +245,18 @@
         <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="r-h">LIVE ESTIMATE</div>
-            <div id="live-indicator" style="width:12px;height:12px;border-radius:50%;background:#999;display:none;box-shadow:0 0 8px currentColor;transition:all 0.3s"></div>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <span class="cta-link" id="audit-log-link" onclick="openAssumptions()" style="display:none;font-size:10px;padding:4px 8px;border:1px solid var(--accent);cursor:pointer">VIEW ASSUMPTIONS</span>
+            <div id="sample-banner" class="sample-banner" style="display:none" aria-live="polite" aria-atomic="true"></div>
             <button id="theme-toggle" onclick="toggleTheme()" style="font-size:10px;padding:4px 8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;text-transform:uppercase">Dark</button>
           </div>
         </div>
       </div>
-      <div class="r-s" id="res-status" style="display:none" aria-live="polite" aria-atomic="true"></div>
 
-      <!-- Cost Comparison Table -->
-      <div class="cost-table-wrap">
-        <div class="cost-table-h">ANNUAL COST COMPARISON</div>
-        <table class="cost-table">
-          <tr class="cost-row">
-            <td class="cost-label">You today</td>
-            <td class="cost-value" id="cost-you">$0</td>
-          </tr>
-          <tr class="cost-row">
-            <td class="cost-label">EquityList</td>
-            <td class="cost-value" id="cost-el">$0</td>
-          </tr>
-          <tr class="cost-row savings">
-            <td class="cost-label">Savings</td>
-            <td class="cost-value savings-val" id="cost-savings">$0</td>
-          </tr>
-        </table>
-      </div>
+      <div class="r-s" id="res-status" style="display:none" aria-live="polite" aria-atomic="true"></div>
 
       <div id="r-body" aria-live="assertive" aria-atomic="true"></div>
     </div>
-    <div id="assumptions-view" class="hidden" role="dialog" aria-label="ROI Audit Log" aria-modal="true"></div>
   </div>
 </div>
 

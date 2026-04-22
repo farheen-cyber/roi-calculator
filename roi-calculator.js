@@ -21,7 +21,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, overrides) {
 
   // Determine stakeholder tier for rate selection
   const stakeholders = Math.min(sh + oh, 10000);
-  const tier = stakeholders <= 10 ? 'p10' : stakeholders <= 50 ? 'p50' : 'p90';
+  const tier = stakeholders <= 30 ? 'p10' : stakeholders <= 70 ? 'p50' : 'p90';
   const tierLabel = tier === 'p10' ? '10th percentile' : tier === 'p50' ? 'median' : '90th percentile';
 
   // Get hourly rate (with override if provided)
@@ -46,7 +46,12 @@ export function computeROI(inputs, rates, compliance, ext, fx, overrides) {
   const ctCost = ctHrs * rate;
 
   // External costs based on method
-  const methodExtCost = meth === 'outsourced' ? ext[geo_op] : toolCost;
+  let methodExtCost = toolCost;
+  if (meth === 'outsourced') {
+    // Apply tier-based scaling only to outsourced retainer costs
+    const tierMultiplier = tier === 'p10' ? 0.8 : tier === 'p50' ? 1.0 : 1.2;
+    methodExtCost = Math.round(ext[geo_op] * tierMultiplier);
+  }
 
   // Total annual cost
   const annCost = grCost + cpCost + ctCost + methodExtCost;

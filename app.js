@@ -3,7 +3,7 @@ import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
 // Global state
-var flow = 'overview';
+var flow = 'input';
 var calcDone = false;
 var updateTimer = null;
 var overrides = { rate: null, grHr: null, compHr: null };
@@ -13,6 +13,53 @@ var userInputStarted = false;
 // Stepper state
 var currentStep = 1;
 var formStateData = {};
+
+// Default values for sample data detection
+const DEFAULTS = {
+  geoInc: 'india',
+  geoOp: 'india',
+  stage: 'series-ab',
+  sh: 30,
+  oh: 15,
+  gr: 10
+};
+
+function isUsingSampleData() {
+  const geoInc = document.getElementById('i-geo-inc')?.value || '';
+  const geoOp = document.getElementById('i-geo-op')?.value || '';
+  const stage = document.getElementById('i-st')?.value || '';
+  const sh = parseInt(document.getElementById('i-sh')?.value || 0);
+  const oh = parseInt(document.getElementById('i-oh')?.value || 0);
+  const gr = parseInt(document.getElementById('i-gr')?.value || 0);
+
+  return (
+    geoInc === DEFAULTS.geoInc &&
+    geoOp === DEFAULTS.geoOp &&
+    stage === DEFAULTS.stage &&
+    sh === DEFAULTS.sh &&
+    oh === DEFAULTS.oh &&
+    gr === DEFAULTS.gr
+  );
+}
+
+function updateSampleDataBanner() {
+  const sampleBanner = document.getElementById('sample-banner');
+  const usingSample = isUsingSampleData();
+  if (sampleBanner) {
+    if (flow === 'input') {
+      sampleBanner.style.display = 'flex';
+      if (usingSample) {
+        sampleBanner.innerHTML = `<span class="sample-dot"></span><span class="sample-text">SAMPLE DATA</span><span class="sample-link">EDIT INPUTS →</span>`;
+        sampleBanner.className = 'sample-banner sample-state';
+      } else {
+        sampleBanner.innerHTML = `<span class="sample-dot"></span><span class="sample-text">LIVE · YOUR INPUTS</span>`;
+        sampleBanner.className = 'sample-banner live-state';
+      }
+    } else {
+      sampleBanner.style.display = 'none';
+    }
+  }
+}
 
 // ==================== THEME MANAGEMENT ====================
 
@@ -49,16 +96,16 @@ function initTheme() {
 // ==================== VALIDATION FUNCTIONS ====================
 
 function validateInputs() {
-  const sh = parseInt(document.getElementById('i-sh').value) || 0;
-  const oh = parseInt(document.getElementById('i-oh').value) || 0;
-  const gr = parseInt(document.getElementById('i-gr').value) || 0;
+  const sh = document.getElementById('i-sh').value;
+  const oh = document.getElementById('i-oh').value;
+  const gr = document.getElementById('i-gr').value;
 
   const errors = {};
 
-  // Validate ranges per PRD
-  if (sh < 1 || sh > 1000) errors.sh = 'Shareholders: 1–1,000';
-  if (oh < 1 || oh > 2000) errors.oh = 'Option Holders: 1–2,000';
-  if (gr < 1 || gr > 500) errors.gr = 'Equity Grants: 1–500';
+  // Only check if fields are filled (no range validation)
+  if (!sh) errors.sh = 'Field required';
+  if (!oh) errors.oh = 'Field required';
+  if (!gr) errors.gr = 'Field required';
 
   return { valid: Object.keys(errors).length === 0, errors };
 }
@@ -185,7 +232,9 @@ function updateStepVisibility() {
 
   // Update button states
   document.getElementById('btn-back').disabled = currentStep === 1;
-  document.getElementById('btn-next').disabled = !validateStep(currentStep);
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.style.display = currentStep === 3 ? 'none' : 'inline-flex';
+  nextBtn.disabled = !validateStep(currentStep);
 }
 
 function stepNext() {
@@ -251,24 +300,74 @@ function valAndEnableNext(el, n) {
 
 // ==================== FORM STATE ====================
 
+function updateNextButtonState() {
+  const nextBtn = document.getElementById('btn-next');
+  if (nextBtn) {
+    nextBtn.disabled = !validateStep(currentStep);
+  }
+}
+
 function lc() {
+  // Update button state immediately for instant visual feedback
+  updateNextButtonState();
+
+  // Debounce calculation
   if (updateTimer) clearTimeout(updateTimer);
-  updateTimer = setTimeout(doCalc, 100);
+  updateTimer = setTimeout(() => {
+    doCalc();
+  }, 100);
 }
 
-function toggleE(id, start) {
-  var el = document.getElementById(id);
-  el.classList.add('editing');
-  el.innerHTML = `<input type="number" class="edit-in" id="in-${id}" value="${start}" onblur="saveE('${id}')" onkeydown="if(event.key==='Enter')this.blur()">`;
-  document.getElementById(`in-${id}`).focus();
+function onRateChange() {
+  const input = document.getElementById('cb-rate-input');
+  if (input) {
+    const v = parseFloat(input.value);
+    overrides.rate = isNaN(v) ? null : v;
+    doCalc();
+  }
 }
 
-function saveE(id) {
-  var v = parseFloat(document.getElementById(`in-${id}`).value);
-  if (id === 'e-rate') overrides.rate = v;
-  if (id === 'e-grhr') overrides.grHr = v;
-  if (id === 'e-comphr') overrides.compHr = v;
-  doCalc();
+function onCompHrChange() {
+  const input = document.getElementById('cb-comph-input');
+  if (input) {
+    const v = parseFloat(input.value);
+    overrides.compHr = isNaN(v) ? null : v;
+    doCalc();
+  }
+}
+
+function onTotalMgmtHoursChange() {
+  const input = document.getElementById('cb-total-input');
+  if (input) {
+    const totalInput = parseFloat(input.value);
+    if (!isNaN(totalInput)) {
+      // Calculate grant admin hours
+      const gr = parseInt(document.getElementById('i-gr')?.value || 0);
+      const grHr = overrides.grHr || 1.5;
+      const grHrs = grHr * gr;
+
+      // Calculate cap table hours
+      const sh = parseInt(document.getElementById('i-sh')?.value || 0);
+      const ctHrs = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
+
+      // Calculate compliance hours from total
+      const compHr = Math.max(0, totalInput - grHrs - ctHrs);
+      overrides.compHr = compHr;
+      doCalc();
+    }
+  }
+}
+
+function toggleCostBreakdown() {
+  const content = document.getElementById('cb-content');
+  const icon = document.getElementById('cb-toggle-icon');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    content.style.display = 'none';
+    icon.style.transform = 'rotate(0deg)';
+  }
 }
 
 function resetO(k) {
@@ -317,7 +416,6 @@ function doCalc() {
   var meth = document.getElementById('i-meth').value;
 
   var valid = shEl.value && ohEl.value && grEl.value;
-  var indicator = document.getElementById('live-indicator');
 
   if (flow === 'input') {
     var hasUserInput =
@@ -331,20 +429,11 @@ function doCalc() {
     userInputStarted = userInputStarted || hasUserInput;
   }
 
-  if (flow === 'input' && userInputStarted) {
-    indicator.style.display = 'inline-block';
-    indicator.style.background = valid ? '#22c55e' : '#ef4444';
-  } else {
-    indicator.style.display = 'none';
-  }
-
   const validationResult = validateInputs();
   displayFieldErrors(validationResult);
 
   if (flow === 'input' && (!valid || !validationResult.valid)) {
-    const errorMsg = !validationResult.valid ? 'Invalid input - check field errors above' : 'Complete all fields to calculate';
-    document.getElementById('res-status').innerText = errorMsg;
-    document.getElementById('res-status').style.display = 'block';
+    document.getElementById('res-status').style.display = 'none';
     document.getElementById('r-body').innerHTML =
       '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
     // Clear cost table when invalid
@@ -370,17 +459,14 @@ function doCalc() {
 
   const sym = CUR[geo_op];
 
-  // Update status
-  document.getElementById('res-status').innerText = 'Based on your inputs';
-  document.getElementById('res-status').style.display = flow === 'input' ? 'block' : 'none';
+  // Update status (hidden)
+  document.getElementById('res-status').style.display = 'none';
 
-  // Render cost comparison table
+  // Update sample data banner
+  updateSampleDataBanner();
+
+  // Calculate savings for use in template
   const savings = roiData.annCost - roiData.elAnn;
-  const savingsColor = savings > 0 ? 'var(--ok)' : 'var(--red)';
-  document.getElementById('cost-you').textContent = sym + fN(roiData.annCost);
-  document.getElementById('cost-el').textContent = sym + fN(roiData.elAnn);
-  document.getElementById('cost-savings').textContent = sym + fN(Math.abs(savings));
-  document.getElementById('cost-savings').style.color = savingsColor;
 
   var ctaHtml = '';
   if (roiData.isSpend) {
@@ -404,42 +490,111 @@ function doCalc() {
     `;
   }
 
-  document.getElementById('r-body').innerHTML = `
-    <div class="hero-metric"><div class="hm-label">Your Current Annual Spend</div><div class="hm-val">${sym}${fN(roiData.annCost)}</div></div>
-    <div class="r-group"><div class="r-group-h">Efficiency</div><div class="r-row"><span>Internal Effort</span><span class="r-val">${Math.round(roiData.internalHTotal)} hrs/yr</span></div><div class="r-row"><span>Time Saved</span><span class="r-val green">~${roiData.timeSavedPct}%</span></div></div>
-    <div style="font-size:11px;color:var(--t3);margin:24px 0;padding:16px;background:rgba(95,23,234,0.05);border-left:2px solid var(--accent);line-height:1.6">
-      <strong>EquityList pricing is directional</strong> based on ${roiData.tierLabel} hourly rates. Actual pricing tailored to your company size and use case.
+  // Calculate cap table hours manually (same formula as roi-calculator.js)
+  const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
+  const ctHrs = ctRaw * roiData.mult;
+
+  // Calculate breakdown for explanations
+  const ctMonthlyBase = 3;
+  const ctMonthlyScaling = Math.max(0, (sh - 20) / 50) * 2;
+  const ctMonthlyTotal = ctMonthlyBase + ctMonthlyScaling;
+
+  // Calculate hours for each component
+  const grHrs = roiData.grHr * gr;
+  const compHrs = roiData.compHr;
+  const capTableHrs = ctRaw;
+  const totalEquityMgmtHrs = grHrs + compHrs + capTableHrs;
+
+  // Calculate cost breakdown percentages
+  const grantAdminPct = roiData.annCost > 0 ? Math.round((roiData.grCost / roiData.annCost) * 100) : 0;
+  const compliancePct = roiData.annCost > 0 ? Math.round((roiData.cpCost / roiData.annCost) * 100) : 0;
+  const capTablePct = roiData.annCost > 0 ? Math.round((roiData.ctCost / roiData.annCost) * 100) : 0;
+  const externalPct = roiData.annCost > 0 ? Math.round((roiData.methodExtCost / roiData.annCost) * 100) : 0;
+
+  const costBreakdownDetails = `
+    <div class="cb-detail">
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">Grant Admin</div>
+        <div class="cb-detail-formula">${roiData.grHr} hrs/grant × ${gr} grants/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.grCost)} <span class="cb-detail-pct">${grantAdminPct}%</span></div>
+      </div>
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">
+          Compliance
+          <span class="cb-info-btn" title="Baseline hours for your country of incorporation. Covers statutory registers, tax reporting, and grant compliance tracking.">ℹ</span>
+        </div>
+        <div class="cb-detail-formula">${roiData.compHr} hrs/yr (${(roiData.compHr / 12).toFixed(0)}h/mo, ${geo_inc.toUpperCase()} statutory baseline) × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.cpCost)} <span class="cb-detail-pct">${compliancePct}%</span></div>
+      </div>
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">
+          Cap Table
+          <span class="cb-info-btn" title="Base 3h/mo + scaling hours for ${sh} shareholders. Base increases by 2h/mo for every 50 shareholders above 20. Includes monthly reconciliation, updates, and stakeholder communications.">ℹ</span>
+        </div>
+        <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.ctCost)} <span class="cb-detail-pct">${capTablePct}%</span></div>
+      </div>
+      ${roiData.methodExtCost > 0 ? `
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">External Service</div>
+        <div class="cb-detail-formula">Fixed annual cost</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.methodExtCost)} <span class="cb-detail-pct">${externalPct}%</span></div>
+      </div>
+      ` : ''}
     </div>
+  `;
+
+  document.getElementById('r-body').innerHTML = `
+    <div class="cost-table-wrap">
+      <div class="cost-table-h">COST COMPARISON</div>
+      <table class="cost-table">
+        <tr class="cost-row">
+          <td class="cost-label">Your Annual Spend</td>
+          <td class="cost-value" style="color: ${savings > 0 ? 'var(--red)' : 'var(--ok)'}">${sym}${fN(roiData.annCost)}</td>
+        </tr>
+        <tr class="cost-row">
+          <td class="cost-label">EquityList*</td>
+          <td class="cost-value">${sym}${fN(roiData.elAnn)}</td>
+        </tr>
+        <tr class="cost-row savings">
+          <td class="cost-label">Your Potential Savings with EquityList*</td>
+          <td class="cost-value savings-val" style="color: ${savings > 0 ? 'var(--ok)' : 'var(--red)'}">${savings > 0 ? sym : '-' + sym}${fN(Math.abs(savings))}</td>
+        </tr>
+      </table>
+    </div>
+    <div style="font-size:var(--fs-xs);color:var(--t3);margin:var(--sp-3) 0 var(--sp-5) 0;line-height:var(--lh-snug)">
+      * <strong>Pricing shown is indicative</strong> and based on benchmarks. Final pricing is tailored to your company's size and requirements.
+    </div>
+    <div class="cb-group">
+      <button class="cb-toggle" onclick="toggleCostBreakdown()" style="width:100%;text-align:left;border:none;background:transparent;padding:12px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd)">
+        <span style="font-size:var(--fs-label);color:var(--t2);text-transform:uppercase;letter-spacing:0.05em;font-weight:500">Cost Breakdown</span>
+        <span id="cb-toggle-icon" style="font-size:12px;color:var(--t3);transition:transform 0.2s">▼</span>
+      </button>
+      <div id="cb-content" class="cb-content" style="display:none;margin-top:16px">
+        ${costBreakdownDetails}
+        <div class="cb-section-divider"></div>
+        <div class="cb-assumption">
+          <div class="cb-assumption-row">
+            <span class="cb-assumption-label">Hourly Rate</span>
+            <div class="cb-assumption-input-wrap">
+              <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}" oninput="onRateChange()">
+              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)} • PayScale</span>
+            </div>
+          </div>
+          <div class="cb-assumption-row">
+            <span class="cb-assumption-label">Total Equity Management Hours</span>
+            <div class="cb-assumption-input-wrap">
+              <input type="number" id="cb-total-input" class="cb-input" value="${Math.round(totalEquityMgmtHrs)}" oninput="onTotalMgmtHoursChange()" style="max-width:60px">
+              <span class="cb-source">hrs/yr</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="r-group"><div class="r-group-h">ROI</div><div class="r-row"><span class="r-lbl">Your ROI with EquityList</span><span class="r-val">${roiData.roi}x</span></div><div class="r-row"><span class="r-lbl">Hours Saved Annually</span><span class="r-val green">${Math.round(roiData.internalHTotal - roiData.manualHTotal * 0.1)} hrs/yr</span></div></div>
     ${ctaHtml}
   `;
 
-  // Show/hide audit log link
-  document.getElementById('audit-log-link').style.display = flow === 'input' ? 'inline' : 'none';
-
-  // Render audit log / assumptions
-  document.getElementById('assumptions-view').innerHTML = `
-    <div class="ap-pane">
-      <div class="ap-hdr"><span class="ap-title">ROI Audit Log</span><span class="ap-close" onclick="closeAssumptions()">DONE [X]</span></div>
-      <div class="ap-grid-3">
-        <div class="ap-col"><div class="ap-sec-h">Your Profile</div><div class="ap-text"><b>Inc:</b> ${geo_inc.toUpperCase()}<br><b>Op:</b> ${geo_op.toUpperCase()}<br><b>Method:</b> ${meth}</div></div>
-        <div class="ap-col"><div class="ap-sec-h">Compliance</div><div class="ap-text">Manual baseline: <span class="editable" id="e-comphr" onclick="toggleE('e-comphr', ${roiData.compHr})">${roiData.compHr}h/yr</span></div></div>
-        <div class="ap-col"><div class="ap-sec-h">Scope</div><div class="ap-text">Statutory registers, tax reporting, and grant drafting.</div></div>
-      </div>
-      <div><div class="ap-sec-h">Calculations</div><div class="ap-formula">
-Manual baseline = ${(roiData.manualHTotal / 12).toFixed(1)} hrs/mo
-Hourly Rate = ${sym}<span class="editable" id="e-rate" onclick="toggleE('e-rate', ${roiData.rate})">${roiData.rate}</span>/hr [PayScale ${roiData.tierLabel}]
-EquityList = ${sym}${fN(roiData.stakeholders * 1200 * FX[geo_op])} platform + ${sym}${fN(roiData.elOverhead)} oversight
-      </div></div>
-      <table class="ap-tbl"><thead><tr><th>Persona</th><th>10th %</th><th>Median</th><th>90th %</th><th>Source</th></tr></thead><tbody>
-        ${['founder', 'finance', 'hr', 'cs']
-          .map((p) => {
-            var r = RATES[geo_op][p];
-            return `<tr class="${p === per ? 'active' : ''}"><td>${p.toUpperCase()}</td><td>${sym}${r.p10}</td><td>${sym}${r.p50}</td><td>${sym}${r.p90}</td><td style="font-size:9px">${RATES_META[geo_op][p].src}</td></tr>`;
-          })
-          .join('')}
-      </tbody></table>
-    </div>
-  `;
 
   // Update mobile summary
   document.getElementById('mob-spend').innerText = sym + fN(roiData.annCost);
@@ -449,21 +604,7 @@ EquityList = ${sym}${fN(roiData.stakeholders * 1200 * FX[geo_op])} platform + ${
 }
 
 // ==================== MODAL FUNCTIONS ====================
-
-function openAssumptions() {
-  document.getElementById('results-view').classList.add('hidden');
-  document.getElementById('assumptions-view').classList.remove('hidden');
-  document.getElementById('audit-log-link').style.display = 'none';
-  document.getElementById('mobile-summary').style.display = 'none';
-}
-
-function closeAssumptions() {
-  document.getElementById('assumptions-view').classList.add('hidden');
-  document.getElementById('results-view').classList.remove('hidden');
-  document.getElementById('audit-log-link').style.display = 'inline';
-  const shouldShowMobileSummary = flow === 'input' && window.innerWidth <= 1024;
-  document.getElementById('mobile-summary').style.display = shouldShowMobileSummary ? 'block' : 'none';
-}
+// Modal functions removed - Cost Breakdown is now inline in main results panel
 
 // ==================== SECTION OBSERVER ====================
 
@@ -505,7 +646,12 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize theme from localStorage
   initTheme();
 
-  document.body.classList.add('state-overview');
+  // Start with form visible (not overview)
+  document.body.classList.remove('state-overview');
+  document.getElementById('overview-state').classList.add('hidden');
+  document.getElementById('input-state').classList.remove('hidden');
+  document.getElementById('res-status').style.display = 'block';
+  document.querySelector('.back-home-btn').style.display = 'none';
 
   // Initialize custom select components
   document.querySelectorAll('.custom-select').forEach((selectElement) => {
@@ -529,15 +675,11 @@ window.addEventListener('DOMContentLoaded', () => {
     f.addEventListener('click', focus);
   });
 
-  // Keyboard support: Escape to close modal
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      const assumptionsView = document.getElementById('assumptions-view');
-      if (assumptionsView && !assumptionsView.classList.contains('hidden')) {
-        closeAssumptions();
-      }
-    }
-  });
+  // Initialize stepper
+  currentStep = 1;
+  formStateData = {};
+  updateStepVisibility();
+  loadStepState();
 
   doCalc();
 
@@ -565,13 +707,13 @@ window.onF = onF;
 window.val = val;
 window.valAndEnableNext = valAndEnableNext;
 window.lc = lc;
-window.toggleE = toggleE;
-window.saveE = saveE;
 window.resetO = resetO;
 window.validateAndDisplayErrors = validateAndDisplayErrors;
 window.onMethChange = onMethChange;
-window.openAssumptions = openAssumptions;
-window.closeAssumptions = closeAssumptions;
+window.onRateChange = onRateChange;
+window.onCompHrChange = onCompHrChange;
+window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;
+window.toggleCostBreakdown = toggleCostBreakdown;
 window.doCalc = doCalc;
 window.stepNext = stepNext;
 window.stepBack = stepBack;
