@@ -107,7 +107,8 @@ body {
   height: calc(100vh - 128px);
   position: relative;
   z-index: 1;
-  max-width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
   gap: 0;
 }
 
@@ -160,14 +161,57 @@ body {
   margin: 0 auto;
 }
 
-@media (max-width: 1199px) {
+/* Tablet Landscape (iPad Pro landscape, etc.) */
+@media (max-width: 1199px) and (min-width: 1025px) {
   .main {
     grid-template-columns: 1fr;
     height: auto;
-    padding-bottom: 140px;
+    padding-bottom: 160px;
   }
   .col-l {
-    padding: var(--sp-7) var(--sp-5);
+    padding: var(--sp-6) var(--sp-5);
+    border-right: none;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .col-r {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    max-height: 160px;
+    padding: 20px 32px;
+    border-top: 1px solid var(--bd);
+    border-left: none;
+    overflow-y: visible;
+  }
+  #mobile-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--bd);
+    height: auto;
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    z-index: 100;
+  }
+}
+
+/* Tablet and Mobile (below 1024px) */
+@media (max-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr;
+    height: auto;
+    padding-bottom: 120px;
+  }
+  .col-l {
+    padding: var(--sp-6) var(--sp-4);
     border-right: none;
     max-height: none;
     overflow-y: visible;
@@ -185,8 +229,8 @@ body {
     left: 0;
     right: 0;
     height: auto;
-    max-height: 140px;
-    padding: 16px 24px;
+    max-height: 120px;
+    padding: 12px 16px;
     border-top: 1px solid var(--bd);
     border-left: none;
     overflow-y: visible;
@@ -311,7 +355,46 @@ body {
   opacity: 0;
 }
 
+/* Mobile Typography & Spacing (below 768px) */
 @media (max-width: 768px) {
+  :root {
+    /* Reduce typography scale for mobile */
+    --fs-display: 32px;
+    --fs-h1: 24px;
+    --fs-h2: 20px;
+    --fs-h3: 16px;
+    --fs-body: 13px;
+    --fs-label: 11px;
+    --fs-table: 12px;
+    --fs-metrics-med: 20px;
+
+    /* Reduce spacing for mobile */
+    --sp-5: 16px;
+    --sp-6: 24px;
+    --sp-7: 32px;
+  }
+
+  body {
+    padding-top: 100px;
+  }
+
+  .main {
+    padding-bottom: 100px;
+  }
+
+  .col-l {
+    padding: var(--sp-5) var(--sp-3);
+  }
+
+  .col-r {
+    max-height: 100px;
+    padding: 10px 12px;
+  }
+
+  #mobile-summary {
+    padding: 10px 12px;
+  }
+
   .method-grid {
     grid-template-columns: 1fr;
   }
