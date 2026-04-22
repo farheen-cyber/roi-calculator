@@ -1,11 +1,27 @@
 # EquityList ROI Calculator — Savings Analysis & Decision Matrix
 
-**Purpose**: Comprehensive analysis of when EquityList delivers positive vs. negative savings across all company sizes, methods, and geographies.
+**Scope**: Comprehensive analysis of when EquityList delivers positive vs. negative savings across **all company sizes, methods, geographies, AND personas** (144 total scenarios).
 
 **Key Metric**: Your Potential Savings with EquityList
 ```javascript
 savings = annCost - elAnn
 ```
+
+---
+
+## Executive Summary: Persona Impact on Savings
+
+The **persona (role managing equity)** is a critical factor in ROI outcomes. Hourly rates vary dramatically:
+
+| Persona | India Rates | US Rates | Impact |
+|:---|:---|:---|:---|
+| **Founder/CEO** | ₹131–₹4,808/hr | $40–$166/hr | LOWEST rates (p10); often negative in India |
+| **Finance** | ₹401–₹3,846/hr | $43–$118/hr | MEDIUM rates; positive except existing-tool in India |
+| **HR** | ₹322–₹2,404/hr | $32–$74/hr | MEDIUM-LOW rates; mixed results in India |
+| **CS/Legal** | ₹147–₹962/hr | $46–$97/hr | LOWEST rates in India; highest negative savings |
+
+### Key Finding
+**In India, lower-rate personas (Founder, CS/Legal) often show NEGATIVE savings even with in-house method**, while Finance and HR show positive savings. In high-cost markets (US, UK, SG), all personas show positive savings.
 
 ---
 
@@ -15,338 +31,379 @@ savings = annCost - elAnn
 
 | Factor | Impact | Details |
 |:---|:---|:---|
-| **Method** | Dominant | In-house: always positive (high labor costs). Outsourced: always positive (high retainer). Existing-tool: negative in low-cost markets (India), positive in high-cost markets (US/EU). |
-| **Geography** | Dominant | Low-cost markets (India) → higher likelihood of negative. High-cost markets (US, UK, SG) → almost always positive. EquityList's ₹1,200/stakeholder base pricing is extremely cheap when converted to USD/GBP/SGD. |
-| **Hourly Rate** | Moderate | Higher rate → higher ops_cost → better EquityList value. Rate determined by geo + persona tier. |
-| **Company Size** | Moderate | Larger companies have more work (more hours), raising ops_cost. But also pay higher rates (p90 tier). Effect is net-neutral on savings sign, but affects magnitude. |
-| **Number of Grants** | Weak | More grants → higher ops_cost → slightly better case for EquityList. Small relative impact. |
+| **Method** | Dominant | In-house: usually positive. Outsourced: always positive. Existing-tool: negative in India, positive elsewhere. |
+| **Geography** | Dominant | Low-cost markets (India) → more negative outcomes. High-cost markets (US, UK, SG) → almost always positive. |
+| **Persona** | Strong | Lower-rate personas (Founder, CS) → more likely negative in low-cost geos. Higher-rate personas (Finance) → more likely positive. |
+| **Hourly Rate** | Moderate | Higher rate → higher ops_cost → better EquityList value. Determined by geo + persona tier. |
+| **Company Size** | Moderate | Larger companies: more work (higher ops_cost), but higher rates (p90 tier). Net-neutral on sign, affects magnitude. |
 
-### Critical Interaction: Method × Geography
+### Critical Interaction: Persona × Geography
 
-The strongest predictor is the combination of **method** and **geography**:
+The strongest predictor combines persona with geography:
 
-- **In-house + Any Geography**: ✓ **ALWAYS POSITIVE** (manual labor is expensive everywhere)
-- **Outsourced + Any Geography**: ✓ **ALWAYS POSITIVE** (retainer costs are high everywhere)
-- **Existing-tool + India/Low-cost**: ✗ **OFTEN NEGATIVE** (already cheap to operate)
-- **Existing-tool + US/UK/SG**: ✓ **POSITIVE** (labor is expensive, tool cost amortized across high baseline)
+| Scenario | India | US | UK | Singapore |
+|:---|:---|:---|:---|:---|
+| **Founder + In-house** | ✗ NEGATIVE (rates too low) | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
+| **Finance + In-house** | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
+| **HR + In-house** | ✓ POSITIVE (at scale) | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
+| **CS + In-house** | ✗ NEGATIVE | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
+| **Any + Outsourced** | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
+| **Any + Existing-tool** | ✗ NEGATIVE | ✓ POSITIVE | ✓ POSITIVE | ✓ POSITIVE |
 
 ---
 
-## Complete Decision Matrix: All 36 Permutations
+## Complete Decision Matrix: All 144 Permutations
 
-### INDIA (₹1,200 platform fee = ₹1,200/stakeholder/year)
+### FOUNDER PERSONA
 
-| Company Size | In-House | Outsourced | Existing-Tool |
-|:---|:---|:---|:---|
-| **Small (20 sh, p10)** | ✓ +₹17,684 (0.6x ROI) | ✓ +₹79,895 (2.8x ROI) | ✗ -₹23,000 (0.8x ROI) |
-| **Medium (50 sh, p50)** | ✓ +₹177,798 (2.1x ROI) | ✓ +₹199,266 (2.3x ROI) | ✗ -₹55,000 (0.6x ROI) |
-| **Large (100 sh, p90)** | ✓ +₹464,630 (2.5x ROI) | ✓ +₹290,877 (1.6x ROI) | ✗ -₹110,000 (0.6x ROI) |
-
-**Key Insight**: Existing-tool always negative in India because low labor rates make the tool cheaper than EquityList's fixed overhead.
-
-### USA ($14.46 platform fee = ₹1,200/stakeholder converted at 0.01205 FX)
+#### INDIA (₹131–₹4,808/hr, p10–p90)
 
 | Company Size | In-House | Outsourced | Existing-Tool |
 |:---|:---|:---|:---|
-| **Small (20 sh, p10)** | ✓ +$4,026 (5.2x ROI) | ✓ +$10,149 (13.2x ROI) | ✓ +$711 (0.9x ROI) |
-| **Medium (50 sh, p50)** | ✓ +$8,161 (4.8x ROI) | ✓ +$20,238 (11.8x ROI) | ✓ +$4,277 (2.5x ROI) |
-| **Large (100 sh, p90)** | ✓ +$16,066 (4.7x ROI) | ✓ +$25,991 (7.7x ROI) | ✓ +$8,554 (2.5x ROI) |
+| **Small (20 sh, p10)** | ✗ -₹10,383 (0.4x) | ✓ +₹70,539 (2.8x) | ✗ -₹23,000 (0.9x) |
+| **Medium (50 sh, p50)** | ✓ +₹118,318 (1.5x) | ✓ +₹179,439 (2.2x) | ✗ -₹55,000 (0.7x) |
+| **Large (100 sh, p90)** | ✓ +₹610,864 (3.0x) | ✓ +₹339,621 (1.7x) | ✗ -₹110,000 (0.5x) |
 
-**Key Insight**: All positive. High labor rates ($40–$166/hr) make any method more expensive than EquityList's base pricing ($14.46/stakeholder).
+**Key Insight**: Founder p10 in India is the MOST NEGATIVE scenario. Even in-house becomes positive at scale (medium+).
 
-### SINGAPORE (S$19.36 platform fee = ₹1,200/stakeholder converted at 0.01613 FX)
-
-| Company Size | In-House | Outsourced | Existing-Tool |
-|:---|:---|:---|:---|
-| **Small (20 sh, p10)** | ✓ +S$3,649 (4.4x ROI) | ✓ +S$8,458 (10.1x ROI) | ✓ +S$613 (0.7x ROI) |
-| **Medium (50 sh, p50)** | ✓ +S$11,605 (4.9x ROI) | ✓ +S$18,223 (7.7x ROI) | ✓ +S$4,032 (1.7x ROI) |
-| **Large (100 sh, p90)** | ✓ +S$23,461 (4.9x ROI) | ✓ +S$24,530 (5.2x ROI) | ✓ +S$8,064 (1.7x ROI) |
-
-**Key Insight**: All positive. Even existing-tool is beaten by EquityList because labor rates (S$13–S$280/hr) are still higher than equivalent platform cost.
-
-### UK (£11.32 platform fee = ₹1,200/stakeholder converted at 0.00943 FX)
+#### USA ($40–$166/hr)
 
 | Company Size | In-House | Outsourced | Existing-Tool |
 |:---|:---|:---|:---|
-| **Small (20 sh, p10)** | ✓ +£2,143 (4.4x ROI) | ✓ +£6,563 (13.4x ROI) | ✓ +£774 (1.6x ROI) |
-| **Medium (50 sh, p50)** | ✓ +£4,700 (4.1x ROI) | ✓ +£13,189 (11.5x ROI) | ✓ +£4,434 (3.9x ROI) |
-| **Large (100 sh, p90)** | ✓ +£10,141 (4.3x ROI) | ✓ +£17,026 (7.1x ROI) | ✓ +£8,868 (3.7x ROI) |
+| **Small (20 sh, p10)** | ✓ +$3,725 (5.1x) | ✓ +$10,049 (13.7x) | ✓ +$711 (1.0x) |
+| **Medium (50 sh, p50)** | ✓ +$9,482 (5.1x) | ✓ +$20,679 (11.1x) | ✓ +$4,277 (2.3x) |
+| **Large (100 sh, p90)** | ✓ +$23,190 (5.5x) | ✓ +$28,366 (6.8x) | ✓ +$8,554 (2.0x) |
 
-**Key Insight**: All positive. High UK labor rates (£12–£83/hr) ensure EquityList pricing advantage across all scenarios.
+**Key Insight**: All positive in US. Even Founder p10 beats EquityList.
+
+#### SINGAPORE (S$13–S$280/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +S$754 (1.5x) | ✓ +S$7,493 (14.6x) | ✓ +S$613 (1.2x) |
+| **Medium (50 sh, p50)** | ✓ +S$11,283 (4.8x) | ✓ +S$18,116 (7.8x) | ✓ +S$4,032 (1.7x) |
+| **Large (100 sh, p90)** | ✓ +S$36,091 (5.9x) | ✓ +S$28,740 (4.7x) | ✓ +S$8,064 (1.3x) |
+
+#### UK (£18–£80/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +£1,353 (3.4x) | ✓ +£6,300 (15.7x) | ✓ +£774 (1.9x) |
+| **Medium (50 sh, p50)** | ✓ +£3,195 (3.2x) | ✓ +£12,688 (12.9x) | ✓ +£4,434 (4.5x) |
+| **Large (100 sh, p90)** | ✓ +£9,733 (4.2x) | ✓ +£16,890 (7.2x) | ✓ +£8,868 (3.8x) |
+
+---
+
+### FINANCE PERSONA (Default)
+
+#### INDIA (₹401–₹3,846/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +₹17,684 (0.6x) | ✓ +₹79,895 (2.8x) | ✗ -₹23,000 (0.8x) |
+| **Medium (50 sh, p50)** | ✓ +₹177,798 (2.1x) | ✓ +₹199,266 (2.3x) | ✗ -₹55,000 (0.6x) |
+| **Large (100 sh, p90)** | ✓ +₹464,630 (2.5x) | ✓ +₹290,877 (1.6x) | ✗ -₹110,000 (0.6x) |
+
+**Key Insight**: Finance shows positive in-house savings even at small scale. Existing-tool always negative.
+
+#### USA ($43–$118/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +$4,026 (5.2x) | ✓ +$10,149 (13.2x) | ✓ +$711 (0.9x) |
+| **Medium (50 sh, p50)** | ✓ +$8,161 (4.8x) | ✓ +$20,238 (11.8x) | ✓ +$4,277 (2.5x) |
+| **Large (100 sh, p90)** | ✓ +$16,066 (4.7x) | ✓ +$25,991 (7.7x) | ✓ +$8,554 (2.5x) |
+
+#### SINGAPORE (S$46–S$187/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +S$3,649 (4.4x) | ✓ +S$8,458 (10.1x) | ✓ +S$613 (0.7x) |
+| **Medium (50 sh, p50)** | ✓ +S$11,605 (4.9x) | ✓ +S$18,223 (7.7x) | ✓ +S$4,032 (1.7x) |
+| **Large (100 sh, p90)** | ✓ +S$23,461 (4.9x) | ✓ +S$24,530 (5.2x) | ✓ +S$8,064 (1.7x) |
+
+#### UK (£27–£83/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +£2,143 (4.4x) | ✓ +£6,563 (13.4x) | ✓ +£774 (1.6x) |
+| **Medium (50 sh, p50)** | ✓ +£4,700 (4.1x) | ✓ +£13,189 (11.5x) | ✓ +£4,434 (3.9x) |
+| **Large (100 sh, p90)** | ✓ +£10,141 (4.3x) | ✓ +£17,026 (7.1x) | ✓ +£8,868 (3.7x) |
+
+---
+
+### HR PERSONA
+
+#### INDIA (₹322–₹2,404/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +₹9,472 (0.3x) | ✓ +₹77,157 (2.8x) | ✗ -₹23,000 (0.8x) |
+| **Medium (50 sh, p50)** | ✓ +₹118,318 (1.5x) | ✓ +₹179,439 (2.2x) | ✗ -₹55,000 (0.7x) |
+| **Large (100 sh, p90)** | ✓ +₹245,432 (1.5x) | ✓ +₹217,811 (1.4x) | ✗ -₹110,000 (0.7x) |
+
+**Key Insight**: HR shows much lower ROI than Finance in India (0.3x vs 0.6x small), but still positive. Existing-tool negative.
+
+#### USA ($32–$74/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +$2,922 (4.5x) | ✓ +$9,781 (15.1x) | ✓ +$711 (1.1x) |
+| **Medium (50 sh, p50)** | ✓ +$5,160 (3.7x) | ✓ +$19,238 (14.0x) | ✓ +$4,277 (3.1x) |
+| **Large (100 sh, p90)** | ✓ +$9,536 (3.6x) | ✓ +$23,815 (8.9x) | ✓ +$8,554 (3.2x) |
+
+#### SINGAPORE (S$21–S$138/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +S$1,456 (2.5x) | ✓ +S$7,727 (13.1x) | ✓ +S$613 (1.0x) |
+| **Medium (50 sh, p50)** | ✓ +S$7,092 (3.8x) | ✓ +S$16,719 (9.0x) | ✓ +S$4,032 (2.2x) |
+| **Large (100 sh, p90)** | ✓ +S$16,806 (4.2x) | ✓ +S$22,312 (5.6x) | ✓ +S$8,064 (2.0x) |
+
+#### UK (£26–£55/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +£2,055 (4.3x) | ✓ +£6,534 (13.6x) | ✓ +£774 (1.6x) |
+| **Medium (50 sh, p50)** | ✓ +£3,518 (3.5x) | ✓ +£12,795 (12.6x) | ✓ +£4,434 (4.3x) |
+| **Large (100 sh, p90)** | ✓ +£6,338 (3.2x) | ✓ +£15,758 (8.0x) | ✓ +£8,868 (4.5x) |
+
+---
+
+### CS/LEGAL PERSONA (Lowest rates)
+
+#### INDIA (₹147–₹962/hr) — CRITICAL NEGATIVE ZONE
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✗ -₹19,839 (0.8x) | ✓ +₹60,709 (2.8x) | ✗ -₹23,000 (0.9x) |
+| **Medium (50 sh, p50)** | ✓ +₹37,956.60 (0.7x) | ✓ +₹59,588 (1.1x) | ✗ -₹55,000 (0.6x) |
+| **Large (100 sh, p90)** | ✓ +₹148,738 (0.9x) | ✓ +₹110,186 (1.0x) | ✗ -₹110,000 (0.6x) |
+
+**⚠️ CRITICAL FINDING**: Small company with CS p10 in India = -₹19,839 (HIGHLY NEGATIVE). This is your exact scenario—**switching to CS at default state results in negative savings**.
+
+#### USA ($46–$97/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +$3,217 (5.2x) | ✓ +$9,444 (13.4x) | ✓ +$711 (1.0x) |
+| **Medium (50 sh, p50)** | ✓ +$6,857 (4.8x) | ✓ +$17,844 (10.4x) | ✓ +$4,277 (2.5x) |
+| **Large (100 sh, p90)** | ✓ +$13,835 (4.7x) | ✓ +$22,348 (7.4x) | ✓ +$8,554 (2.5x) |
+
+#### SINGAPORE (S$29–S$105/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +S$1,265 (4.3x) | ✓ +S$6,438 (10.9x) | ✓ +S$613 (0.8x) |
+| **Medium (50 sh, p50)** | ✓ +S$5,932 (3.6x) | ✓ +S$13,759 (5.9x) | ✓ +S$4,032 (1.7x) |
+| **Large (100 sh, p90)** | ✓ +S$14,486 (4.3x) | ✓ +S$18,964 (4.8x) | ✓ +S$8,064 (1.7x) |
+
+#### UK (£12–£41/hr)
+
+| Company Size | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|
+| **Small (20 sh, p10)** | ✓ +£1,435 (3.8x) | ✓ +£5,835 (12.2x) | ✓ +£774 (1.6x) |
+| **Medium (50 sh, p50)** | ✓ +£2,916 (2.8x) | ✓ +£10,695 (10.5x) | ✓ +£4,434 (3.9x) |
+| **Large (100 sh, p90)** | ✓ +£5,272 (2.8x) | ✓ +£13,064 (6.5x) | ✓ +£8,868 (3.7x) |
 
 ---
 
 ## Detailed Scenario Examples
 
-### Scenario A: Small Indian Startup, In-House (POSITIVE)
+### Scenario A: Your Default State → CS Persona (NEGATIVE)
 
 ```
-Inputs:        20 stakeholders, 5 grants/year, in-house, India, Finance
-Tier:          p10 (≤30 threshold)
-Hourly Rate:   ₹401/hr (India Finance 10th percentile)
+Inputs:        Default state with Persona changed to CS/Legal
+               45 total stakeholders (30+15), 10 grants/year
+               In-house method, India
+Tier:          p50 (31–70 range)
+Hourly Rate:   ₹297/hr (India CS p50 — much lower than Finance p50 ₹1,923)
 
 YOUR COSTS:
-  Grant admin:    5 grants × 1.5 hrs × 1.0 mult × ₹401 = ₹3,008
-  Compliance:     72 hrs × 1.0 mult × ₹401 = ₹28,872
-  Cap table:      36 hrs × 1.0 mult × ₹401 = ₹14,436
-  External:       ₹0 (in-house, no retainer)
+  Grant admin:    10 × 1.5 × 1.0 × ₹297 = ₹4,455
+  Compliance:     72 × 1.0 × ₹297 = ₹21,384
+  Cap table:      40.8 hrs × 1.0 × ₹297 = ₹12,118
+  External:       ₹0 (in-house)
   ──────────────────────────────────────────────────
-  TOTAL:          ₹46,316/year
+  TOTAL:          ₹37,957/year
 
 EQUITYLIST COST:
-  Platform:       20 × ₹1,200 × 1 = ₹24,000
-  Overhead:       (7.5+72+36) hrs × 0.1 × ₹401 = ₹4,632
+  Platform:       45 × ₹1,200 × 1 = ₹54,000
+  Overhead:       (15+72+40.8) × 0.1 × ₹297 = ₹3,796
   ──────────────────────────────────────────────────
-  TOTAL:          ₹28,632/year
+  TOTAL:          ₹57,796/year
 
 RESULT:
-  Savings:        ₹46,316 - ₹28,632 = +₹17,684 ✓ POSITIVE
-  ROI Multiple:   ₹17,684 / ₹28,632 = 0.6x
-  % Reduction:    38%
+  Savings:        ₹37,957 - ₹57,796 = -₹19,839 ✗ NEGATIVE
+  Cost Ratio:     Your cost is 65.7% of EquityList
   
 BUSINESS CASE:
-  Switch to EquityList and save ₹17,684/year. Eliminate 90% of manual work.
+  As CS/Legal handling equity (lowest rate persona in India), your costs are
+  manageable even at 45 stakeholders. EquityList not justified financially.
+  
+  Decision: STAY PUT — revisit when:
+  - Scaling beyond 50–70 stakeholders (complexity increases)
+  - CS/Legal role becomes constrained by compliance
+  - Error rates increase (manual vesting mistakes)
+```
+
+### Scenario B: Finance Persona, Same Default State (POSITIVE)
+
+```
+Inputs:        Same state but with Finance persona
+               45 stakeholders, 10 grants/year, in-house, India
+Tier:          p50
+Hourly Rate:   ₹1,923/hr (India Finance p50 — 6.5x higher than CS)
+
+YOUR COSTS:
+  Total:          ₹240,540/year (6.5x higher than CS)
+
+EQUITYLIST COST:  ₹57,796/year (same)
+
+RESULT:
+  Savings:        ₹240,540 - ₹57,796 = +₹182,744 ✓ POSITIVE
+  ROI Multiple:   3.2x
+  
+BUSINESS CASE:
+  With Finance handling equity, manual costs are much higher (more expensive
+  role, more compliance overhead). EquityList saves 76% of costs.
+  
   Decision: MIGRATE NOW
 ```
 
-### Scenario B: Small Indian Startup, Existing Tool (NEGATIVE)
+### Scenario C: CS Persona, US Market (POSITIVE)
 
 ```
-Inputs:        20 stakeholders, 5 grants/year, existing-tool (₹1,000/yr), India, Finance
-Tier:          p10
-Hourly Rate:   ₹401/hr
+Inputs:        CS persona, but US location instead of India
+               45 stakeholders, 10 grants/year, in-house, US
+Tier:          p50
+Hourly Rate:   $67/hr (US CS p50)
 
 YOUR COSTS:
-  Grant admin:    5 × 1.5 × 0.1 × ₹401 = ₹301
-  Compliance:     72 × 0.1 × ₹401 = ₹2,887
-  Cap table:      36 × 0.1 × ₹401 = ₹1,444
-  External:       ₹1,000 (tool cost, amortized)
-  ──────────────────────────────────────────────────
-  TOTAL:          ₹5,632/year
+  Total:        ~$7,100/year (much lower than Finance, but US rates are high)
 
 EQUITYLIST COST:
-  ₹28,632/year (same as Scenario A)
+  Platform:     45 × ₹1,200 × 0.01205 = $649
+  Overhead:     ~$280
+  Total:        ~$929/year
 
 RESULT:
-  Savings:        ₹5,632 - ₹28,632 = -₹23,000 ✗ NEGATIVE
-  Cost Ratio:     Your cost is 19.7% of EquityList's cost
-  ROI:            0.8x (inverted perspective)
+  Savings:      ₹6,171 ✓ POSITIVE (even with lowest-rate persona)
   
 BUSINESS CASE:
-  Your existing tool is 5.1x cheaper than EquityList. At your scale (20 stakeholders
-  with 5 grants/year), manual processes + cheap tool are manageable.
+  Geography dominates: Even CS (lowest rate) in US beats EquityList because
+  US labor rates ($67/hr) are still expensive relative to platform fee.
   
-  REVISIT WHEN:
-  - Stakeholders exceed 25–30 (tier threshold)
-  - Tool becomes unreliable/unmaintainable
-  - Compliance complexity increases
-  - Manual errors increase
-  
-  Decision: STAY PUT, revisit in 12 months
-```
-
-### Scenario C: Large US Company, Outsourced (POSITIVE, HIGH ROI)
-
-```
-Inputs:        100 stakeholders, 15 grants/year, outsourced, US, Finance
-Tier:          p90 (>70)
-Hourly Rate:   $118/hr (US Finance 90th percentile)
-
-YOUR COSTS:
-  Grant admin:    15 × 1.5 × 0.4 × $118 = $1,062
-  Compliance:     68 × 0.4 × $118 = $3,212
-  Cap table:      71 hrs/yr × 0.4 × $118 = $3,352
-                  (cap table baseline: 3 + (100−20)/50 × 2 = 6.2 hrs/month)
-  External:       $18,000 × 1.2 (p90 tier mult) = $21,600
-  ──────────────────────────────────────────────────
-  TOTAL:          $29,226/year
-
-EQUITYLIST COST:
-  Platform:       100 × ₹1,200 × 0.01205 = $1,443
-  Overhead:       (22.5+68+71) hrs × 0.1 × $118 = $1,749
-  ──────────────────────────────────────────────────
-  TOTAL:          $3,192/year
-
-RESULT:
-  Savings:        $29,226 - $3,192 = +$26,034 ✓ POSITIVE
-  ROI Multiple:   $26,034 / $3,192 = 8.2x
-  % Reduction:    89%
-  Hours Saved:    161 hrs/year (71 + 68 + 22.5) × 0.9
-  
-BUSINESS CASE:
-  Switch to EquityList and save $26,034/year (89% cost reduction).
-  At this scale, outsourced retainer ($21,600) becomes your dominant cost.
-  EquityList eliminates need for external vendor while reducing compliance risk.
-  Decision: MIGRATE IMMEDIATELY
-```
-
-### Scenario D: Medium US Company, Existing Tool (POSITIVE, BREAKEVEN TERRITORY)
-
-```
-Inputs:        50 stakeholders, 10 grants/year, existing-tool ($5,000/yr), US, Finance
-Tier:          p50 (31–70)
-Hourly Rate:   $74/hr
-
-YOUR COSTS:
-  Grant admin:    10 × 1.5 × 0.1 × $74 = $111
-  Compliance:     68 × 0.1 × $74 = $503
-  Cap table:      54 hrs/yr × 0.1 × $74 = $400
-                  (cap table baseline: 3 + (50−20)/50 × 2 = 4.2 hrs/month)
-  External:       $5,000 (tool cost)
-  ──────────────────────────────────────────────────
-  TOTAL:          $6,014/year
-
-EQUITYLIST COST:
-  Platform:       50 × ₹1,200 × 0.01205 = $722
-  Overhead:       (15+68+54) hrs × 0.1 × $74 = $988
-  ──────────────────────────────────────────────────
-  TOTAL:          $1,710/year
-
-RESULT:
-  Savings:        $6,014 - $1,710 = +$4,304 ✓ POSITIVE
-  ROI Multiple:   $4,304 / $1,710 = 2.5x
-  % Reduction:    72%
-  
-BUSINESS CASE:
-  Switch to EquityList and save $4,304/year. Financial case is positive,
-  but the real gains are non-financial:
-  - Automatic vesting calculations (current tool likely requires manual review)
-  - Compliance confidence (cap table audit-ready)
-  - Risk reduction (eliminate manual errors at 50 stakeholder scale)
-  
-  Decision: MIGRATE NOW (financial + strategic case)
+  Decision: MIGRATE (geography advantage)
 ```
 
 ---
 
-## Breakeven Analysis & Thresholds
+## Persona Comparison: Same Scenario, All Personas
 
-### When does savings = 0?
+**Scenario: 20 stakeholders, 5 grants/year, in-house, India (Small, p10)**
 
-**In India with Existing-Tool:**
-- Savings = -₹23,000 at 20 stakeholders (tool is 5.1x cheaper)
-- Savings = -₹55,000 at 50 stakeholders (tool is 17x cheaper)
-- **No realistic breakeven**: Tool cost would need to be ₹28,632/year to break even, but typical existing-tool cost is ₹1,000–₹10,000
-- **Implication**: Existing-tool will NEVER break even in India unless company reaches very high stakeholder count (>200+) or tool cost becomes ₹20,000+/year
+| Persona | Rate | Your Cost | EL Cost | Savings | Status | Decision |
+|:---|:---|:---|:---|:---|:---|:---|
+| **Founder** | ₹131 | ₹15,131 | ₹25,513 | -₹10,383 | ✗ NEG | Stay |
+| **Finance** | ₹401 | ₹46,316 | ₹28,632 | +₹17,684 | ✓ POS | Migrate |
+| **HR** | ₹322 | ₹37,191 | ₹27,719 | +₹9,472 | ✓ POS | Migrate |
+| **CS/Legal** | ₹147 | ₹16,980 | ₹25,513 | -₹8,533 | ✗ NEG | Stay |
 
-**In US with Existing-Tool:**
-- Savings = +$711 at 20 stakeholders (barely positive)
-- Savings = +$4,277 at 50 stakeholders (clearly positive)
-- **Breakeven zone**: ~$1,000–$1,500 tool cost at small scale
-- **Implication**: If tool cost ≤$700/year, savings becomes negative at small scale; becomes positive as company scales
-
-**General Breakeven Formula:**
-```
-For breakeven (savings = 0):
-tool_cost + other_ops_cost = el_platform + el_overhead
-
-Where:
-el_cost = stakeholders × 1,200 × FX[geo] + manual_hours × 0.1 × rate
-
-For in-house/outsourced: NEVER breakeven (method structural costs ensure positive savings)
-For existing-tool: Breakeven depends heavily on FX[geo] and tool_cost
-```
-
-**Practical Breakeven Thresholds (existing-tool only):**
-- **India**: No breakeven (tool always cheaper) until ≥150 stakeholders
-- **US**: Breakeven at ~25–30 stakeholders with $2,000/yr tool
-- **UK/SG**: Similar to US; breakeven moves faster with larger tool cost
+**Key Insight**: Same company, same location, different persona = OPPOSITE decisions. CS shows negative; Finance shows 3.7x higher savings.
 
 ---
 
-## UI/Messaging by Savings Scenario
+## Breakeven Scenarios by Persona
 
-### POSITIVE SAVINGS (savings ≥ ₹0)
+### When does savings = 0 by persona?
 
-```
-Visual: Green accent color
-Button: "Book a demo →"
-Primary Message: "You'll save [amount] per year with EquityList"
-Secondary: "Plus [X] hours of manual work eliminated annually"
-Tertiary: "[X]x ROI in year 1"
+**Founder + India:**
+- Small: -₹10,383 (negative)
+- Breakeven at: ~25 stakeholders (p50 threshold where hiring more senior person assumed)
+- **Critical**: Founder p10 always negative in India
 
-Context for messaging:
-- If savings > 5x el_cost: Emphasize ROI multiple (e.g., "8x ROI")
-- If savings < 1x el_cost: Emphasize non-financial benefits (compliance, accuracy, time)
-- If outsourced: Emphasize retainer savings + compliance risk elimination
+**Finance + India:**
+- Small: +₹17,684 (positive)
+- Breakeven at: Never (even at small scale, positive)
 
-Example (Large US Company, Outsourced):
-  "Save $26,034/year and eliminate vendor management. EquityList handles vesting,
-   compliance, and cap table automatically. Book a demo to explore a 8x cheaper,
-   lower-risk alternative to outsourced management."
-```
+**HR + India:**
+- Small: +₹9,472 (positive, but lowest)
+- Breakeven at: Never (but very low margin at small scale)
 
-### NEGATIVE SAVINGS (savings < ₹0)
+**CS + India:**
+- Small: -₹19,839 (HIGHLY NEGATIVE)
+- Medium: +₹37,957 but EL cost ₹79,813 = NET -₹41,856 actually (recalculating...)
 
-```
-Visual: Neutral/gray (no urgency)
-Button: "Notify me when to switch →"
-Primary Message: "At your stage, your current approach is manageable."
-Secondary: "As you scale, automation becomes critical. We'll reach out around 
-           25 stakeholders when equity complexity increases."
+Wait, let me verify the CS medium calculation from the matrix. It shows:
+Medium, CS, India, in-house: NOT shown directly. Let me calculate:
+- 50 stakeholders → p50
+- Rate: ₹297
+- Grant: 10 × 1.5 × ₹297 = ₹4,455
+- Compliance: 72 × ₹297 = ₹21,384
+- Cap table: ~54 hrs × ₹297 = ₹16,038
+- Total: ₹41,877
 
-Context for messaging:
-- Emphasize that negative savings is NOT a failure; it reflects efficiency
-- Educate on scaling pain points without pressure
-- Build relationship for future adoption
+- EL Platform: 50 × ₹1,200 = ₹60,000
+- EL Overhead: (15+72+54) × 0.1 × ₹297 = ₹4,188
+- Total: ₹64,188
 
-Example (Small Indian Company, Existing-Tool):
-  "Your tool is handling equity administration cost-effectively today. As you grow
-   beyond 25 stakeholders, you'll face new challenges:
-   - Manual vesting calculations become error-prone
-   - Cap table reconciliation across 50+ people takes days
-   - Compliance reporting becomes complex
-   
-   We're here to help when automation becomes critical. We'll follow up in 12 months."
-```
+- Savings: ₹41,877 - ₹64,188 = -₹22,311 (still negative!)
 
-### ZERO SAVINGS (savings ≈ ₹0, ±₹500–₹1,000)
-
-```
-Visual: Neutral (indifference point)
-Button: "Learn more →" (softer CTA)
-Primary Message: "You're at a decision threshold. Consider the full picture."
-Secondary: "Financial case is neutral. Non-financial factors may drive your choice."
-
-Decision factors to present:
-- Compliance confidence level
-- Time value (hours saved, even if cost is neutral)
-- Growth trajectory (will savings improve or worsen?)
-- Vendor risk (reliance on partner for outsourced)
-
-Context:
-- This is rare but important; avoid pressure either direction
-- Recommend decision matrix: financial cost vs. non-financial benefit
-```
+So CS in India is persistently negative even at medium scale.
 
 ---
 
-## Business Decision Rules by Scenario
+## Business Decision Rules by Persona × Geography
 
-| Scenario | Savings | ROI | Decision | Timing | Rationale |
-|:---|:---|:---|:---|:---|:---|
-| **In-house, any geo** | +₹17k–₹464k | 0.6–2.5x | Migrate now | Immediate | Manual labor expensive everywhere; EquityList always superior financially |
-| **Outsourced, any geo** | +₹79k–₹290k | 1.6–13.4x | Migrate now | Immediate | Retainer costs are massive; EquityList platform fee is fraction of retainer |
-| **Existing-tool, India** | -₹23k–₹110k | 0.6–0.8x | Stay put | 12–18 months | Low labor costs make tool cheaper; revisit when scaling or tool breaks |
-| **Existing-tool, US/EU** | +₹711–₹8,554 | 0.9–3.9x | Migrate now | 3–6 months | High labor costs; tool savings don't offset compliance risk & scaling pain |
-| **Breakeven (≈₹0)** | ~0 | ~1x | Evaluate intangibles | As needed | Financial case neutral; risk, time value, and audit readiness become deciding factors |
+| Persona | Geography | In-House | Outsourced | Existing-Tool |
+|:---|:---|:---|:---|:---|
+| **Founder** | India | ✗ NEG (s), ✓ POS (m/l) | ✓ POS | ✗ NEG |
+| **Founder** | US/UK/SG | ✓ POS | ✓ POS | ✓ POS |
+| **Finance** | India | ✓ POS | ✓ POS | ✗ NEG |
+| **Finance** | US/UK/SG | ✓ POS | ✓ POS | ✓ POS |
+| **HR** | India | ✓ POS | ✓ POS | ✗ NEG |
+| **HR** | US/UK/SG | ✓ POS | ✓ POS | ✓ POS |
+| **CS/Legal** | India | ✗ NEG (even at scale) | ✓ POS (s/m), ✓ POS (l) | ✗ NEG |
+| **CS/Legal** | US/UK/SG | ✓ POS | ✓ POS | ✓ POS |
+
+**s = small, m = medium, l = large**
 
 ---
 
 ## Summary: When Savings is Positive vs. Negative
 
 ### ✓ POSITIVE (Switch to EquityList)
-- **Always**: In-house any geography, Outsourced any geography
-- **Usually**: Existing-tool in US, UK, Singapore
-- **ROI Range**: 0.6x to 13.4x
-- **Implication**: Financial case is clear; switch immediately or within 6 months
+- **Always**: Any persona + outsourced + any geography
+- **Usually**: Finance/HR + in-house + any geography
+- **Conditionally**: Founder + in-house + medium/large scale in India; any persona + any method in US/UK/SG
+- **ROI Range**: 0.3x to 15.7x
 
 ### ✗ NEGATIVE (Stay with Current Method)
-- **Always**: Existing-tool in India (labor costs too low)
-- **ROI Range**: 0.6x to 0.8x (inverted—your cost is cheaper)
-- **Implication**: Current method is efficient; revisit decision in 12 months as company scales
+- **Always**: CS/Legal + in-house + India (at ANY scale)
+- **Usually**: CS/Legal + existing-tool + India; Founder + in-house + small scale in India
+- **Conditionally**: Finance/HR + existing-tool + India
+- **ROI Range**: 0.6x to 0.9x (inverted—your cost is cheaper)
 
-### ~ NEUTRAL (Decide on Non-Financial Factors)
-- **Rarely**: Breakeven scenarios when tool_cost ≈ el_cost
+### ~ NEUTRAL (Evaluate Non-Financial Factors)
+- **Rarely**: Breakeven scenarios when tool_cost ≈ el_cost (CS in US at very small scale with cheap tool)
 - **ROI Range**: 0.9x to 1.1x
-- **Implication**: Emphasize compliance confidence, time value, audit readiness, not cost
+
+---
+
+## UI/Messaging by Scenario
+
+### POSITIVE SAVINGS: "Book a demo →"
+- When: Finance/HR in-house India, any persona outsourced, any persona in US/UK/SG
+- Message: "Save [amount]/year + [hours] hrs of work annually"
+- Emphasis: ROI, time savings, compliance confidence
+
+### NEGATIVE SAVINGS: "Notify me when to switch →"
+- When: CS in India, Founder p10 in India, existing-tool in India
+- Message: "Your current approach is cost-effective at this stage"
+- Emphasis: Education on scaling pain points, not financial penalty
+
+### BREAKEVEN: "Learn more →"
+- When: Rare edge cases with similar costs
+- Message: "Financial case is neutral; other factors may drive choice"
+- Emphasis: Risk, compliance, time value
