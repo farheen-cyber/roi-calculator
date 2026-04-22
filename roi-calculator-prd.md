@@ -1,7 +1,7 @@
 # EquityList ROI Calculator — Logic & Calculation Specification
 
-**Version**: 2.5
-**Last Updated**: April 21, 2026
+**Version**: 2.6
+**Last Updated**: April 22, 2026
 **Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine.
 
 ---
@@ -10,9 +10,9 @@
 
 | UI Input | Variable | Range / Type | Default | Required |
 |:---|:---|:---|:---|:---|
-| Shareholders | `sh` | 1–1,000 | 30 | Yes |
-| Option Holders | `oh` | 1–2,000 | 15 | Yes |
-| Equity grants issued / year | `gr` | 1–500 | 10 | Yes |
+| Shareholders | `sh` | Positive number | 30 | Yes |
+| Option Holders | `oh` | Positive number | 15 | Yes |
+| Equity grants issued / year | `gr` | Positive number | 10 | Yes |
 | Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Yes |
 | Country of Operation | `geo_op` | India, US, Singapore, UK | India | Yes |
 | Persona | `per` | Founder, Finance, HR, CS | Finance | Yes |
@@ -44,9 +44,9 @@ Determines which PayScale salary percentile to apply based on total stakeholder 
 
 ```javascript
 stakeholders = sh + oh
-tier = stakeholders ≤ 10  → p10 (10th percentile)
-tier = 10 < stakeholders ≤ 50 → p50 (median)
-tier = stakeholders > 50  → p90 (90th percentile)
+tier = stakeholders ≤ 30  → p10 (10th percentile)
+tier = 30 < stakeholders ≤ 70 → p50 (median)
+tier = stakeholders > 70  → p90 (90th percentile)
 ```
 
 ### 2.4 Geographic Model
@@ -133,13 +133,20 @@ All rates sourced from PayScale. Annual salary ÷ 2,080 working hours (52 weeks 
 - **Scaling**: Additional 2 hrs/month per 50 shareholders above a base of 20.
 
 ### 4.4 External Retainer Cost
-**Formula**: `RETAINER[geo_op]` (Only if Method = Outsourced)
+**Formula**: `RETAINER[geo_op] × tier_multiplier` (Only if Method = Outsourced)
+
+**Base Retainer by Geography**:
 - **India**: ₹1,80,000/yr
 - **US**: $18,000/yr
 - **Singapore**: S$15,000/yr
 - **UK**: £12,000/yr
 
-> *Applied based on country of operation, where the work is performed.*
+**Tier Multiplier** (applied only to outsourced retainer, not to user-provided tool costs):
+- **p10 (≤30 stakeholders)**: 0.8x
+- **p50 (31–70 stakeholders)**: 1.0x
+- **p90 (>70 stakeholders)**: 1.2x
+
+> *Applied based on country of operation, where the work is performed. Tier scaling reflects varying vendor availability and negotiation leverage at different company sizes.*
 
 ---
 
