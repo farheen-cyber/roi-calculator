@@ -49,7 +49,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, overrides) {
   let methodExtCost = toolCost;
   if (meth === 'outsourced') {
     // Apply tier-based scaling only to outsourced retainer costs
-    const tierMultiplier = tier === 'p10' ? 0.8 : tier === 'p50' ? 1.0 : 1.2;
+    const tierMultiplier = tier === 'p10' ? 0.5 : tier === 'p50' ? 1.0 : 1.2;
     methodExtCost = Math.round(ext[geo_op] * tierMultiplier);
   }
 

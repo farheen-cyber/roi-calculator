@@ -134,7 +134,7 @@ body {
 
 #input-state {
   max-height: 640px;
-  overflow-y: hidden;
+  overflow-y: visible;
 }
 
 .col-r {
@@ -957,7 +957,7 @@ body.state-overview #res-status {
   right: 0;
   background: var(--bg-r);
   border: 1px solid var(--bd);
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   display: none;
   list-style: none;

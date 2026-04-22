@@ -21,7 +21,10 @@ const DEFAULTS = {
   stage: 'series-ab',
   sh: 30,
   oh: 15,
-  gr: 10
+  gr: 10,
+  per: 'finance',
+  meth: 'in-house',
+  tc: 0
 };
 
 function isUsingSampleData() {
@@ -31,6 +34,9 @@ function isUsingSampleData() {
   const sh = parseInt(document.getElementById('i-sh')?.value || 0);
   const oh = parseInt(document.getElementById('i-oh')?.value || 0);
   const gr = parseInt(document.getElementById('i-gr')?.value || 0);
+  const per = document.getElementById('i-per')?.value || '';
+  const meth = document.getElementById('i-meth')?.value || '';
+  const tc = parseInt(document.getElementById('i-tc')?.value || 0);
 
   return (
     geoInc === DEFAULTS.geoInc &&
@@ -38,7 +44,10 @@ function isUsingSampleData() {
     stage === DEFAULTS.stage &&
     sh === DEFAULTS.sh &&
     oh === DEFAULTS.oh &&
-    gr === DEFAULTS.gr
+    gr === DEFAULTS.gr &&
+    per === DEFAULTS.per &&
+    meth === DEFAULTS.meth &&
+    tc === DEFAULTS.tc
   );
 }
 
@@ -231,7 +240,9 @@ function updateStepVisibility() {
   document.getElementById('current-step').textContent = currentStep;
 
   // Update button states
-  document.getElementById('btn-back').disabled = currentStep === 1;
+  const backBtn = document.getElementById('btn-back');
+  backBtn.style.display = currentStep === 1 ? 'none' : 'inline-flex';
+  backBtn.disabled = false;
   const nextBtn = document.getElementById('btn-next');
   nextBtn.style.display = currentStep === 3 ? 'none' : 'inline-flex';
   nextBtn.disabled = !validateStep(currentStep);
@@ -471,7 +482,7 @@ function doCalc() {
   var ctaHtml = '';
   if (roiData.isSpend) {
     // EL is cheaper
-    ctaHtml = `<button onclick="window.open('https://www.equitylist.co/contact', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">📅 Book a demo →</button>`;
+    ctaHtml = `<button onclick="window.open('https://www.equitylist.co/contact', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">Book a demo →</button>`;
   } else {
     // EL is more expensive or break-even
     ctaHtml = `
@@ -486,7 +497,7 @@ function doCalc() {
         </div>
         <div style="font-size:11px;color:var(--t3)">We'll reach out around 25 stakeholders when automation becomes critical.</div>
       </div>
-      <button onclick="window.open('https://www.equitylist.co/newsletter', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none;margin-top:16px">📧 Notify me when to switch →</button>
+      <button onclick="window.open('https://www.equitylist.co/newsletter', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none;margin-top:16px">Notify me when to switch →</button>
     `;
   }
 

@@ -1,6 +1,6 @@
 # EquityList ROI Calculator — Logic & Calculation Specification
 
-**Version**: 2.6
+**Version**: 2.7
 **Last Updated**: April 22, 2026
 **Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine.
 
@@ -26,9 +26,9 @@
 ## 2. Derived Base Metrics
 
 ### 2.1 Total Stakeholders
-Used for EquityList platform pricing.
+Used for EquityList platform pricing. Capped at 10,000 maximum.
 ```javascript
-stakeholders = sh + oh
+stakeholders = min(sh + oh, 10000)
 ```
 
 ### 2.2 Method Multipliers (`mult`)
@@ -142,7 +142,7 @@ All rates sourced from PayScale. Annual salary ÷ 2,080 working hours (52 weeks 
 - **UK**: £12,000/yr
 
 **Tier Multiplier** (applied only to outsourced retainer, not to user-provided tool costs):
-- **p10 (≤30 stakeholders)**: 0.8x
+- **p10 (≤30 stakeholders)**: 0.5x
 - **p50 (31–70 stakeholders)**: 1.0x
 - **p90 (>70 stakeholders)**: 1.2x
 
@@ -205,6 +205,21 @@ time_saved_pct = round((manual_hours - adjusted_hours) / manual_hours × 100)
 ```javascript
 roi = round(abs(savings) / el_cost, 1)
 // How many times the savings exceeds EquityList's cost; shown as "Xx"
+```
+
+### 6.6 Your Annual Spend
+```javascript
+annual_spend = grant_admin_cost + compliance_cost + cap_table_cost + external_cost
+// Total annual operational cost for current method (in-house, outsourced, or existing-tool)
+// Also called ops_total; primary comparison point against EquityList
+```
+
+### 6.7 Hours Saved Annually (with EquityList)
+```javascript
+hours_saved = adjusted_hours - (manual_hours × 0.1)
+// Actual hours eliminated by switching to EquityList from current method
+// Accounts for the 10% minimum oversight required even with EquityList
+// Example: With outsourced (mult=0.4), switching to EL saves (manualHTotal×0.4) - (manualHTotal×0.1) = manualHTotal×0.3 hours
 ```
 
 ---
