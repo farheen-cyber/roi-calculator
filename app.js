@@ -785,8 +785,8 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStepVisibility();
   loadStepState();
 
-  // Do not call doCalc() on page load - wait for user to complete inputs
-  // doCalc() will be called when user interacts with fields or clicks Calculate
+  // Calculate with default values (form has defaults: India, Series A/B, 30/15/10)
+  doCalc();
 
   // Fetch live FX rates
   fetch('https://open.er-api.com/v6/latest/INR')
