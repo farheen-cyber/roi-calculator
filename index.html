@@ -113,7 +113,7 @@
             <div class="fi">
               <label for="i-geo-inc">Country of Incorporation * <span title="Determines compliance requirements and statutory reporting obligations" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
               <div class="custom-select-wrapper">
-                <select id="i-geo-inc" class="custom-select" aria-label="Country of Incorporation" aria-required="true" onchange="lc()" onblur="val(this)"><option value="">Select a country</option><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+                <select id="i-geo-inc" class="custom-select" aria-label="Country of Incorporation" aria-required="true" onchange="validateAndUpdateButtonState()" onblur="val(this)"><option value="">Select a country</option><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
                 <div class="select-display">
                   <span class="select-label">India</span>
                   <span class="select-chevron">▼</span>
@@ -130,7 +130,7 @@
             <div class="fi">
               <label for="i-geo-op">Country of Operation * <span title="Determines hourly rates, currency, and EquityList pricing" style="cursor:help;opacity:0.5;font-size:12px;font-weight:600">ℹ</span></label>
               <div class="custom-select-wrapper">
-                <select id="i-geo-op" class="custom-select" aria-label="Country of Operation" aria-required="true" onchange="lc()" onblur="val(this)"><option value="">Select a country</option><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
+                <select id="i-geo-op" class="custom-select" aria-label="Country of Operation" aria-required="true" onchange="validateAndUpdateButtonState()" onblur="val(this)"><option value="">Select a country</option><option value="india" selected>India</option><option value="us">United States</option><option value="singapore">Singapore</option><option value="uk">United Kingdom</option></select>
                 <div class="select-display">
                   <span class="select-label">India</span>
                   <span class="select-chevron">▼</span>
@@ -149,7 +149,7 @@
             <div class="fi">
               <label for="i-st">Current Stage *</label>
               <div class="custom-select-wrapper">
-                <select id="i-st" class="custom-select" aria-label="Company current stage" aria-required="true" onchange="lc()" onblur="val(this)"><option value="">Select a stage</option><option value="preseed">Pre-seed</option><option value="seed">Seed</option><option value="seriesab" selected>Series A/B</option><option value="seriesbc">Series B/C</option><option value="seriesc">Series C+</option></select>
+                <select id="i-st" class="custom-select" aria-label="Company current stage" aria-required="true" onchange="validateAndUpdateButtonState()" onblur="val(this)"><option value="">Select a stage</option><option value="preseed">Pre-seed</option><option value="seed">Seed</option><option value="seriesab" selected>Series A/B</option><option value="seriesbc">Series B/C</option><option value="seriesc">Series C+</option></select>
                 <div class="select-display">
                   <span class="select-label">Series A/B</span>
                   <span class="select-chevron">▼</span>
@@ -164,7 +164,7 @@
               </div>
               <div class="err-msg">Field required</div>
             </div>
-            <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name" oninput="lc()"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name"><div class="err-msg">Field required</div></div>
           </div>
         </div>
       </div>
@@ -176,9 +176,9 @@
         </fieldset>
         <div class="fg">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
-            <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
-            <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
-            <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" oninput="lc()"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1"><div class="err-msg">Field required</div></div>
+            <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1"><div class="err-msg">Field required</div></div>
           </div>
         </div>
       </div>
@@ -193,7 +193,7 @@
             <div class="fi">
               <label for="i-per">Managed by *</label>
               <div class="custom-select-wrapper">
-                <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="lc()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
+                <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="validateAndUpdateButtonState()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
                 <div class="select-display">
                   <span class="select-label">Finance / CFO</span>
                   <span class="select-chevron">▼</span>
@@ -222,6 +222,13 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Calculate Button (visible on Step 3) -->
+      <div id="calculate-btn-wrap" style="display: none; margin-top: 32px;">
+        <button id="calculate-btn" class="btn btn-p" onclick="onCalculateClick()" style="width: 100%; text-align: center; cursor: pointer;">
+          Calculate ROI
+        </button>
       </div>
 
       <!-- Stepper Navigation -->

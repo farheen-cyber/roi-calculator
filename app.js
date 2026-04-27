@@ -5,7 +5,6 @@ import { SelectField } from './SelectField.js';
 // Global state
 var flow = 'input';
 var calcDone = false;
-var updateTimer = null;
 var overrides = { rate: null, grHr: null, compHr: null };
 var initialMethod = null;
 var userInputStarted = false;
@@ -263,6 +262,16 @@ function updateStepVisibility() {
   const nextBtn = document.getElementById('btn-next');
   nextBtn.style.display = currentStep === 3 ? 'none' : 'inline-flex';
   nextBtn.disabled = !validateStep(currentStep);
+
+  // Show Calculate button only on Step 3
+  const calculateBtnWrap = document.getElementById('calculate-btn-wrap');
+  if (calculateBtnWrap) {
+    calculateBtnWrap.style.display = currentStep === 3 ? 'block' : 'none';
+    // Update button enabled/disabled state when showing on Step 3
+    if (currentStep === 3) {
+      validateAndUpdateButtonState();
+    }
+  }
 }
 
 function stepNext() {
@@ -338,12 +347,26 @@ function updateNextButtonState() {
 function lc() {
   // Update button state immediately for instant visual feedback
   updateNextButtonState();
+  validateAndUpdateButtonState();
+}
 
-  // Debounce calculation
-  if (updateTimer) clearTimeout(updateTimer);
-  updateTimer = setTimeout(() => {
-    doCalc();
-  }, 100);
+function validateAndUpdateButtonState() {
+  const calculateBtn = document.getElementById('calculate-btn');
+  if (!calculateBtn) return;
+
+  const validation = validateInputs();
+  calculateBtn.disabled = !validation.valid;
+}
+
+function onCalculateClick() {
+  const validation = validateInputs();
+  if (!validation.valid) {
+    validateAndDisplayErrors();
+    return;
+  }
+
+  // Calculate and display results
+  doCalc();
 }
 
 function onRateChange() {
@@ -776,8 +799,17 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStepVisibility();
   loadStepState();
 
-  // Calculate with default values (form has defaults: India, Series A/B, 30/15/10)
-  doCalc();
+  // Initialize results area with placeholder (no auto-calculation on load)
+  document.getElementById('r-body').innerHTML = `
+    <div style="padding: 40px 20px; text-align: center; color: var(--t3);">
+      <div style="font-size: var(--fs-label); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--t2);">Ready to calculate?</div>
+      <div style="font-size: var(--fs-sm); line-height: 1.6;">Fill in all required fields and click the <strong>Calculate ROI</strong> button at the bottom to see your custom estimate.</div>
+    </div>
+  `;
+  document.getElementById('mobile-summary').style.display = 'none';
+
+  // Initialize Calculate button state
+  validateAndUpdateButtonState();
 
   // Fetch live FX rates
   fetch('https://open.er-api.com/v6/latest/INR')
@@ -806,6 +838,8 @@ window.onF = onF;
 window.val = val;
 window.valAndEnableNext = valAndEnableNext;
 window.lc = lc;
+window.validateAndUpdateButtonState = validateAndUpdateButtonState;
+window.onCalculateClick = onCalculateClick;
 window.resetO = resetO;
 window.validateAndDisplayErrors = validateAndDisplayErrors;
 window.onMethChange = onMethChange;
