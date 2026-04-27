@@ -1,7 +1,7 @@
 # EquityList ROI Calculator — Logic & Calculation Specification
 
-**Version**: 2.7
-**Last Updated**: April 22, 2026
+**Version**: 3.0  
+**Last Updated**: April 28, 2026  
 **Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine.
 
 ---
@@ -15,11 +15,11 @@
 | Equity grants issued / year | `gr` | Positive number | 10 | Yes |
 | Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Yes |
 | Country of Operation | `geo_op` | India, US, Singapore, UK | India | Yes |
-| Persona | `per` | Founder, Finance, HR, CS | Finance | Yes |
-| Current Method | `meth` | In-house, Outsourced, Existing Tool | In-house | Yes |
-| Annual Tool Cost | `tool_cost` | Number | 0 | Only if meth = Existing Tool |
-| Current Stage | `stage` | Seed, Series A/B, Series C+, Public/Pre-IPO | Series A/B | No (display only) |
+| Current Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Yes |
+| Administrative Method | `meth` | In-house, Outsourced | In-house | Yes |
 | Legal Entity Name | `co` | String | — | No (display only) |
+
+**Note**: The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.4).
 
 ---
 
@@ -35,19 +35,26 @@ stakeholders = min(sh + oh, 10000)
 Represents the fraction of execution effort retained by the internal team.
 - **In-house**: 1.0 (100%)
 - **Outsourced (CA/Legal)**: 0.4 (40%) — *Reflects time spent on review, approval, and coordination.*
-- **Existing Tool**: 0.1 (10%) — *Reflects minimal oversight time; the tool handles most execution.*
 
-> When `meth = Existing Tool`, total ops cost = `(grant_admin + compliance + cap_table costs at mult=0.1) + tool_cost`. The `tool_cost` is user-supplied and added as a direct line item.
-
-### 2.3 Scale Tier
-Determines which salary percentile to apply based on total stakeholder count.
+### 2.3 Stage-Based Staffing Matrix
+Determines FTE (Full-Time Equivalent) allocation by role for each company stage. This replaces the old persona-based approach.
 
 ```javascript
-stakeholders = sh + oh
-tier = stakeholders ≤ 30  → p10 (10th percentile)
-tier = 30 < stakeholders ≤ 70 → p50 (median)
-tier = stakeholders > 70  → p90 (90th percentile)
+const STAFFING_MATRIX = {
+  preseed: { founder: 1.0, hr: 0, finance: 0, secretarial: 0 },
+  seed: { founder: 1.0, hr: 0.5, finance: 0.5, secretarial: 0 },
+  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, secretarial: 0.5 },
+  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, secretarial: 1.0 },
+  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, secretarial: 1.5 }
+};
 ```
+
+**Staffing Allocation Rationale:**
+- **Pre-seed**: Solo founder handles all equity admin
+- **Seed**: Founder still leads; beginning to split finance/HR (0.5 FTE each)
+- **Series A/B**: Dedicated HR and Finance roles join; founder reduces to 0.8 FTE oversight
+- **Series B/C**: Scaled team with more HR and Finance; founder mostly strategy (0.5 FTE)
+- **Series C+**: Mature team structure; founder strategic involvement (0.25 FTE), seasoned HR/Finance/Legal leads
 
 ### 2.4 Geographic Model
 The calculator accepts two geography inputs:
@@ -56,7 +63,7 @@ The calculator accepts two geography inputs:
   - Determines baseline compliance hours (COMPLIANCE[geo_inc])
   
 - **`geo_op`** (Country of Operation): Used for hourly rates, external retainer costs, currency conversion, and EL pricing
-  - Selects industry-standard hourly rates per persona and stage (STAGE_HOURLY_RATES[geo_op])
+  - Selects industry-standard hourly rates per role and stage (STAGE_HOURLY_RATES[geo_op])
   - Determines stage-based external retainer cost (if method = Outsourced): STAGE_RETAINER[geo_op][stage]
   - Determines FX conversion rates (INR → local currency)
   - Used for EquityList platform fee and internal overhead calculations
@@ -65,48 +72,48 @@ The calculator accepts two geography inputs:
 
 ## 3. Hourly Rate Assumptions (Industry Benchmarks)
 
-Industry-standard rates based on market research. Annual salary ÷ 2,080 working hours (52 weeks × 40 hrs). Rates vary by geography and company stage.
-
-**India (₹/hr)**
-| Persona | 10th %ile | Median | 90th %ile |
-|:---|---:|---:|---:|
-| Founder/CEO | ₹131 | ₹1,442 | ₹4,808 |
-| Finance/CFO | ₹401 | ₹1,923 | ₹3,846 |
-| HR Lead | ₹322 | ₹1,442 | ₹2,404 |
-| CS/Legal | ₹147 | ₹297 | ₹962 |
+Stage-based hourly rates by role and geography. Rates reflect market-standard compensation for equity administration professionals at each funding stage. Annual salary ÷ 2,080 working hours (52 weeks × 40 hrs).
 
 **United States ($/hr)**
-| Persona | 10th %ile | Median | 90th %ile |
-|:---|---:|---:|---:|
-| Founder/CEO | $40 | $85 | $166 |
-| Finance/CFO | $43 | $74 | $118 |
-| HR Lead | $32 | $49 | $74 |
-| CS/Legal | $46 | $67 | $97 |
+| Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|---:|---:|---:|---:|---:|
+| Founder/CEO | $113 | $181 | $288 | $356 | $431 |
+| Finance/CFO | $69 | $110 | $156 | $200 | $250 |
+| HR Lead | $63 | $94 | $131 | $169 | $219 |
+| Legal/Secretarial | $56 | $88 | $119 | $150 | $200 |
+
+**India (₹/hr)**
+| Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|---:|---:|---:|---:|---:|
+| Founder/CEO | ₹500 | ₹1,000 | ₹1,875 | ₹2,750 | ₹4,000 |
+| Finance/CFO | ₹325 | ₹650 | ₹1,188 | ₹1,688 | ₹2,313 |
+| HR Lead | ₹288 | ₹563 | ₹1,025 | ₹1,438 | ₹2,000 |
+| Legal/Secretarial | ₹250 | ₹475 | ₹875 | ₹1,225 | ₹1,688 |
 
 **Singapore (S$/hr)**
-| Persona | 10th %ile | Median | 90th %ile |
-|:---|---:|---:|---:|
-| Founder/CEO | S$13 | S$114 | S$280 |
-| Finance/CFO | S$46 | S$117 | S$187 |
-| HR Lead | S$21 | S$75 | S$138 |
-| CS/Legal | S$29 | S$59 | S$105 |
+| Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|---:|---:|---:|---:|---:|
+| Founder/CEO | $100 | $188 | $331 | $431 | $563 |
+| Finance/CFO | $69 | $119 | $200 | $275 | $375 |
+| HR Lead | $63 | $103 | $181 | $250 | $325 |
+| Legal/Secretarial | $54 | $85 | $150 | $213 | $288 |
 
 **United Kingdom (£/hr)**
-| Persona | 10th %ile | Median | 90th %ile |
-|:---|---:|---:|---:|
-| Founder/CEO | £18 | £35 | £80 |
-| Finance/CFO | £27 | £49 | £83 |
-| HR Lead | £26 | £38 | £55 |
-| CS/Legal | £12 | £22 | £41 |
+| Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|---:|---:|---:|---:|---:|
+| Founder/CEO | £63 | £110 | £181 | £225 | £281 |
+| Finance/CFO | £44 | £70 | £110 | £138 | £188 |
+| HR Lead | £40 | £63 | £98 | £125 | £169 |
+| Legal/Secretarial | £31 | £55 | £85 | £113 | £150 |
 
-> ⚠ **Note on CEO/Founder rates**: Founder/CEO compensation varies widely. These are industry benchmarks; actual rates should reflect your company's funding stage and market.
+> ⚠ **Note on Staffing Premium**: Rates are stage-aware, not persona-selected. The blended hourly rate is calculated as the sum of (FTE × role_rate) for all roles in the staffing matrix for the selected stage. This eliminates the need for a CEO premium multiplier.
 
 ---
 
 ## 4. Cost Components (PRD Match Logic)
 
 ### 4.1 Grant Administration Cost
-**Formula**: `gr × 1.5 hrs × mult × rate`
+**Formula**: `gr × grHr hrs × mult × blended_rate`
 - **Baseline**: 1.5 hours per grant (90 mins).
 - **Execution Breakdown**:
     - Drafting letter: 20m
@@ -117,104 +124,146 @@ Industry-standard rates based on market research. Annual salary ÷ 2,080 working
     - Error checking: 10m
 
 ### 4.2 Compliance & Reporting Cost
-**Formula**: `base_comp_hours[geo_inc] × mult × rate[geo_op]`
+**Formula**: `base_comp_hours[geo_inc] × mult × blended_rate`
 - **Baseline Hours (Manual)** — varies by country of incorporation:
     - **India**: 72 hrs/yr
     - **US**: 68 hrs/yr
     - **Singapore / UK**: 54 hrs/yr
-- **Regulatory scope** (by country of incorporation):
+- **Regulatory Scope** (by country of incorporation):
     - **India**: SH-6 Statutory Register, IND AS 102/15 Equity Expense.
     - **US**: ASC 718/820 Equity Expense, Rule 701 Compliance.
     - **Europe/Asia**: IFRS 2 Share-based Payment.
 
 ### 4.3 Cap Table Maintenance Cost
-**Formula**: `((3 + max(0, (sh - 20) / 50) × 2) × 12) × mult × rate`
+**Formula**: `((3 + max(0, (sh - 20) / 50) × 2) × 12) × mult × blended_rate`
 - **Baseline**: 3 hrs/month minimum.
 - **Scaling**: Additional 2 hrs/month per 50 shareholders above a base of 20.
 
-### 4.4 External Retainer Cost
-**Formula**: `RETAINER[geo_op] × tier_multiplier` (Only if Method = Outsourced)
+### 4.4 External Service Cost (Outsourced Only)
+**Formula**: `STAGE_RETAINER[geo_op][stage]` (Only if Method = Outsourced)
 
-**Base Retainer by Geography**:
-- **India**: ₹1,80,000/yr
-- **US**: $18,000/yr
-- **Singapore**: S$15,000/yr
-- **UK**: £12,000/yr
+**Stage-Based Retainer by Geography**:
+- **India**: 
+  - Preseed: ₹50,000/yr
+  - Seed: ₹80,000/yr
+  - Series A/B: ₹130,000/yr
+  - Series B/C: ₹220,000/yr
+  - Series C+: ₹350,000/yr
+- **US**: 
+  - Preseed: $6,000/yr
+  - Seed: $11,000/yr
+  - Series A/B: $18,000/yr
+  - Series B/C: $35,000/yr
+  - Series C+: $60,000/yr
+- **Singapore**: 
+  - Preseed: S$7,000/yr
+  - Seed: S$11,000/yr
+  - Series A/B: S$15,000/yr
+  - Series B/C: S$28,000/yr
+  - Series C+: S$50,000/yr
+- **UK**: 
+  - Preseed: £4,500/yr
+  - Seed: £8,000/yr
+  - Series A/B: £12,000/yr
+  - Series B/C: £22,000/yr
+  - Series C+: £40,000/yr
 
-**Tier Multiplier** (applied only to outsourced retainer, not to user-provided tool costs):
-- **p10 (≤30 stakeholders)**: 0.5x
-- **p50 (31–70 stakeholders)**: 1.0x
-- **p90 (>70 stakeholders)**: 1.2x
-
-> *Applied based on country of operation, where the work is performed. Tier scaling reflects varying vendor availability and negotiation leverage at different company sizes.*
+> For outsourced method, this retainer cost replaces hourly-based calculation. No staffing matrix or blended rate is applied.
 
 ---
 
-## 5. Summary Formulas
+## 5. Blended Hourly Rate Calculation
 
-### 5.1 Total Annual Ops Cost (Manual)
+### 5.1 In-House Method
+The blended hourly rate is calculated as the sum of FTE-weighted hourly rates for the stage:
+
 ```javascript
-ops_total = grant_admin_cost + compliance_cost + cap_table_cost + retainer_cost
+blended_rate = 0
+for each role in ['founder', 'hr', 'finance', 'secretarial']:
+  fte = STAFFING_MATRIX[stage][role]
+  rate = STAGE_HOURLY_RATES[geo_op][stage][role]
+  blended_rate += (fte × rate)
 ```
 
-### 5.2 EquityList Annual Cost
+**Example - Series A/B in US:**
+```
+blended_rate = (0.8 × $288) + (1.0 × $156) + (1.0 × $131) + (0.5 × $119)
+             = $230.40 + $156 + $131 + $59.50
+             = $576.90/hr
+```
+
+This represents the effective hourly cost for equity administration across the full team.
+
+### 5.2 Outsourced Method
+No blended rate calculation. Use stage-based retainer directly (see §4.4).
+
+---
+
+## 6. Summary Formulas
+
+### 6.1 Total Annual Ops Cost (Manual)
+```javascript
+ops_total = grant_admin_cost + compliance_cost + cap_table_cost + external_cost
+```
+
+### 6.2 EquityList Annual Cost
 ```javascript
 el_platform = stakeholders × 1200 × FX[geo_op]
 // 1200 = ₹1,200 per stakeholder per year (India base price, converted at live rates)
 // FX[geo_op] = INR→local rate fetched live; fallbacks: US 0.01205, SG 0.01613, UK 0.00943
 
-el_overhead = manual_hours × 0.1 × rate[geo_op]
+el_overhead = manual_hours × 0.1 × blended_rate[geo_op][stage]
 // Internal oversight still required even with EquityList (10% of full manual baseline)
-// Rate determined by country of operation and stakeholder tier
+// Blended rate determined by stage and country of operation
 
 el_cost = el_platform + el_overhead
 ```
 
-> *Pricing calculated using country of operation. Applies hourly rates from geo_op for internal oversight cost.*
+> *Pricing calculated using country of operation. Applies blended hourly rates from geo_op for internal oversight cost.*
 > *\* Pricing may vary based on reporting complexity and requirements.*
 
 ---
 
-## 6. Derived Output Metrics
+## 7. Derived Output Metrics
 
-### 6.1 Annual Savings
+### 7.1 Annual Savings
 ```javascript
 savings = ops_total - el_cost
 // Positive = EquityList is cheaper; negative = ops already cheaper than EL
 ```
 
-### 6.2 Internal Effort (Manual Baseline)
+### 7.2 Internal Effort (Manual Baseline)
 ```javascript
-manual_hours = (gr × grHr) + compliance_hours[geo] + ((3 + max(0,(sh-20)/50)×2) × 12)
+manual_hours = (gr × grHr) + compliance_hours[geo_inc] + ((3 + max(0,(sh-20)/50)×2) × 12)
 // Full unaffected-by-method hours — what 100% manual execution would cost in time
 ```
 
-### 6.3 Internal Effort (Method-Adjusted)
+### 7.3 Internal Effort (Method-Adjusted)
 ```javascript
-adjusted_hours = (gr × grHr × mult) + (compliance_hours[geo] × mult) + (cap_table_hours × mult)
+adjusted_hours = (gr × grHr × mult) + (compliance_hours[geo_inc] × mult) + (cap_table_hours × mult)
 // Actual internal hours after applying method multiplier
 ```
 
-### 6.4 Time Saved %
+### 7.4 Time Saved %
 ```javascript
 time_saved_pct = round((manual_hours - adjusted_hours) / manual_hours × 100)
 // Represents the % of total equity ops effort that the current method eliminates vs. pure in-house
 ```
 
-### 6.5 Direct ROI Multiple
+### 7.5 Direct ROI Multiple
 ```javascript
 roi = round(abs(savings) / el_cost, 1)
 // How many times the savings exceeds EquityList's cost; shown as "Xx"
 ```
 
-### 6.6 Your Annual Spend
+### 7.6 Your Annual Spend
 ```javascript
 annual_spend = grant_admin_cost + compliance_cost + cap_table_cost + external_cost
-// Total annual operational cost for current method (in-house, outsourced, or existing-tool)
+// Total annual operational cost for current method (in-house or outsourced)
 // Also called ops_total; primary comparison point against EquityList
 ```
 
-### 6.7 Hours Saved Annually (with EquityList)
+### 7.7 Hours Saved Annually (with EquityList)
 ```javascript
 hours_saved = adjusted_hours - (manual_hours × 0.1)
 // Actual hours eliminated by switching to EquityList from current method
@@ -224,25 +273,69 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 
 ---
 
-## 7. Data Sources
+## 8. Data Sources
 
-Industry-standard hourly rates by geography and role. Annual salary ÷ 2,080 working hours. Rates vary by seniority level — see §3 for full values.
+Industry-standard hourly rates by stage, geography, and role. Rates reflect market compensation for equity administration professionals at each funding stage. Annual salary ÷ 2,080 working hours.
 
-| Geo | Persona | Role | Annual (p10 / median / p90) |
-|:---|:---|:---|:---|:---|
-| **India** | Founder/CEO | Chief Executive Officer | ₹2,73,000 / ₹30,00,000 / ₹1,00,00,000 | |
-| **India** | Finance/CFO | Chief Financial Officer | ₹8,35,000 / ₹40,00,000 / ₹80,00,000 | IN/Job=Chief_Financial_Officer_(CFO)/Salary) |
-| **India** | HR Lead | HR Director | ₹6,70,000 / ₹30,00,000 / ₹50,00,000 | IN/Job=Human_Resources_(HR)_Director/Salary) |
-| **India** | CS/Legal | Corporate Secretary | ₹3,05,000 / ₹6,18,000 / ₹20,00,000 |
-| **US** | Founder/CEO | Chief Executive Officer | $84,000 / $177,000 / $345,000 | US/Job=Chief_Executive_Officer_(CEO)/Salary) |
-| **US** | Finance/CFO | Chief Financial Officer | $90,000 / $154,000 / $246,000 | US/Job=Chief_Financial_Officer_(CFO)/Salary) |
-| **US** | HR Lead | HR Director | $66,000 / $102,000 / $153,000 | US/Job=Human_Resources_(HR)_Director/Salary) |
-| **US** | CS/Legal | Corporate Counsel | $95,000 / $140,000 / $201,000 |
-| **Singapore** | Founder/CEO | Chief Executive Officer | S$26,000 / S$238,000 / S$582,000 | SG/Job=Chief_Executive_Officer_(CEO)/Salary) |
-| **Singapore** | Finance/CFO | Chief Financial Officer | S$96,000 / S$243,000 / S$388,000 | SG/Job=Chief_Financial_Officer_(CFO)/Salary) |
-| **Singapore** | HR Lead | HR Director | S$44,000 / S$157,000 / S$286,000 | SG/Job=Human_Resources_(HR)_Director/Salary) |
-| **Singapore** | CS/Legal | Legal Counsel | S$60,000 / S$123,000 / S$218,000 |
-| **UK** | Founder/CEO | Chief Executive Officer | £37,000 / £73,000 / £166,000 | UK/Job=Chief_Executive_Officer_(CEO)/Salary) |
-| **UK** | Finance/CFO | Chief Financial Officer | £56,000 / £102,000 / £172,000 | UK/Job=Chief_Financial_Officer_(CFO)/Salary) |
-| **UK** | HR Lead | HR Director | £54,000 / £79,000 / £114,000 | UK/Job=Human_Resources_(HR)_Director/Salary) |
-| **UK** | CS/Legal | Corporate Secretary | £24,000 / £46,000 / £86,000 |
+| Geography | Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|:---|---:|---:|---:|---:|---:|
+| **US** | Founder/CEO | $113 | $181 | $288 | $356 | $431 |
+| **US** | Finance/CFO | $69 | $110 | $156 | $200 | $250 |
+| **US** | HR Lead | $63 | $94 | $131 | $169 | $219 |
+| **US** | Legal/Secretarial | $56 | $88 | $119 | $150 | $200 |
+| **India** | Founder/CEO | ₹500 | ₹1,000 | ₹1,875 | ₹2,750 | ₹4,000 |
+| **India** | Finance/CFO | ₹325 | ₹650 | ₹1,188 | ₹1,688 | ₹2,313 |
+| **India** | HR Lead | ₹288 | ₹563 | ₹1,025 | ₹1,438 | ₹2,000 |
+| **India** | Legal/Secretarial | ₹250 | ₹475 | ₹875 | ₹1,225 | ₹1,688 |
+| **Singapore** | Founder/CEO | $100 | $188 | $331 | $431 | $563 |
+| **Singapore** | Finance/CFO | $69 | $119 | $200 | $275 | $375 |
+| **Singapore** | HR Lead | $63 | $103 | $181 | $250 | $325 |
+| **Singapore** | Legal/Secretarial | $54 | $85 | $150 | $213 | $288 |
+| **UK** | Founder/CEO | £63 | £110 | £181 | £225 | £281 |
+| **UK** | Finance/CFO | £44 | £70 | £110 | £138 | £188 |
+| **UK** | HR Lead | £40 | £63 | £98 | £125 | £169 |
+| **UK** | Legal/Secretarial | £31 | £55 | £85 | £113 | £150 |
+
+---
+
+## 9. Key Changes from Previous Versions
+
+### Version 3.0 (Current)
+- **Removed**: Persona-based approach ("Managed By" field)
+- **Added**: Stage-based staffing matrix with FTE allocations
+- **Changed**: Hourly rate calculation from persona selection to blended rate (sum of FTE × role_rate)
+- **Removed**: CEO premium multiplier (now implicit in stage-aware rates)
+- **Improved**: More realistic staffing allocation matching company growth patterns
+- **Simplified**: User flow — stage selection determines staffing, no ambiguous role selection needed
+
+### Version 2.7
+- Added stage-based retainer costs and hourly rates
+- Removed PayScale references
+- Removed "Existing Tool" administrative method
+- Implemented CEO premium for founder/CEO selection
+
+---
+
+## 10. Implementation Notes
+
+### Calculation Flow
+1. User selects: stage, geo_inc, geo_op, shareholders, option holders, grants, method
+2. System looks up STAFFING_MATRIX[stage] for FTE allocations
+3. For **in-house** method:
+   - Calculate blended_rate = sum(FTE × STAGE_HOURLY_RATES[geo_op][stage][role])
+   - Calculate costs = hours × blended_rate × 1.0
+4. For **outsourced** method:
+   - Use STAGE_RETAINER[geo_op][stage] directly
+   - Skip hourly calculation
+5. Compare to EquityList cost and show ROI
+
+### Edge Cases
+- If stage is missing, default to "seriesab" (Series A/B)
+- If role missing from STAGE_HOURLY_RATES, use 0
+- Blended rate is always >= 0 (sum of positive terms)
+- Outsourced method ignores staffing matrix entirely
+
+### Future Considerations
+- Could add custom staffing matrix per company type (SaaS vs. Hardware, etc.)
+- Could weight blended rate by industry standards
+- Could add role-specific cost adjustments (senior vs. junior)
