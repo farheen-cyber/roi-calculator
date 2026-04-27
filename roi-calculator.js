@@ -8,8 +8,8 @@
  * @param {string} inputs.geo_op - Country of operation
  * @param {string} inputs.per - Personnel role (founder, finance, hr, cs)
  * @param {string} inputs.stage - Company stage (preseed, seed, seriesab, seriesbc, seriesc)
- * @param {string} inputs.meth - Administrative method (in-house, outsourced, existing-tool)
- * @param {number} inputs.toolCost - Annual tool cost (if existing-tool)
+ * @param {string} inputs.meth - Administrative method (in-house, outsourced)
+ * @param {number} inputs.toolCost - Annual tool cost (unused, kept for compatibility)
  * @param {Object} rates - RATES lookup table (legacy, used as fallback)
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
@@ -35,7 +35,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   }
 
   // Cost multiplier based on method
-  const mult = { 'in-house': 1, 'outsourced': 0.4, 'existing-tool': 0.1 }[meth];
+  const mult = { 'in-house': 1, 'outsourced': 0.4 }[meth];
 
   // Editable assumption overrides
   const grHr = overrides.grHr || 1.5;

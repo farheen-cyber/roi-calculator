@@ -37,7 +37,6 @@ function isUsingSampleData() {
   const gr = parseInt(document.getElementById('i-gr')?.value || 0);
   const per = document.getElementById('i-per')?.value || '';
   const meth = document.getElementById('i-meth')?.value || '';
-  const tc = parseInt(document.getElementById('i-tc')?.value || 0);
 
   return (
     geoInc === DEFAULTS.geoInc &&
@@ -433,7 +432,6 @@ function resetO(k) {
 
 function onMethChange() {
   var m = document.getElementById('i-meth').value;
-  document.getElementById('tool-cost-wrap').classList.toggle('hidden', m !== 'existing-tool');
   lc();
 }
 
@@ -501,8 +499,8 @@ function doCalc() {
     return;
   }
 
-  // Get tool cost if using existing-tool method
-  const toolCost = meth === 'existing-tool' ? parseFloat(document.getElementById('i-tc').value) || 0 : 0;
+  // Tool cost no longer used (existing-tool method removed)
+  const toolCost = 0;
 
   // Call pure ROI calculation function
   const roiData = computeROI(
@@ -535,8 +533,6 @@ function doCalc() {
     state = 'POSITIVE_SAVINGS';
   } else if (savings < 0 && (meth === 'in-house' || meth === 'outsourced')) {
     state = 'NEGATIVE_SAVINGS_INHOUSE_OUTSOURCED';
-  } else if (savings < 0 && meth === 'existing-tool') {
-    state = 'NEGATIVE_SAVINGS_EXISTING_TOOL';
   } else {
     state = 'BREAKEVEN';
   }
@@ -560,11 +556,6 @@ function doCalc() {
     msgPart2 = isFounder ? ' Even if costs look low, the CEO\'s time is undervalued here — this work pulls focus from higher-impact priorities.' : '';
     ctaText = 'Notify me when it\'s time to switch →';
     ctaUrl = 'https://www.equitylist.co/newsletter';
-  } else if (state === 'NEGATIVE_SAVINGS_EXISTING_TOOL') {
-    msgPart1 = 'Your current tool is cost-efficient — but may not reduce operational risk. At your scale, your existing setup handles equity operations at a lower cost. However, most tools don\'t eliminate manual work — leaving room for errors in vesting, reporting, and compliance.';
-    msgPart2 = isFounder ? ' If the CEO is still involved, the true cost is higher than shown — leadership time is not being fully accounted for.' : '';
-    ctaText = 'See how EquityList handles this →';
-    ctaUrl = 'https://www.equitylist.co/contact';
   } else {
     msgPart1 = 'Cost isn\'t the deciding factor here. Your current setup and EquityList are comparable in cost at your scale. The real difference is how reliably your equity operations are managed as complexity increases.';
     msgPart2 = isFounder ? ' At this point, the CEO\'s time and oversight become the more important factor than direct cost.' : '';

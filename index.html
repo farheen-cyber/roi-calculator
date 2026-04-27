@@ -209,7 +209,7 @@
             <div class="fi">
               <label for="i-meth">Administrative Method *</label>
               <div class="custom-select-wrapper">
-                <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option><option value="existing-tool">Existing Tool</option></select>
+                <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option></select>
                 <div class="select-display">
                   <span class="select-label">In-house (Spreadsheets)</span>
                   <span class="select-chevron">▼</span>
@@ -217,15 +217,9 @@
                 <ul class="select-dropdown" role="listbox">
                   <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
                   <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
-                  <li role="option" data-value="existing-tool" aria-selected="false">Existing Tool</li>
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="fi hidden" id="tool-cost-wrap">
-            <label for="i-tc">Annual Tool Cost</label>
-            <input type="number" id="i-tc" placeholder="e.g. 50000" aria-describedby="tc-hint" oninput="lc()">
-            <div id="tc-hint" class="field-hint">Your existing tool handles most execution, but your team still oversees and verifies everything. We add this cost to your residual internal oversight time (10% of manual effort) to show your true total cost of operations.</div>
           </div>
         </div>
       </div>
