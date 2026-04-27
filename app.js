@@ -672,7 +672,7 @@ function doCalc() {
             <span class="cb-assumption-label">Hourly Rate${roiData.ceoPremiumApplied ? ' (with 1.5x CEO Premium)' : ''}</span>
             <div class="cb-assumption-input-wrap">
               <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}">
-              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)} • PayScale${roiData.ceoPremiumApplied ? ' • 1.5x' : ''}</span>
+              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)}${roiData.ceoPremiumApplied ? ' • 1.5x' : ''}</span>
             </div>
           </div>
           <div class="cb-assumption-row">

@@ -34,28 +34,28 @@ export const RATES = {
 
 export const RATES_META = {
   india: {
-    founder: { src: 'PayScale India CEO' },
-    finance: { src: 'PayScale India CFO' },
-    hr: { src: 'PayScale India HR Director' },
-    cs: { src: 'PayScale India Corporate Secretary' }
+    founder: { src: 'Industry Benchmarks' },
+    finance: { src: 'Industry Benchmarks' },
+    hr: { src: 'Industry Benchmarks' },
+    cs: { src: 'Industry Benchmarks' }
   },
   us: {
-    founder: { src: 'PayScale US CEO' },
-    finance: { src: 'PayScale US CFO' },
-    hr: { src: 'PayScale US HR Director' },
-    cs: { src: 'PayScale US Corporate Counsel' }
+    founder: { src: 'Industry Benchmarks' },
+    finance: { src: 'Industry Benchmarks' },
+    hr: { src: 'Industry Benchmarks' },
+    cs: { src: 'Industry Benchmarks' }
   },
   singapore: {
-    founder: { src: 'PayScale SG CEO' },
-    finance: { src: 'PayScale SG CFO' },
-    hr: { src: 'PayScale SG HR Director' },
-    cs: { src: 'PayScale SG Legal Counsel' }
+    founder: { src: 'Industry Benchmarks' },
+    finance: { src: 'Industry Benchmarks' },
+    hr: { src: 'Industry Benchmarks' },
+    cs: { src: 'Industry Benchmarks' }
   },
   uk: {
-    founder: { src: 'PayScale UK CEO' },
-    finance: { src: 'PayScale UK CFO' },
-    hr: { src: 'PayScale UK HR Director' },
-    cs: { src: 'PayScale UK Corporate Secretary' }
+    founder: { src: 'Industry Benchmarks' },
+    finance: { src: 'Industry Benchmarks' },
+    hr: { src: 'Industry Benchmarks' },
+    cs: { src: 'Industry Benchmarks' }
   }
 };
 
