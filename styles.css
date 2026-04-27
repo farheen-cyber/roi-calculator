@@ -1518,6 +1518,30 @@ body.state-overview #res-status {
   transition: all 0.2s ease;
 }
 
+.cb-assumption-apply-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.cb-apply-btn {
+  padding: 6px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s;
+}
+
+.cb-apply-btn:hover {
+  opacity: 0.85;
+}
+
 .cb-detail {
   display: flex;
   flex-direction: column;

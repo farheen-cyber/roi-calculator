@@ -9,6 +9,7 @@ var updateTimer = null;
 var overrides = { rate: null, grHr: null, compHr: null };
 var initialMethod = null;
 var userInputStarted = false;
+var cbOpen = false; // tracks whether Cost Breakdown panel is open across re-renders
 
 // Stepper state
 var currentStep = 1;
@@ -374,11 +375,38 @@ function toggleCostBreakdown() {
   const icon = document.getElementById('cb-toggle-icon');
   if (content.style.display === 'none') {
     content.style.display = 'block';
-    icon.style.transform = 'rotate(180deg)';
+    if (icon) icon.style.transform = 'rotate(180deg)';
+    cbOpen = true;
   } else {
     content.style.display = 'none';
-    icon.style.transform = 'rotate(0deg)';
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    cbOpen = false;
   }
+}
+
+function applyAssumptions() {
+  const rateInput = document.getElementById('cb-rate-input');
+  const totalInput = document.getElementById('cb-total-input');
+
+  if (rateInput) {
+    const v = parseFloat(rateInput.value);
+    overrides.rate = isNaN(v) ? null : v;
+  }
+
+  if (totalInput) {
+    const totalVal = parseFloat(totalInput.value);
+    if (!isNaN(totalVal)) {
+      const gr = parseInt(document.getElementById('i-gr')?.value || 0);
+      const grHr = overrides.grHr != null ? overrides.grHr : 1.5;
+      const grHrs = grHr * gr;
+      const sh = parseInt(document.getElementById('i-sh')?.value || 0);
+      const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
+      overrides.compHr = Math.max(0, totalVal - grHrs - ctRaw);
+    }
+  }
+
+  cbOpen = true; // keep panel open after apply
+  doCalc();
 }
 
 function resetO(k) {
@@ -478,28 +506,56 @@ function doCalc() {
 
   // Calculate savings for use in template
   const savings = roiData.annCost - roiData.elAnn;
+  const savingsFormatted = sym + fN(Math.abs(savings));
 
-  var ctaHtml = '';
-  if (roiData.isSpend) {
-    // EL is cheaper
-    ctaHtml = `<button onclick="window.open('https://www.equitylist.co/contact', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">Book a demo →</button>`;
+  // Determine savings state
+  let state;
+  if (savings > 0) {
+    state = 'POSITIVE_SAVINGS';
+  } else if (savings < 0 && (meth === 'in-house' || meth === 'outsourced')) {
+    state = 'NEGATIVE_SAVINGS_INHOUSE_OUTSOURCED';
+  } else if (savings < 0 && meth === 'existing-tool') {
+    state = 'NEGATIVE_SAVINGS_EXISTING_TOOL';
   } else {
-    // EL is more expensive or break-even
-    ctaHtml = `
-      <div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-top:24px">
-        <div style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px">
-          <strong>At your stage, manual processes are manageable.</strong> But as you scale, spreadsheets become error-prone and time-consuming:
-          <ul style="margin:8px 0 0 16px;color:var(--t3);font-size:11px">
-            <li>Missed vesting calculations & compliance deadlines</li>
-            <li>Hours wasted on grant drafting and reconciliation</li>
-            <li>Cap table inconsistencies across stakeholders</li>
-          </ul>
-        </div>
-        <div style="font-size:11px;color:var(--t3)">We'll reach out around 25 stakeholders when automation becomes critical.</div>
-      </div>
-      <button onclick="window.open('https://www.equitylist.co/newsletter', '_blank')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none;margin-top:16px">Notify me when to switch →</button>
-    `;
+    state = 'BREAKEVEN';
   }
+
+  // Check if persona is Founder
+  const isFounder = per === 'founder';
+
+  // Build message parts separately (no nested templates)
+  let msgPart1 = '';
+  let msgPart2 = '';
+  let ctaText = '';
+  let ctaUrl = '';
+
+  if (state === 'POSITIVE_SAVINGS') {
+    msgPart1 = 'You\'re currently overspending on equity operations. You could save ' + savingsFormatted + '/year while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.';
+    msgPart2 = isFounder ? ' Your time is significantly more valuable than the cost assumed here — equity operations shouldn\'t sit with the CEO.' : '';
+    ctaText = 'Book a demo →';
+    ctaUrl = 'https://www.equitylist.co/contact';
+  } else if (state === 'NEGATIVE_SAVINGS_INHOUSE_OUTSOURCED') {
+    msgPart1 = 'Your current setup is cost-efficient — for now. At your scale, manual or outsourced workflows are still manageable. However, these processes rely heavily on manual effort — increasing the risk of errors, delays, and compliance gaps as your company grows.';
+    msgPart2 = isFounder ? ' Even if costs look low, the CEO\'s time is undervalued here — this work pulls focus from higher-impact priorities.' : '';
+    ctaText = 'Notify me when it\'s time to switch →';
+    ctaUrl = 'https://www.equitylist.co/newsletter';
+  } else if (state === 'NEGATIVE_SAVINGS_EXISTING_TOOL') {
+    msgPart1 = 'Your current tool is cost-efficient — but may not reduce operational risk. At your scale, your existing setup handles equity operations at a lower cost. However, most tools don\'t eliminate manual work — leaving room for errors in vesting, reporting, and compliance.';
+    msgPart2 = isFounder ? ' If the CEO is still involved, the true cost is higher than shown — leadership time is not being fully accounted for.' : '';
+    ctaText = 'See how EquityList handles this →';
+    ctaUrl = 'https://www.equitylist.co/contact';
+  } else {
+    msgPart1 = 'Cost isn\'t the deciding factor here. Your current setup and EquityList are comparable in cost at your scale. The real difference is how reliably your equity operations are managed as complexity increases.';
+    msgPart2 = isFounder ? ' At this point, the CEO\'s time and oversight become the more important factor than direct cost.' : '';
+    ctaText = 'Explore how it works →';
+    ctaUrl = 'https://www.equitylist.co/contact';
+  }
+
+  // Assemble final message
+  const fullMessage = msgPart1 + msgPart2;
+
+  // Build CTA HTML with simple string concatenation
+  const ctaHtml = '<div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-bottom:16px"><div style="font-size:12px;color:var(--t2);line-height:1.5">' + fullMessage + '</div></div><button onclick="window.open(\'' + ctaUrl + '\', \'_blank\')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">' + ctaText + '</button>';
 
   // Calculate cap table hours manually (same formula as roi-calculator.js)
   const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
@@ -588,16 +644,19 @@ function doCalc() {
           <div class="cb-assumption-row">
             <span class="cb-assumption-label">Hourly Rate</span>
             <div class="cb-assumption-input-wrap">
-              <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}" oninput="onRateChange()">
+              <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}">
               <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)} • PayScale</span>
             </div>
           </div>
           <div class="cb-assumption-row">
             <span class="cb-assumption-label">Total Equity Management Hours</span>
             <div class="cb-assumption-input-wrap">
-              <input type="number" id="cb-total-input" class="cb-input" value="${Math.round(totalEquityMgmtHrs)}" oninput="onTotalMgmtHoursChange()" style="max-width:60px">
+              <input type="number" id="cb-total-input" class="cb-input" value="${Math.round(totalEquityMgmtHrs)}" style="max-width:60px">
               <span class="cb-source">hrs/yr</span>
             </div>
+          </div>
+          <div class="cb-assumption-apply-row">
+            <button class="cb-apply-btn" onclick="applyAssumptions()">Apply</button>
           </div>
         </div>
       </div>
@@ -606,6 +665,13 @@ function doCalc() {
     ${ctaHtml}
   `;
 
+  // Restore cost breakdown open state after re-render
+  if (cbOpen) {
+    const content = document.getElementById('cb-content');
+    const icon = document.getElementById('cb-toggle-icon');
+    if (content) content.style.display = 'block';
+    if (icon) icon.style.transform = 'rotate(180deg)';
+  }
 
   // Update mobile summary
   document.getElementById('mob-spend').innerText = sym + fN(roiData.annCost);
@@ -725,6 +791,7 @@ window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;
 window.toggleCostBreakdown = toggleCostBreakdown;
+window.applyAssumptions = applyAssumptions;
 window.doCalc = doCalc;
 window.stepNext = stepNext;
 window.stepBack = stepBack;
