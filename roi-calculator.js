@@ -16,10 +16,11 @@
  * @param {Object} fx - FX lookup table
  * @param {Object} pricing - PRICING lookup table (per-stakeholder cost by geography)
  * @param {Object} stageRates - STAGE_HOURLY_RATES lookup table (stage-based rates by geography and role)
+ * @param {Object} stageRetainer - STAGE_RETAINER lookup table (stage-based retainer costs by geography and stage)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, overrides) {
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, overrides) {
   const { sh, oh, gr, stage, geo_inc, geo_op, per, meth, toolCost = 0 } = inputs;
 
   // Get hourly rate from stage-based rates (with override if provided)
@@ -48,8 +49,8 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   // External costs based on method
   let methodExtCost = toolCost;
   if (meth === 'outsourced') {
-    // Fixed external service cost (CA/Law Firm retainer)
-    methodExtCost = ext[geo_op];
+    // Stage-based external service cost (CA/Law Firm retainer)
+    methodExtCost = stageRetainer[geo_op]?.[stageKey] || ext[geo_op];
   }
 
   // Total annual cost

@@ -73,6 +73,37 @@ export const EXT = {
   uk: 12000
 };
 
+export const STAGE_RETAINER = {
+  usa: {
+    preseed: 8000,
+    seed: 12000,
+    seriesab: 18000,
+    seriesbc: 30000,
+    seriesc: 50000
+  },
+  india: {
+    preseed: 60000,
+    seed: 90000,
+    seriesab: 180000,
+    seriesbc: 300000,
+    seriesc: 500000
+  },
+  uk: {
+    preseed: 5000,
+    seed: 8000,
+    seriesab: 12000,
+    seriesbc: 20000,
+    seriesc: 35000
+  },
+  singapore: {
+    preseed: 5000,
+    seed: 10000,
+    seriesab: 15000,
+    seriesbc: 25000,
+    seriesc: 40000
+  }
+};
+
 export const PRICING = {
   india: 1200,
   us: 40,
