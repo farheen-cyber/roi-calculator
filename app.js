@@ -106,6 +106,8 @@ function initTheme() {
 // ==================== VALIDATION FUNCTIONS ====================
 
 function validateInputs() {
+  const geoInc = document.getElementById('i-geo-inc').value;
+  const geoOp = document.getElementById('i-geo-op').value;
   const sh = document.getElementById('i-sh').value;
   const oh = document.getElementById('i-oh').value;
   const gr = document.getElementById('i-gr').value;
@@ -114,6 +116,8 @@ function validateInputs() {
   const errors = {};
 
   // Only check if fields are filled (no range validation)
+  if (!geoInc) errors.geo_inc = 'Field required';
+  if (!geoOp) errors.geo_op = 'Field required';
   if (!sh) errors.sh = 'Field required';
   if (!oh) errors.oh = 'Field required';
   if (!gr) errors.gr = 'Field required';
@@ -123,11 +127,22 @@ function validateInputs() {
 }
 
 function displayFieldErrors(validationResult) {
-  const fieldMap = { sh: 'i-sh', oh: 'i-oh', gr: 'i-gr', st: 'i-st' };
+  const fieldMap = {
+    geo_inc: 'i-geo-inc',
+    geo_op: 'i-geo-op',
+    sh: 'i-sh',
+    oh: 'i-oh',
+    gr: 'i-gr',
+    st: 'i-st'
+  };
 
   Object.entries(fieldMap).forEach(([key, fieldId]) => {
     const el = document.getElementById(fieldId);
-    const fi = el.parentElement;
+    if (!el) return;
+
+    const fi = el.closest('.fi');
+    if (!fi) return;
+
     const errMsg = fi.querySelector('.err-msg');
 
     if (validationResult.errors[key]) {
@@ -169,7 +184,6 @@ function goInput() {
   loadStepState();
 
   document.getElementById('i-geo-inc').focus();
-  doCalc();
 }
 
 function goOverview() {
@@ -765,7 +779,8 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStepVisibility();
   loadStepState();
 
-  doCalc();
+  // Do not call doCalc() on page load - wait for user to complete inputs
+  // doCalc() will be called when user interacts with fields or clicks Calculate
 
   // Fetch live FX rates
   fetch('https://open.er-api.com/v6/latest/INR')
@@ -775,7 +790,10 @@ window.addEventListener('DOMContentLoaded', () => {
         FX.us = d.rates.USD;
         FX.singapore = d.rates.SGD;
         FX.uk = d.rates.GBP;
-        doCalc();
+        // Only recalculate if user has already started entering data
+        if (userInputStarted) {
+          doCalc();
+        }
       }
     })
     .catch((e) => console.warn('FX update failed'));
