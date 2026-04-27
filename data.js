@@ -75,32 +75,32 @@ export const EXT = {
 
 export const STAGE_RETAINER = {
   usa: {
-    preseed: 8000,
-    seed: 12000,
+    preseed: 6000,
+    seed: 11000,
     seriesab: 18000,
-    seriesbc: 30000,
-    seriesc: 50000
+    seriesbc: 35000,
+    seriesc: 60000
   },
   india: {
-    preseed: 60000,
-    seed: 90000,
-    seriesab: 180000,
-    seriesbc: 300000,
-    seriesc: 500000
+    preseed: 50000,
+    seed: 80000,
+    seriesab: 130000,
+    seriesbc: 220000,
+    seriesc: 350000
   },
   uk: {
-    preseed: 5000,
+    preseed: 4500,
     seed: 8000,
     seriesab: 12000,
-    seriesbc: 20000,
-    seriesc: 35000
+    seriesbc: 22000,
+    seriesc: 40000
   },
   singapore: {
-    preseed: 5000,
-    seed: 10000,
+    preseed: 7000,
+    seed: 11000,
     seriesab: 15000,
-    seriesbc: 25000,
-    seriesc: 40000
+    seriesbc: 28000,
+    seriesc: 50000
   }
 };
 
