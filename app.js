@@ -662,11 +662,17 @@ function doCalc() {
         ${costBreakdownDetails}
         <div class="cb-section-divider"></div>
         <div class="cb-assumption">
+          ${roiData.ceoPremiumApplied ? `
+            <div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:12px;border-radius:6px;margin-bottom:16px">
+              <div style="font-size:var(--fs-xs);color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">CEO Premium Applied</div>
+              <div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5">Founder/CEO time is valued at <strong>1.5x</strong> standard hourly rate to reflect true cost of leadership time.</div>
+            </div>
+          ` : ''}
           <div class="cb-assumption-row">
-            <span class="cb-assumption-label">Hourly Rate</span>
+            <span class="cb-assumption-label">Hourly Rate${roiData.ceoPremiumApplied ? ' (with 1.5x CEO Premium)' : ''}</span>
             <div class="cb-assumption-input-wrap">
               <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}">
-              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)} • PayScale</span>
+              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)} • PayScale${roiData.ceoPremiumApplied ? ' • 1.5x' : ''}</span>
             </div>
           </div>
           <div class="cb-assumption-row">

@@ -26,7 +26,13 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   // Get hourly rate from stage-based rates (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
   const stageKey = stage || 'seriesab'; // default to Series A/B if not specified
-  const rate = overrides.rate || stageRates[geo_op]?.[stageKey]?.[per] || rates[geo_op][per].p50;
+  let rate = overrides.rate || stageRates[geo_op]?.[stageKey]?.[per] || rates[geo_op][per].p50;
+
+  // Apply CEO premium (1.5x) when founder/CEO manages equity
+  const ceoPremiumApplied = per === 'founder';
+  if (ceoPremiumApplied) {
+    rate = rate * 1.5;
+  }
 
   // Cost multiplier based on method
   const mult = { 'in-house': 1, 'outsourced': 0.4, 'existing-tool': 0.1 }[meth];
@@ -98,6 +104,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     compHr,
     geo_inc,
     geo_op,
-    meth
+    meth,
+    ceoPremiumApplied
   };
 }
