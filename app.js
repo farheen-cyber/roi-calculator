@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -22,7 +22,6 @@ const DEFAULTS = {
   sh: 30,
   oh: 15,
   gr: 10,
-  per: 'finance',
   meth: 'in-house',
   tc: 0
 };
@@ -34,7 +33,6 @@ function isUsingSampleData() {
   const sh = parseInt(document.getElementById('i-sh')?.value || 0);
   const oh = parseInt(document.getElementById('i-oh')?.value || 0);
   const gr = parseInt(document.getElementById('i-gr')?.value || 0);
-  const per = document.getElementById('i-per')?.value || '';
   const meth = document.getElementById('i-meth')?.value || '';
 
   return (
@@ -44,7 +42,6 @@ function isUsingSampleData() {
     sh === DEFAULTS.sh &&
     oh === DEFAULTS.oh &&
     gr === DEFAULTS.gr &&
-    per === DEFAULTS.per &&
     meth === DEFAULTS.meth &&
     tc === DEFAULTS.tc
   );
@@ -234,8 +231,8 @@ function validateStep(step) {
     return sh && oh && gr; // All three required
   }
   if (step === 3) {
-    const per = document.getElementById('i-per').value;
-    return per; // Managed by required
+    const meth = document.getElementById('i-meth').value;
+    return meth; // Administrative method required
   }
   return true;
 }
@@ -490,7 +487,6 @@ function doCalc() {
   var sh = parseInt(shEl.value) || 0;
   var oh = parseInt(ohEl.value) || 0;
   var gr = parseInt(grEl.value) || 0;
-  var per = document.getElementById('i-per').value;
   var meth = document.getElementById('i-meth').value;
 
   var valid = shEl.value && ohEl.value && grEl.value && stage;
@@ -502,7 +498,6 @@ function doCalc() {
       gr !== 10 ||
       geo_inc !== 'india' ||
       geo_op !== 'india' ||
-      per !== 'finance' ||
       meth !== initialMethod;
     userInputStarted = userInputStarted || hasUserInput;
   }
@@ -527,7 +522,7 @@ function doCalc() {
 
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage, geo_inc, geo_op, per, meth, toolCost },
+    { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost },
     RATES,
     COMPLIANCE,
     EXT,
@@ -535,6 +530,7 @@ function doCalc() {
     PRICING,
     STAGE_HOURLY_RATES,
     STAGE_RETAINER,
+    STAFFING_MATRIX,
     overrides
   );
 
@@ -676,17 +672,11 @@ function doCalc() {
         ${costBreakdownDetails}
         <div class="cb-section-divider"></div>
         <div class="cb-assumption">
-          ${roiData.ceoPremiumApplied ? `
-            <div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:12px;border-radius:6px;margin-bottom:16px">
-              <div style="font-size:var(--fs-xs);color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">CEO Premium Applied</div>
-              <div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5">Founder/CEO time is valued at <strong>1.5x</strong> standard hourly rate to reflect true cost of leadership time.</div>
-            </div>
-          ` : ''}
           <div class="cb-assumption-row">
-            <span class="cb-assumption-label">Hourly Rate${roiData.ceoPremiumApplied ? ' (with 1.5x CEO Premium)' : ''}</span>
+            <span class="cb-assumption-label">Blended Hourly Rate</span>
             <div class="cb-assumption-input-wrap">
               <span style="font-size:var(--fs-table);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:500">${sym}</span><input type="number" id="cb-rate-input" class="cb-input" value="${roiData.rate}">
-              <span class="cb-source">${per.charAt(0).toUpperCase() + per.slice(1)}${roiData.ceoPremiumApplied ? ' • 1.5x' : ''}</span>
+              <span class="cb-source">${roiData.stage.charAt(0).toUpperCase() + roiData.stage.slice(1)} Staffing Mix</span>
             </div>
           </div>
           <div class="cb-assumption-row">

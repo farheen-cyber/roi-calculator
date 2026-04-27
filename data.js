@@ -148,3 +148,11 @@ export let FX = {
   singapore: 0.01613,
   uk: 0.00943
 };
+
+export const STAFFING_MATRIX = {
+  preseed: { founder: 1.0, hr: 0, finance: 0, secretarial: 0 },
+  seed: { founder: 1.0, hr: 0.5, finance: 0.5, secretarial: 0 },
+  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, secretarial: 0.5 },
+  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, secretarial: 1.0 },
+  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, secretarial: 1.5 }
+};

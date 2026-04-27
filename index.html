@@ -186,39 +186,21 @@
       <div class="sec dim" id="sec-3">
         <span class="sec-n">03 — CURRENT OPERATIONS</span>
         <fieldset style="border:none;padding:0;margin:0">
-          <p class="sec-p">Who executes the work and what tools they use currently.</p>
+          <p class="sec-p">How you currently manage equity administration.</p>
         </fieldset>
         <div class="fg">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
-            <div class="fi">
-              <label for="i-per">Managed by *</label>
-              <div class="custom-select-wrapper">
-                <select id="i-per" class="custom-select" aria-label="Who manages equity administration" aria-required="true" onchange="validateAndUpdateButtonState()"><option value="founder">Founder / CEO</option><option value="finance" selected>Finance / CFO</option><option value="hr">HR Lead</option><option value="cs">Legal / Company Sec</option></select>
-                <div class="select-display">
-                  <span class="select-label">Finance / CFO</span>
-                  <span class="select-chevron">▼</span>
-                </div>
-                <ul class="select-dropdown" role="listbox">
-                  <li role="option" data-value="founder" aria-selected="false">Founder / CEO</li>
-                  <li role="option" data-value="finance" aria-selected="false">Finance / CFO</li>
-                  <li role="option" data-value="hr" aria-selected="false">HR Lead</li>
-                  <li role="option" data-value="cs" aria-selected="false">Legal / Company Sec</li>
-                </ul>
+          <div class="fi">
+            <label for="i-meth">Administrative Method *</label>
+            <div class="custom-select-wrapper">
+              <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option></select>
+              <div class="select-display">
+                <span class="select-label">In-house (Spreadsheets)</span>
+                <span class="select-chevron">▼</span>
               </div>
-            </div>
-            <div class="fi">
-              <label for="i-meth">Administrative Method *</label>
-              <div class="custom-select-wrapper">
-                <select id="i-meth" class="custom-select" aria-label="Current administrative method" aria-required="true" onchange="onMethChange()"><option value="in-house" selected>In-house (Spreadsheets)</option><option value="outsourced">Outsourced (CA/Law Firm)</option></select>
-                <div class="select-display">
-                  <span class="select-label">In-house (Spreadsheets)</span>
-                  <span class="select-chevron">▼</span>
-                </div>
-                <ul class="select-dropdown" role="listbox">
-                  <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
-                  <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
-                </ul>
-              </div>
+              <ul class="select-dropdown" role="listbox">
+                <li role="option" data-value="in-house" aria-selected="false">In-house (Spreadsheets)</li>
+                <li role="option" data-value="outsourced" aria-selected="false">Outsourced (CA/Law Firm)</li>
+              </ul>
             </div>
           </div>
         </div>

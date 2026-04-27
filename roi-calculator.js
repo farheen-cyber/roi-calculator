@@ -6,7 +6,6 @@
  * @param {number} inputs.gr - Equity grants per year
  * @param {string} inputs.geo_inc - Country of incorporation
  * @param {string} inputs.geo_op - Country of operation
- * @param {string} inputs.per - Personnel role (founder, finance, hr, cs)
  * @param {string} inputs.stage - Company stage (preseed, seed, seriesab, seriesbc, seriesc)
  * @param {string} inputs.meth - Administrative method (in-house, outsourced)
  * @param {number} inputs.toolCost - Annual tool cost (unused, kept for compatibility)
@@ -17,21 +16,36 @@
  * @param {Object} pricing - PRICING lookup table (per-stakeholder cost by geography)
  * @param {Object} stageRates - STAGE_HOURLY_RATES lookup table (stage-based rates by geography and role)
  * @param {Object} stageRetainer - STAGE_RETAINER lookup table (stage-based retainer costs by geography and stage)
+ * @param {Object} staffingMatrix - STAFFING_MATRIX lookup table (FTE allocations by stage and role)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, overrides) {
-  const { sh, oh, gr, stage, geo_inc, geo_op, per, meth, toolCost = 0 } = inputs;
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, overrides) {
+  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0 } = inputs;
 
-  // Get hourly rate from stage-based rates (with override if provided)
+  // Get blended hourly rate from stage-based staffing matrix (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
   const stageKey = stage || 'seriesab'; // default to Series A/B if not specified
-  let rate = overrides.rate || stageRates[geo_op]?.[stageKey]?.[per] || rates[geo_op][per].p50;
 
-  // Apply CEO premium (1.5x) when founder/CEO manages equity
-  const ceoPremiumApplied = per === 'founder';
-  if (ceoPremiumApplied) {
-    rate = rate * 1.5;
+  let rate = overrides.rate;
+  if (!rate) {
+    // Calculate blended rate based on staffing matrix for the stage
+    if (meth === 'in-house') {
+      const matrix = staffingMatrix[stageKey] || staffingMatrix['seriesab'];
+      const roles = ['founder', 'hr', 'finance', 'secretarial'];
+      rate = 0;
+
+      for (const role of roles) {
+        const fte = matrix[role] || 0;
+        if (fte > 0) {
+          const roleRate = stageRates[geo_op]?.[stageKey]?.[role] || 0;
+          rate += fte * roleRate;
+        }
+      }
+    } else if (meth === 'outsourced') {
+      // For outsourced, we don't use hourly rate; we use retainer instead
+      rate = 0;
+    }
   }
 
   // Cost multiplier based on method
@@ -104,7 +118,6 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     compHr,
     geo_inc,
     geo_op,
-    meth,
-    ceoPremiumApplied
+    meth
   };
 }
