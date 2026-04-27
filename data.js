@@ -80,6 +80,37 @@ export const PRICING = {
   singapore: 25
 };
 
+export const STAGE_HOURLY_RATES = {
+  usa: {
+    preseed: { founder: 113, finance: 69, hr: 63, cs: 56 },
+    seed: { founder: 181, finance: 110, hr: 94, cs: 88 },
+    seriesab: { founder: 288, finance: 156, hr: 131, cs: 119 },
+    seriesbc: { founder: 356, finance: 200, hr: 169, cs: 150 },
+    seriesc: { founder: 431, finance: 250, hr: 219, cs: 200 }
+  },
+  india: {
+    preseed: { founder: 500, finance: 325, hr: 288, cs: 250 },
+    seed: { founder: 1000, finance: 650, hr: 563, cs: 475 },
+    seriesab: { founder: 1875, finance: 1188, hr: 1025, cs: 875 },
+    seriesbc: { founder: 2750, finance: 1688, hr: 1438, cs: 1225 },
+    seriesc: { founder: 4000, finance: 2313, hr: 2000, cs: 1688 }
+  },
+  uk: {
+    preseed: { founder: 63, finance: 44, hr: 40, cs: 31 },
+    seed: { founder: 110, finance: 70, hr: 63, cs: 55 },
+    seriesab: { founder: 181, finance: 110, hr: 98, cs: 85 },
+    seriesbc: { founder: 225, finance: 138, hr: 125, cs: 113 },
+    seriesc: { founder: 281, finance: 188, hr: 169, cs: 150 }
+  },
+  singapore: {
+    preseed: { founder: 100, finance: 69, hr: 63, cs: 54 },
+    seed: { founder: 188, finance: 119, hr: 103, cs: 85 },
+    seriesab: { founder: 331, finance: 200, hr: 181, cs: 150 },
+    seriesbc: { founder: 431, finance: 275, hr: 250, cs: 213 },
+    seriesc: { founder: 563, finance: 375, hr: 325, cs: 288 }
+  }
+};
+
 export let FX = {
   india: 1,
   us: 0.01205,

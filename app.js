@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -19,7 +19,7 @@ var formStateData = {};
 const DEFAULTS = {
   geoInc: 'india',
   geoOp: 'india',
-  stage: 'series-ab',
+  stage: 'seriesab',
   sh: 30,
   oh: 15,
   gr: 10,
@@ -109,6 +109,7 @@ function validateInputs() {
   const sh = document.getElementById('i-sh').value;
   const oh = document.getElementById('i-oh').value;
   const gr = document.getElementById('i-gr').value;
+  const stage = document.getElementById('i-st').value;
 
   const errors = {};
 
@@ -116,12 +117,13 @@ function validateInputs() {
   if (!sh) errors.sh = 'Field required';
   if (!oh) errors.oh = 'Field required';
   if (!gr) errors.gr = 'Field required';
+  if (!stage) errors.st = 'Field required';
 
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
 function displayFieldErrors(validationResult) {
-  const fieldMap = { sh: 'i-sh', oh: 'i-oh', gr: 'i-gr' };
+  const fieldMap = { sh: 'i-sh', oh: 'i-oh', gr: 'i-gr', st: 'i-st' };
 
   Object.entries(fieldMap).forEach(([key, fieldId]) => {
     const el = document.getElementById(fieldId);
@@ -210,7 +212,8 @@ function validateStep(step) {
   if (step === 1) {
     const geoInc = document.getElementById('i-geo-inc').value;
     const geoOp = document.getElementById('i-geo-op').value;
-    return geoInc && geoOp; // Both countries required
+    const stage = document.getElementById('i-st').value;
+    return geoInc && geoOp && stage; // Countries and stage required
   }
   if (step === 2) {
     const sh = document.getElementById('i-sh').value;
@@ -445,6 +448,7 @@ function track(e) {
 function doCalc() {
   var geo_inc = document.getElementById('i-geo-inc').value;
   var geo_op = document.getElementById('i-geo-op').value;
+  var stage = document.getElementById('i-st').value;
   var shEl = document.getElementById('i-sh');
   var ohEl = document.getElementById('i-oh');
   var grEl = document.getElementById('i-gr');
@@ -454,7 +458,7 @@ function doCalc() {
   var per = document.getElementById('i-per').value;
   var meth = document.getElementById('i-meth').value;
 
-  var valid = shEl.value && ohEl.value && grEl.value;
+  var valid = shEl.value && ohEl.value && grEl.value && stage;
 
   if (flow === 'input') {
     var hasUserInput =
@@ -488,12 +492,13 @@ function doCalc() {
 
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, geo_inc, geo_op, per, meth, toolCost },
+    { sh, oh, gr, stage, geo_inc, geo_op, per, meth, toolCost },
     RATES,
     COMPLIANCE,
     EXT,
     FX,
     PRICING,
+    STAGE_HOURLY_RATES,
     overrides
   );
 

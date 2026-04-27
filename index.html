@@ -147,20 +147,23 @@
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
             <div class="fi">
-              <label for="i-st">Current Stage <span style="color:var(--t3);font-size:9px">(optional)</span></label>
+              <label for="i-st">Current Stage *</label>
               <div class="custom-select-wrapper">
-                <select id="i-st" class="custom-select" aria-label="Company current stage (optional)" onchange="lc()"><option value="seed">Seed</option><option value="series-ab" selected>Series A / B</option><option value="series-c">Series C+</option><option value="public">Public / Pre-IPO</option></select>
+                <select id="i-st" class="custom-select" aria-label="Company current stage" aria-required="true" onchange="lc()" onblur="val(this)"><option value="">Select a stage</option><option value="preseed">Pre-seed</option><option value="seed">Seed</option><option value="seriesab" selected>Series A/B</option><option value="seriesbc">Series B/C</option><option value="seriesc">Series C+</option></select>
                 <div class="select-display">
-                  <span class="select-label">Series A / B</span>
+                  <span class="select-label">Series A/B</span>
                   <span class="select-chevron">▼</span>
                 </div>
                 <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="" aria-selected="false">Select a stage</li>
+                  <li role="option" data-value="preseed" aria-selected="false">Pre-seed</li>
                   <li role="option" data-value="seed" aria-selected="false">Seed</li>
-                  <li role="option" data-value="series-ab" aria-selected="false">Series A / B</li>
-                  <li role="option" data-value="series-c" aria-selected="false">Series C+</li>
-                  <li role="option" data-value="public" aria-selected="false">Public / Pre-IPO</li>
+                  <li role="option" data-value="seriesab" aria-selected="false">Series A/B</li>
+                  <li role="option" data-value="seriesbc" aria-selected="false">Series B/C</li>
+                  <li role="option" data-value="seriesc" aria-selected="false">Series C+</li>
                 </ul>
               </div>
+              <div class="err-msg">Field required</div>
             </div>
             <div class="fi"><label>Legal Entity Name <span style="color:var(--t3);font-size:9px">(optional)</span></label><input type="text" id="i-co" placeholder="Your Entity Name" oninput="lc()"><div class="err-msg">Field required</div></div>
           </div>

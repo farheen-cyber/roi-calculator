@@ -7,26 +7,25 @@
  * @param {string} inputs.geo_inc - Country of incorporation
  * @param {string} inputs.geo_op - Country of operation
  * @param {string} inputs.per - Personnel role (founder, finance, hr, cs)
+ * @param {string} inputs.stage - Company stage (preseed, seed, seriesab, seriesbc, seriesc)
  * @param {string} inputs.meth - Administrative method (in-house, outsourced, existing-tool)
  * @param {number} inputs.toolCost - Annual tool cost (if existing-tool)
- * @param {Object} rates - RATES lookup table
+ * @param {Object} rates - RATES lookup table (legacy, used as fallback)
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
  * @param {Object} fx - FX lookup table
  * @param {Object} pricing - PRICING lookup table (per-stakeholder cost by geography)
+ * @param {Object} stageRates - STAGE_HOURLY_RATES lookup table (stage-based rates by geography and role)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, overrides) {
-  const { sh, oh, gr, geo_inc, geo_op, per, meth, toolCost = 0 } = inputs;
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, overrides) {
+  const { sh, oh, gr, stage, geo_inc, geo_op, per, meth, toolCost = 0 } = inputs;
 
-  // Determine stakeholder tier for rate selection
+  // Get hourly rate from stage-based rates (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
-  const tier = stakeholders <= 30 ? 'p10' : stakeholders <= 70 ? 'p50' : 'p90';
-  const tierLabel = tier === 'p10' ? '10th percentile' : tier === 'p50' ? 'median' : '90th percentile';
-
-  // Get hourly rate (with override if provided)
-  const rate = overrides.rate || rates[geo_op][per][tier];
+  const stageKey = stage || 'seriesab'; // default to Series A/B if not specified
+  const rate = overrides.rate || stageRates[geo_op]?.[stageKey]?.[per] || rates[geo_op][per].p50;
 
   // Cost multiplier based on method
   const mult = { 'in-house': 1, 'outsourced': 0.4, 'existing-tool': 0.1 }[meth];
@@ -49,9 +48,8 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, override
   // External costs based on method
   let methodExtCost = toolCost;
   if (meth === 'outsourced') {
-    // Apply tier-based scaling only to outsourced retainer costs
-    const tierMultiplier = tier === 'p10' ? 0.5 : tier === 'p50' ? 1.0 : 1.2;
-    methodExtCost = Math.round(ext[geo_op] * tierMultiplier);
+    // Fixed external service cost (CA/Law Firm retainer)
+    methodExtCost = ext[geo_op];
   }
 
   // Total annual cost
@@ -84,8 +82,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, override
 
     // Details for audit log
     stakeholders,
-    tier,
-    tierLabel,
+    stage: stageKey,
     rate,
     mult,
     manualHTotal: Math.round(manualHTotal * 10) / 10,
