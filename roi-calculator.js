@@ -13,10 +13,11 @@
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
  * @param {Object} fx - FX lookup table
+ * @param {Object} pricing - PRICING lookup table (per-stakeholder cost by geography)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, overrides) {
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, overrides) {
   const { sh, oh, gr, geo_inc, geo_op, per, meth, toolCost = 0 } = inputs;
 
   // Determine stakeholder tier for rate selection
@@ -64,8 +65,8 @@ export function computeROI(inputs, rates, compliance, ext, fx, overrides) {
   // EquityList overhead (10% of manual baseline)
   const elOverhead = manualHTotal * 0.1 * rate;
 
-  // EquityList annual cost
-  const elAnn = stakeholders * 1200 * fx[geo_op] + elOverhead;
+  // EquityList annual cost (pricing is per-stakeholder in local currency)
+  const elAnn = stakeholders * pricing[geo_op] + elOverhead;
 
   // ROI calculation
   const diff = annCost - elAnn;

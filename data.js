@@ -73,6 +73,13 @@ export const EXT = {
   uk: 12000
 };
 
+export const PRICING = {
+  india: 1200,
+  us: 40,
+  uk: 30,
+  singapore: 25
+};
+
 export let FX = {
   india: 1,
   us: 0.01205,

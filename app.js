@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -493,6 +493,7 @@ function doCalc() {
     COMPLIANCE,
     EXT,
     FX,
+    PRICING,
     overrides
   );
 
