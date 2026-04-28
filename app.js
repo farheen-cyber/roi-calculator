@@ -264,15 +264,11 @@ function validateStep(step) {
 }
 
 function updateStepVisibility() {
-  document.querySelectorAll('#input-state .sec').forEach((sec, idx) => {
-    if (idx + 1 === currentStep) {
-      sec.classList.add('active');
-      sec.classList.remove('hidden');
-      sec.classList.remove('dim');
-    } else {
-      sec.classList.remove('active');
-      sec.classList.add('hidden');
-    }
+  // For single-page form, show all sections
+  document.querySelectorAll('#input-state .sec').forEach((sec) => {
+    sec.classList.add('active');
+    sec.classList.remove('hidden');
+    sec.classList.remove('dim');
   });
 
   // Update step indicator
@@ -613,9 +609,6 @@ function doCalc() {
   // Assemble final message
   const fullMessage = msgPart1;
 
-  // Build CTA HTML with simple string concatenation
-  const ctaHtml = '<div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-bottom:16px"><div style="font-size:12px;color:var(--t2);line-height:1.5">' + fullMessage + '</div></div><button onclick="window.open(\'' + ctaUrl + '\', \'_blank\')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">' + ctaText + '</button>';
-
   // Calculate cap table hours manually (same formula as roi-calculator.js)
   const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
   const ctHrs = ctRaw * roiData.mult;
@@ -721,8 +714,29 @@ function doCalc() {
       </div>
     </div>
     <div class="r-group"><div class="r-group-h">ROI</div><div class="r-row"><span class="r-lbl">Your ROI with EquityList</span><span class="r-val">${roiData.roi}x</span></div><div class="r-row"><span class="r-lbl">Hours Saved Annually</span><span class="r-val green">${Math.round(roiData.internalHTotal - roiData.manualHTotal * 0.1)} hrs/yr</span></div></div>
-    ${ctaHtml}
+    <div id="cta-container"></div>
   `;
+
+  // Build CTA button safely using DOM methods (not innerHTML)
+  const ctaContainer = document.getElementById('cta-container');
+  const ctaWrapper = document.createElement('div');
+  ctaWrapper.style.cssText = 'background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-bottom:16px';
+
+  const ctaMessage = document.createElement('div');
+  ctaMessage.style.cssText = 'font-size:12px;color:var(--t2);line-height:1.5';
+  ctaMessage.textContent = fullMessage;
+  ctaWrapper.appendChild(ctaMessage);
+
+  const ctaButton = document.createElement('button');
+  ctaButton.className = 'btn btn-p';
+  ctaButton.style.cssText = 'width:100%;text-align:center;cursor:pointer;border:none;margin-top:12px';
+  ctaButton.textContent = ctaText;
+  ctaButton.addEventListener('click', () => {
+    window.open(ctaUrl, '_blank');
+  });
+  ctaWrapper.appendChild(ctaButton);
+
+  ctaContainer.appendChild(ctaWrapper);
 
   // Restore cost breakdown open state after re-render
   if (cbOpen) {
@@ -827,9 +841,17 @@ window.addEventListener('DOMContentLoaded', () => {
   // Add field change detection to mark results as stale
   document.querySelectorAll('#input-state input, #input-state select').forEach((field) => {
     field.addEventListener('change', () => {
+      // Validate numeric inputs are non-negative
+      if (field.type === 'number' && field.value !== '' && parseFloat(field.value) < 0) {
+        field.value = '0';
+      }
       setResultsStale(true);
     });
     field.addEventListener('input', () => {
+      // Validate numeric inputs are non-negative
+      if (field.type === 'number' && field.value !== '' && parseFloat(field.value) < 0) {
+        field.value = '0';
+      }
       setResultsStale(true);
     });
   });

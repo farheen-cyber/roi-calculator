@@ -74,7 +74,7 @@ export const EXT = {
 };
 
 export const STAGE_RETAINER = {
-  usa: {
+  us: {
     preseed: 6000,
     seed: 11000,
     seriesab: 18000,
@@ -112,7 +112,7 @@ export const PRICING = {
 };
 
 export const STAGE_HOURLY_RATES = {
-  usa: {
+  us: {
     preseed: { founder: 113, finance: 69, hr: 63, cs: 56 },
     seed: { founder: 181, finance: 110, hr: 94, cs: 88 },
     seriesab: { founder: 288, finance: 156, hr: 131, cs: 119 },
@@ -150,9 +150,9 @@ export let FX = {
 };
 
 export const STAFFING_MATRIX = {
-  preseed: { founder: 1.0, hr: 0, finance: 0, secretarial: 0 },
-  seed: { founder: 1.0, hr: 0.5, finance: 0.5, secretarial: 0 },
-  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, secretarial: 0.5 },
-  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, secretarial: 1.0 },
-  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, secretarial: 1.5 }
+  preseed: { founder: 1.0, hr: 0, finance: 0, cs: 0 },
+  seed: { founder: 1.0, hr: 0.5, finance: 0.5, cs: 0 },
+  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, cs: 0.5 },
+  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, cs: 1.0 },
+  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, cs: 1.5 }
 };
