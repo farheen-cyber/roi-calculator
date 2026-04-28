@@ -787,7 +787,8 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('overview-state').classList.add('hidden');
   document.getElementById('input-state').classList.remove('hidden');
   document.getElementById('res-status').style.display = 'block';
-  document.querySelector('.back-home-btn').style.display = 'none';
+  const backHomeBtn = document.querySelector('.back-home-btn');
+  if (backHomeBtn) backHomeBtn.style.display = 'none';
 
   // Initialize custom select components
   setTimeout(() => {
