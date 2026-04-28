@@ -9,6 +9,7 @@ var overrides = { rate: null, grHr: null, compHr: null };
 var initialMethod = null;
 var userInputStarted = false;
 var cbOpen = false; // tracks whether Cost Breakdown panel is open across re-renders
+var resultsStale = false; // tracks if inputs changed since last calculation
 
 // Stepper state
 var currentStep = 1;
@@ -42,8 +43,7 @@ function isUsingSampleData() {
     sh === DEFAULTS.sh &&
     oh === DEFAULTS.oh &&
     gr === DEFAULTS.gr &&
-    meth === DEFAULTS.meth &&
-    tc === DEFAULTS.tc
+    meth === DEFAULTS.meth
   );
 }
 
@@ -158,6 +158,32 @@ function displayFieldErrors(validationResult) {
 function validateAndDisplayErrors() {
   const result = validateInputs();
   displayFieldErrors(result);
+}
+
+// ==================== RESULTS STATE MANAGEMENT ====================
+
+function setResultsStale(isStale) {
+  resultsStale = isStale;
+  const banner = document.getElementById('results-outdated-banner');
+  if (banner) {
+    if (isStale) {
+      banner.style.display = 'block';
+      const rBody = document.getElementById('r-body');
+      if (rBody) {
+        rBody.style.filter = 'blur(4px)';
+        rBody.style.pointerEvents = 'none';
+        rBody.style.opacity = '0.6';
+      }
+    } else {
+      banner.style.display = 'none';
+      const rBody = document.getElementById('r-body');
+      if (rBody) {
+        rBody.style.filter = 'none';
+        rBody.style.pointerEvents = 'auto';
+        rBody.style.opacity = '1';
+      }
+    }
+  }
 }
 
 // ==================== NAVIGATION FUNCTIONS ====================
@@ -371,6 +397,7 @@ function onCalculateClick() {
 
   // Calculate and display results
   doCalc();
+  setResultsStale(false); // Clear the stale state
 }
 
 function onRateChange() {
@@ -459,6 +486,7 @@ function resetO(k) {
 
 function onMethChange() {
   var m = document.getElementById('i-meth').value;
+  setResultsStale(true);
   lc();
 }
 
@@ -789,17 +817,19 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStepVisibility();
   loadStepState();
 
-  // Initialize results area with placeholder (no auto-calculation on load)
-  document.getElementById('r-body').innerHTML = `
-    <div style="padding: 40px 20px; text-align: center; color: var(--t3);">
-      <div style="font-size: var(--fs-label); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--t2);">Ready to calculate?</div>
-      <div style="font-size: var(--fs-sm); line-height: 1.6;">Fill in all required fields and click the <strong>Calculate ROI</strong> button at the bottom to see your custom estimate.</div>
-    </div>
-  `;
-  document.getElementById('mobile-summary').style.display = 'none';
+  // Calculate with default values on load
+  initialMethod = document.getElementById('i-meth').value;
+  doCalc();
 
-  // Initialize Calculate button state
-  validateAndUpdateButtonState();
+  // Add field change detection to mark results as stale
+  document.querySelectorAll('#input-state input, #input-state select').forEach((field) => {
+    field.addEventListener('change', () => {
+      setResultsStale(true);
+    });
+    field.addEventListener('input', () => {
+      setResultsStale(true);
+    });
+  });
 
   // Fetch live FX rates
   fetch('https://open.er-api.com/v6/latest/INR')
@@ -842,3 +872,4 @@ window.doCalc = doCalc;
 window.stepNext = stepNext;
 window.stepBack = stepBack;
 window.toggleTheme = toggleTheme;
+window.setResultsStale = setResultsStale;
