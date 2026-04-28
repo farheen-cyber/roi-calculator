@@ -170,17 +170,13 @@ function setResultsStale(isStale) {
       banner.style.display = 'block';
       const rBody = document.getElementById('r-body');
       if (rBody) {
-        rBody.style.filter = 'blur(4px)';
         rBody.style.pointerEvents = 'none';
-        rBody.style.opacity = '0.6';
       }
     } else {
       banner.style.display = 'none';
       const rBody = document.getElementById('r-body');
       if (rBody) {
-        rBody.style.filter = 'none';
         rBody.style.pointerEvents = 'auto';
-        rBody.style.opacity = '1';
       }
     }
   }
