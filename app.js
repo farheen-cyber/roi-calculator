@@ -790,9 +790,11 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.back-home-btn').style.display = 'none';
 
   // Initialize custom select components
-  document.querySelectorAll('.custom-select').forEach((selectElement) => {
-    new SelectField(selectElement);
-  });
+  setTimeout(() => {
+    document.querySelectorAll('.custom-select').forEach((selectElement) => {
+      new SelectField(selectElement);
+    });
+  }, 0);
 
   // Initialize section 01 as active
   const sec1 = document.getElementById('sec-1');
