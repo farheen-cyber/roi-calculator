@@ -32,7 +32,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     // Calculate blended rate based on staffing matrix for the stage
     if (meth === 'in-house') {
       const matrix = staffingMatrix[stageKey] || staffingMatrix['seriesab'];
-      const roles = ['founder', 'hr', 'finance', 'secretarial'];
+      const roles = ['founder', 'hr', 'finance', 'cs']; // 'cs' = Legal/Company Secretary
       rate = 0;
 
       for (const role of roles) {

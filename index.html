@@ -176,9 +176,9 @@
         </fieldset>
         <div class="fg">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
-            <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1"><div class="err-msg">Field required</div></div>
-            <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1"><div class="err-msg">Field required</div></div>
-            <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Shareholders *</label><input type="number" id="i-sh" value="30" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
+            <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
+            <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
           </div>
         </div>
       </div>

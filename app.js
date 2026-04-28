@@ -278,7 +278,7 @@ function stepNext() {
     currentStep++;
     updateStepVisibility();
     loadStepState();
-    doCalc();
+    // Don't auto-calculate - user must click Calculate button
   }
 }
 
@@ -288,7 +288,14 @@ function stepBack() {
     currentStep--;
     updateStepVisibility();
     loadStepState();
-    doCalc();
+    // Clear results when going back to edit inputs
+    document.getElementById('r-body').innerHTML = `
+      <div style="padding: 40px 20px; text-align: center; color: var(--t3);">
+        <div style="font-size: var(--fs-label); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--t2);">Ready to calculate?</div>
+        <div style="font-size: var(--fs-sm); line-height: 1.6;">Fill in all required fields and click the <strong>Calculate ROI</strong> button at the bottom to see your custom estimate.</div>
+      </div>
+    `;
+    document.getElementById('mobile-summary').style.display = 'none';
   }
 }
 
