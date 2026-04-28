@@ -563,34 +563,27 @@ function doCalc() {
     state = 'BREAKEVEN';
   }
 
-  // Check if persona is Founder
-  const isFounder = per === 'founder';
-
   // Build message parts separately (no nested templates)
   let msgPart1 = '';
-  let msgPart2 = '';
   let ctaText = '';
   let ctaUrl = '';
 
   if (state === 'POSITIVE_SAVINGS') {
     msgPart1 = 'You\'re currently overspending on equity operations. You could save ' + savingsFormatted + '/year while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.';
-    msgPart2 = isFounder ? ' Your time is significantly more valuable than the cost assumed here — equity operations shouldn\'t sit with the CEO.' : '';
     ctaText = 'Book a demo →';
     ctaUrl = 'https://www.equitylist.co/contact';
   } else if (state === 'NEGATIVE_SAVINGS_INHOUSE_OUTSOURCED') {
     msgPart1 = 'Your current setup is cost-efficient — for now. At your scale, manual or outsourced workflows are still manageable. However, these processes rely heavily on manual effort — increasing the risk of errors, delays, and compliance gaps as your company grows.';
-    msgPart2 = isFounder ? ' Even if costs look low, the CEO\'s time is undervalued here — this work pulls focus from higher-impact priorities.' : '';
     ctaText = 'Notify me when it\'s time to switch →';
     ctaUrl = 'https://www.equitylist.co/newsletter';
   } else {
     msgPart1 = 'Cost isn\'t the deciding factor here. Your current setup and EquityList are comparable in cost at your scale. The real difference is how reliably your equity operations are managed as complexity increases.';
-    msgPart2 = isFounder ? ' At this point, the CEO\'s time and oversight become the more important factor than direct cost.' : '';
     ctaText = 'Explore how it works →';
     ctaUrl = 'https://www.equitylist.co/contact';
   }
 
   // Assemble final message
-  const fullMessage = msgPart1 + msgPart2;
+  const fullMessage = msgPart1;
 
   // Build CTA HTML with simple string concatenation
   const ctaHtml = '<div style="background:rgba(95,23,234,0.08);border:1px solid rgba(95,23,234,0.2);padding:16px;border-radius:6px;margin-bottom:16px"><div style="font-size:12px;color:var(--t2);line-height:1.5">' + fullMessage + '</div></div><button onclick="window.open(\'' + ctaUrl + '\', \'_blank\')" class="btn btn-p" style="width:100%;text-align:center;cursor:pointer;border:none">' + ctaText + '</button>';
