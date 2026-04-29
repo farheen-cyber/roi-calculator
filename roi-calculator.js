@@ -70,27 +70,36 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   const cpRaw = compHr;
   const cpCost = cpRaw * mult * rate;
 
-  // Cap table maintenance cost
+  // Cap table maintenance cost (base)
   const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
-  const ctFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.capTable || 0) : 0;
-  const ctTotalWorkflows = ctRaw + (ctFundraisingWorkflows * 2.5 * 12); // Add fundraising workflows in hours
-  const ctHrs = ctTotalWorkflows * mult;
+  const ctHrs = ctRaw * mult;
   const ctCost = ctHrs * rate;
 
-  // Calculate secretarial & board operations cost based on geography-specific workflows
+  // Cap table fundraising cost (separate)
+  const ctFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.capTable || 0) : 0;
+  const ctFundraisingHours = ctFundraisingWorkflows * 2.5 * 12;
+  const ctFundraisingHrs = ctFundraisingHours * mult;
+  const ctFundraisingCost = ctFundraisingHrs * rate;
+
+  // Calculate secretarial & board operations cost (base - without fundraising)
   const baseWorkflows = secretarialWorkflows?.[geo_inc]?.[stageKey] || 0;
-  const secFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.secretarial || 0) : 0;
-  const totalSecWorkflows = baseWorkflows + secFundraisingWorkflows;
-  const secBaseHours = totalSecWorkflows * 2.5;
+  const secBaseHours = baseWorkflows * 2.5;
 
-  // Use future shareholder count only if planning to fundraise
-  const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
-  const shareholderScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
-
+  // Use base shareholder count for base secretarial scaling
+  const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
   const secRaw = secBaseHours * shareholderScaling;
   const secHrs = secRaw * mult;
   const secRate = stageRates[geo_op]?.[stageKey]?.cs || 0;
   const secCost = secHrs * secRate;
+
+  // Secretarial fundraising cost (separate)
+  const secFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.secretarial || 0) : 0;
+  const secFundraisingHours = secFundraisingWorkflows * 2.5;
+  const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
+  const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
+  const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
+  const secFundraisingHrs = secFundraisingRaw * mult;
+  const secFundraisingCost = secFundraisingHrs * secRate;
 
   // External costs based on method
   let methodExtCost = toolCost;
@@ -108,12 +117,12 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     elValuationCost = valuationCostEl * frequencyMultiplier;
   }
 
-  // Total annual cost
-  const annCost = grCost + cpCost + ctCost + secCost + methodExtCost + valuationCost;
+  // Total annual cost (includes all fundraising costs)
+  const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
 
   // Calculate efficiency metrics
-  const manualHTotal = grHrs + cpRaw + ctRaw + secRaw;
-  const internalHTotal = grHrs * mult + cpRaw * mult + ctHrs + secHrs;
+  const manualHTotal = grHrs + cpRaw + ctRaw + secRaw + ctFundraisingHours + secFundraisingHours;
+  const internalHTotal = grHrs * mult + cpRaw * mult + ctHrs + secHrs + ctFundraisingHrs + secFundraisingHrs;
   const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
 
   // EquityList overhead (10% of manual baseline)
@@ -147,15 +156,14 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     grCost: Math.round(grCost),
     cpCost: Math.round(cpCost),
     ctCost: Math.round(ctCost),
+    ctFundraisingCost: Math.round(ctFundraisingCost),
     ctFundraisingWorkflows,
     secCost: Math.round(secCost),
-    secRaw,
+    secFundraisingCost: Math.round(secFundraisingCost),
+    secFundraisingWorkflows,
     secRate,
     baseWorkflows,
-    totalSecWorkflows,
-    secFundraisingWorkflows,
     shareholderScaling,
-    effectiveShareholders,
     planningToFundraise,
     newShareholdersFromFundraise,
     methodExtCost: Math.round(methodExtCost),

@@ -853,7 +853,9 @@ function doCalc() {
   const grantAdminPct = roiData.annCost > 0 ? Math.round((roiData.grCost / roiData.annCost) * 100) : 0;
   const compliancePct = roiData.annCost > 0 ? Math.round((roiData.cpCost / roiData.annCost) * 100) : 0;
   const capTablePct = roiData.annCost > 0 ? Math.round((roiData.ctCost / roiData.annCost) * 100) : 0;
+  const capTableFundraisingPct = roiData.annCost > 0 ? Math.round((roiData.ctFundraisingCost / roiData.annCost) * 100) : 0;
   const secretarialPct = roiData.annCost > 0 ? Math.round((roiData.secCost / roiData.annCost) * 100) : 0;
+  const secretarialFundraisingPct = roiData.annCost > 0 ? Math.round((roiData.secFundraisingCost / roiData.annCost) * 100) : 0;
   const externalPct = roiData.annCost > 0 ? Math.round((roiData.methodExtCost / roiData.annCost) * 100) : 0;
   const valuationPct = roiData.annCost > 0 ? Math.round((roiData.valuationCost / roiData.annCost) * 100) : 0;
 
@@ -877,7 +879,7 @@ function doCalc() {
       </div>
       <div class="cb-detail-item">
         <div class="cb-detail-label">
-          Cap Table
+          Cap Table (Base)
           <div class="cb-info-tooltip-wrapper">
             <span class="cb-info-btn">ℹ</span>
             <div class="cb-tooltip">
@@ -888,17 +890,23 @@ function doCalc() {
                 Scaling: (${sh} shareholders − 20) ÷ 50 × 2h/mo = ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo<br>
                 Monthly total: ${ctMonthlyTotal.toFixed(1)}h/mo<br>
                 Annual: ${ctMonthlyTotal.toFixed(1)} × 12 = ${Math.round(ctRaw)} hrs
-                ${roiData.ctFundraisingWorkflows > 0 ? `<br><br><strong>+ Fundraising:</strong> ${roiData.ctFundraisingWorkflows} workflow(s) × 2.5h × 12 = ${Math.round(roiData.ctFundraisingWorkflows * 2.5 * 12)}h` : ''}
               </div>
             </div>
           </div>
         </div>
-        <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr ${roiData.ctFundraisingWorkflows > 0 ? `+ ${Math.round(roiData.ctFundraisingWorkflows * 2.5 * 12)}h fundraising` : ''} × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.ctCost)} <span class="cb-detail-pct">${capTablePct}%</span></div>
       </div>
+      ${roiData.ctFundraisingCost > 0 ? `
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">Cap Table (Fundraising)</div>
+        <div class="cb-detail-formula">${roiData.ctFundraisingWorkflows} workflow(s) × 2.5h × 12 months = ${Math.round(roiData.ctFundraisingWorkflows * 2.5 * 12)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.ctFundraisingCost)} <span class="cb-detail-pct">${capTableFundraisingPct}%</span></div>
+      </div>
+      ` : ''}
       <div class="cb-detail-item">
         <div class="cb-detail-label">
-          Secretarial & Board Operations
+          Secretarial & Board Operations (Base)
           <div class="cb-info-tooltip-wrapper">
             <span class="cb-info-btn">ℹ</span>
             <div class="cb-tooltip">
@@ -906,18 +914,23 @@ function doCalc() {
                 <strong>This cost includes:</strong> Board meetings, shareholder approvals, and governance workflows.<br><br>
                 <strong>Calculation:</strong><br>
                 Base workflows: ${roiData.baseWorkflows}/yr<br>
-                ${roiData.secFundraisingWorkflows > 0 ? `Fundraising workflows: ${roiData.secFundraisingWorkflows}/yr<br>` : ''}
-                Total workflows: ${roiData.totalSecWorkflows}/yr<br>
-                × 2.5 hrs/workflow = ${(roiData.totalSecWorkflows * 2.5).toFixed(0)} hrs<br>
+                × 2.5 hrs/workflow = ${(roiData.baseWorkflows * 2.5).toFixed(0)} hrs<br>
                 × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling)<br>
                 = ${Math.round(roiData.secRaw)} hrs/yr
               </div>
             </div>
           </div>
         </div>
-        <div class="cb-detail-formula">${roiData.totalSecWorkflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
+        <div class="cb-detail-formula">${roiData.baseWorkflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.secCost)} <span class="cb-detail-pct">${secretarialPct}%</span></div>
       </div>
+      ${roiData.secFundraisingCost > 0 ? `
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">Secretarial & Board Operations (Fundraising)</div>
+        <div class="cb-detail-formula">${roiData.secFundraisingWorkflows} workflow(s) × 2.5 hrs/workflow = ${Math.round(roiData.secFundraisingWorkflows * 2.5)} hrs × (shareholder scaling + new shareholders) = fundraising overhead × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.secFundraisingCost)} <span class="cb-detail-pct">${secretarialFundraisingPct}%</span></div>
+      </div>
+      ` : ''}
       ${roiData.methodExtCost > 0 ? `
       <div class="cb-detail-item">
         <div class="cb-detail-label">External Service</div>
