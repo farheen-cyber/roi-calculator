@@ -1660,17 +1660,18 @@ body.state-overview #res-status {
   width: 56px;
   height: 32px;
   background: rgba(195, 190, 230, 0.5);
-  border: none;
+  border: 1px solid rgba(195, 190, 230, 0.7);
   border-radius: 16px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   margin: 0;
   padding: 0;
 }
 
 #i-fundraise:checked {
   background-color: var(--accent);
+  border-color: var(--accent);
 }
 
 #i-fundraise::before {
