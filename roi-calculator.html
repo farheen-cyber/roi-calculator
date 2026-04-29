@@ -174,6 +174,17 @@
             <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
             <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
           </div>
+          <div style="margin-top:24px;padding:12px;background:var(--bg-secondary);border-radius:4px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <label for="i-fundraise" style="margin:0;font-weight:500">Planning to Fundraise?</label>
+              <input type="checkbox" id="i-fundraise" style="width:18px;height:18px;cursor:pointer" onchange="onFundraisingChange()">
+              <span style="font-size:12px;color:var(--t3)">Do you plan to fundraise in the next 12 months?</span>
+            </div>
+            <div id="fundraise-info" style="display:none;font-size:12px;color:var(--t3);margin-bottom:12px;font-style:italic">This helps us estimate governance workflows for your upcoming fundraising activities</div>
+            <div id="new-shareholders-wrapper" style="display:none">
+              <div class="fi"><label>New Shareholders Expected</label><input type="number" id="i-new-sh" value="0" min="0" step="1" placeholder="e.g., 5-10" onchange="lc()" oninput="lc()"><div class="err-msg" id="new-sh-warning" style="display:none;color:#ff6b35">Recommended: specify expected new shareholders</div></div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -187,3 +187,8 @@ export const SECRETARIAL_WORKFLOWS_BY_GEO = {
     seriesc: 14
   }
 };
+
+export const FUNDRAISING_WORKFLOWS = {
+  capTable: 1,
+  secretarial: 3
+};

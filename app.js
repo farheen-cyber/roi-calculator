@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -355,6 +355,20 @@ function lc() {
   // Update button state immediately for instant visual feedback
   updateNextButtonState();
   validateAndUpdateButtonState();
+
+  // Check fundraising validation
+  const fundraiseCheckbox = document.getElementById('i-fundraise');
+  const newShInput = document.getElementById('i-new-sh');
+  const warning = document.getElementById('new-sh-warning');
+
+  if (fundraiseCheckbox && fundraiseCheckbox.checked && newShInput && warning) {
+    const value = parseInt(newShInput.value || 0);
+    if (value === 0) {
+      warning.style.display = 'block';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
 }
 
 function validateAndUpdateButtonState() {
@@ -467,6 +481,27 @@ function onMethChange() {
   lc();
 }
 
+function onFundraisingChange() {
+  const checkbox = document.getElementById('i-fundraise');
+  const infoNote = document.getElementById('fundraise-info');
+  const newShareholdersWrapper = document.getElementById('new-shareholders-wrapper');
+  const newShInput = document.getElementById('i-new-sh');
+  const warning = document.getElementById('new-sh-warning');
+
+  if (checkbox.checked) {
+    if (infoNote) infoNote.style.display = 'block';
+    if (newShareholdersWrapper) newShareholdersWrapper.style.display = 'block';
+  } else {
+    if (infoNote) infoNote.style.display = 'none';
+    if (newShareholdersWrapper) newShareholdersWrapper.style.display = 'none';
+    if (warning) warning.style.display = 'none';
+    if (newShInput) newShInput.value = '0';
+  }
+
+  setResultsStale(true);
+  lc();
+}
+
 // ==================== HELPER FUNCTIONS ====================
 
 function fN(n) {
@@ -528,9 +563,13 @@ function doCalc() {
   // Tool cost no longer used (existing-tool method removed)
   const toolCost = 0;
 
+  // Get fundraising parameters
+  const planningToFundraise = document.getElementById('i-fundraise')?.checked || false;
+  const newShareholdersFromFundraise = parseInt(document.getElementById('i-new-sh')?.value || 0) || 0;
+
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost },
+    { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise },
     RATES,
     COMPLIANCE,
     EXT,
@@ -540,6 +579,7 @@ function doCalc() {
     STAGE_RETAINER,
     STAFFING_MATRIX,
     SECRETARIAL_WORKFLOWS_BY_GEO,
+    FUNDRAISING_WORKFLOWS,
     overrides
   );
 
@@ -636,10 +676,20 @@ function doCalc() {
           Cap Table
           <div class="cb-info-tooltip-wrapper">
             <span class="cb-info-btn">ℹ</span>
-            <div class="cb-tooltip">Base 3h/mo + scaling hours for ${sh} shareholders. Base increases by 2h/mo for every 50 shareholders above 20. Includes monthly reconciliation, updates, and stakeholder communications.</div>
+            <div class="cb-tooltip">
+              <div style="font-size:11px;line-height:1.5">
+                <strong>This cost includes:</strong> Monthly reconciliation, updates, and stakeholder communications.<br><br>
+                <strong>Calculation:</strong><br>
+                Base: 3h/mo + scaling<br>
+                Scaling: (${sh} shareholders − 20) ÷ 50 × 2h/mo = ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo<br>
+                Monthly total: ${ctMonthlyTotal.toFixed(1)}h/mo<br>
+                Annual: ${ctMonthlyTotal.toFixed(1)} × 12 = ${Math.round(ctRaw)} hrs
+                ${roiData.ctFundraisingWorkflows > 0 ? `<br><br><strong>+ Fundraising:</strong> ${roiData.ctFundraisingWorkflows} workflow(s) × 2.5h × 12 = ${Math.round(roiData.ctFundraisingWorkflows * 2.5 * 12)}h` : ''}
+              </div>
+            </div>
           </div>
         </div>
-        <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
+        <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr ${roiData.ctFundraisingWorkflows > 0 ? `+ ${Math.round(roiData.ctFundraisingWorkflows * 2.5 * 12)}h fundraising` : ''} × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.ctCost)} <span class="cb-detail-pct">${capTablePct}%</span></div>
       </div>
       <div class="cb-detail-item">
@@ -647,10 +697,21 @@ function doCalc() {
           Secretarial & Board Operations
           <div class="cb-info-tooltip-wrapper">
             <span class="cb-info-btn">ℹ</span>
-            <div class="cb-tooltip">This cost includes board meetings, shareholder approvals, and required governance workflows.</div>
+            <div class="cb-tooltip">
+              <div style="font-size:11px;line-height:1.5">
+                <strong>This cost includes:</strong> Board meetings, shareholder approvals, and governance workflows.<br><br>
+                <strong>Calculation:</strong><br>
+                Base workflows: ${roiData.baseWorkflows}/yr<br>
+                ${roiData.secFundraisingWorkflows > 0 ? `Fundraising workflows: ${roiData.secFundraisingWorkflows}/yr<br>` : ''}
+                Total workflows: ${roiData.totalSecWorkflows}/yr<br>
+                × 2.5 hrs/workflow = ${(roiData.totalSecWorkflows * 2.5).toFixed(0)} hrs<br>
+                × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling)<br>
+                = ${Math.round(roiData.secRaw)} hrs/yr
+              </div>
+            </div>
           </div>
         </div>
-        <div class="cb-detail-formula">${roiData.workflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
+        <div class="cb-detail-formula">${roiData.totalSecWorkflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.secCost)} <span class="cb-detail-pct">${secretarialPct}%</span></div>
       </div>
       ${roiData.methodExtCost > 0 ? `

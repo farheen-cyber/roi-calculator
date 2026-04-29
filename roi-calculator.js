@@ -9,6 +9,8 @@
  * @param {string} inputs.stage - Company stage (preseed, seed, seriesab, seriesbc, seriesc)
  * @param {string} inputs.meth - Administrative method (in-house, outsourced)
  * @param {number} inputs.toolCost - Annual tool cost (unused, kept for compatibility)
+ * @param {boolean} inputs.planningToFundraise - Planning to fundraise in next 12 months
+ * @param {number} inputs.newShareholdersFromFundraise - Expected new shareholders from fundraise
  * @param {Object} rates - RATES lookup table (legacy, used as fallback)
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
@@ -18,11 +20,12 @@
  * @param {Object} stageRetainer - STAGE_RETAINER lookup table (stage-based retainer costs by geography and stage)
  * @param {Object} staffingMatrix - STAFFING_MATRIX lookup table (FTE allocations by stage and role)
  * @param {Object} secretarialWorkflows - SECRETARIAL_WORKFLOWS_BY_GEO lookup table (workflows by geography and stage)
+ * @param {Object} fundraisingWorkflows - FUNDRAISING_WORKFLOWS lookup table (workflows for fundraising)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, overrides) {
-  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0 } = inputs;
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, fundraisingWorkflows, overrides) {
+  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0 } = inputs;
 
   // Get blended hourly rate from stage-based staffing matrix (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
@@ -65,13 +68,21 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
 
   // Cap table maintenance cost
   const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
-  const ctHrs = ctRaw * mult;
+  const ctFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.capTable || 0) : 0;
+  const ctTotalWorkflows = ctRaw + (ctFundraisingWorkflows * 2.5 * 12); // Add fundraising workflows in hours
+  const ctHrs = ctTotalWorkflows * mult;
   const ctCost = ctHrs * rate;
 
   // Calculate secretarial & board operations cost based on geography-specific workflows
-  const workflows = secretarialWorkflows?.[geo_inc]?.[stageKey] || 0;
-  const secBaseHours = workflows * 2.5;
-  const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
+  const baseWorkflows = secretarialWorkflows?.[geo_inc]?.[stageKey] || 0;
+  const secFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.secretarial || 0) : 0;
+  const totalSecWorkflows = baseWorkflows + secFundraisingWorkflows;
+  const secBaseHours = totalSecWorkflows * 2.5;
+
+  // Use future shareholder count only if planning to fundraise
+  const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
+  const shareholderScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
+
   const secRaw = secBaseHours * shareholderScaling;
   const secHrs = secRaw * mult;
   const secRate = stageRates[geo_op]?.[stageKey]?.cs || 0;
@@ -123,11 +134,17 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     grCost: Math.round(grCost),
     cpCost: Math.round(cpCost),
     ctCost: Math.round(ctCost),
+    ctFundraisingWorkflows,
     secCost: Math.round(secCost),
     secRaw,
     secRate,
-    workflows,
+    baseWorkflows,
+    totalSecWorkflows,
+    secFundraisingWorkflows,
     shareholderScaling,
+    effectiveShareholders,
+    planningToFundraise,
+    newShareholdersFromFundraise,
     methodExtCost: Math.round(methodExtCost),
     elOverhead: Math.round(elOverhead),
     grHr,
