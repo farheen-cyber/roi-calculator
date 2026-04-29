@@ -1650,3 +1650,92 @@ body.state-overview #res-status {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ── Fundraise Section Styling ─────────────────────────────── */
+
+/* Toggle switch styling */
+#i-fundraise {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 44px;
+  height: 24px;
+  background: var(--bd);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s ease;
+  margin: 0;
+  padding: 0;
+}
+
+#i-fundraise:checked {
+  background-color: var(--accent);
+}
+
+#i-fundraise::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s ease;
+}
+
+#i-fundraise:checked::before {
+  left: 22px;
+}
+
+#i-fundraise:hover {
+  opacity: 0.9;
+}
+
+/* Round type and timing button styling */
+input[name="fundraise-round"],
+input[name="fundraise-timing"] {
+  display: none;
+}
+
+input[name="fundraise-round"] + div,
+input[name="fundraise-timing"] + div {
+  padding: 10px;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--t2);
+}
+
+input[name="fundraise-round"] + div:hover,
+input[name="fundraise-timing"] + div:hover {
+  border-color: var(--accent);
+  background: rgba(88, 86, 214, 0.05);
+}
+
+input[name="fundraise-round"]:checked + div,
+input[name="fundraise-timing"]:checked + div {
+  background-color: var(--accent) !important;
+  color: white !important;
+  border-color: var(--accent) !important;
+  font-weight: 600;
+}
+
+/* Dark mode support */
+.dark-theme input[name="fundraise-round"] + div,
+.dark-theme input[name="fundraise-timing"] + div {
+  background: var(--bg-secondary);
+  color: var(--t2);
+}
+
+.dark-theme input[name="fundraise-round"]:checked + div,
+.dark-theme input[name="fundraise-timing"]:checked + div {
+  background-color: var(--accent);
+  color: white;
+}
