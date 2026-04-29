@@ -361,13 +361,17 @@ function lc() {
   const newShInput = document.getElementById('i-new-sh');
   const warning = document.getElementById('new-sh-warning');
 
-  if (fundraiseCheckbox && fundraiseCheckbox.checked && newShInput && warning) {
-    const value = parseInt(newShInput.value || 0);
-    if (value === 0) {
-      warning.style.display = 'block';
-    } else {
-      warning.style.display = 'none';
+  if (fundraiseCheckbox && fundraiseCheckbox.checked) {
+    if (newShInput && warning) {
+      const value = parseInt(newShInput.value || 0);
+      if (value === 0) {
+        warning.style.display = 'block';
+      } else {
+        warning.style.display = 'none';
+      }
     }
+    // Update the calculation note when inputs change
+    updateFundraiseNote();
   }
 }
 
@@ -483,23 +487,57 @@ function onMethChange() {
 
 function onFundraisingChange() {
   const checkbox = document.getElementById('i-fundraise');
-  const infoNote = document.getElementById('fundraise-info');
-  const newShareholdersWrapper = document.getElementById('new-shareholders-wrapper');
+  const details = document.getElementById('fundraise-details');
+  const status = document.getElementById('fundraise-status');
+  const note = document.getElementById('fundraise-calc-note');
   const newShInput = document.getElementById('i-new-sh');
-  const warning = document.getElementById('new-sh-warning');
 
   if (checkbox.checked) {
-    if (infoNote) infoNote.style.display = 'block';
-    if (newShareholdersWrapper) newShareholdersWrapper.style.display = 'block';
+    if (details) details.style.display = 'block';
+    if (status) status.textContent = 'YES';
+    if (note) note.style.display = 'block';
+    updateFundraiseNote();
   } else {
-    if (infoNote) infoNote.style.display = 'none';
-    if (newShareholdersWrapper) newShareholdersWrapper.style.display = 'none';
-    if (warning) warning.style.display = 'none';
+    if (details) details.style.display = 'none';
+    if (status) status.textContent = 'NO';
+    if (note) note.style.display = 'none';
+    // Reset fields
+    document.querySelectorAll('input[name="fundraise-round"]').forEach(r => r.checked = false);
+    document.querySelectorAll('input[name="fundraise-timing"]').forEach(t => t.checked = false);
     if (newShInput) newShInput.value = '0';
   }
 
   setResultsStale(true);
   lc();
+}
+
+function getFundraiseRound() {
+  return document.querySelector('input[name="fundraise-round"]:checked')?.value || null;
+}
+
+function getFundraiseTiming() {
+  return document.querySelector('input[name="fundraise-timing"]:checked')?.value || null;
+}
+
+function getFundraiseNewShareholders() {
+  return parseInt(document.getElementById('i-new-sh')?.value || 0) || 0;
+}
+
+function updateFundraiseNote() {
+  const note = document.getElementById('fundraise-calc-note');
+  const content = document.getElementById('fundraise-note-content');
+  if (!note || !content) return;
+
+  const newSh = getFundraiseNewShareholders();
+  const timing = getFundraiseTiming();
+
+  if (newSh > 0 && timing) {
+    content.textContent = `+${newSh} stakeholders onboarded over ~${timing} months.`;
+  } else if (newSh > 0) {
+    content.textContent = `+${newSh} stakeholders.`;
+  } else {
+    content.textContent = `+0 stakeholders.`;
+  }
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -565,11 +603,18 @@ function doCalc() {
 
   // Get fundraising parameters
   const planningToFundraise = document.getElementById('i-fundraise')?.checked || false;
-  const newShareholdersFromFundraise = parseInt(document.getElementById('i-new-sh')?.value || 0) || 0;
+  const fundraiseRound = getFundraiseRound();
+  const newShareholdersFromFundraise = getFundraiseNewShareholders();
+
+  // Determine stage: use fundraise round as stage unless SAFE/Bridge (then use current stage)
+  let calculationStage = stage;
+  if (planningToFundraise && fundraiseRound && fundraiseRound !== 'safe' && fundraiseRound !== 'bridge') {
+    calculationStage = fundraiseRound;
+  }
 
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise },
+    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise },
     RATES,
     COMPLIANCE,
     EXT,
@@ -898,6 +943,10 @@ window.resetO = resetO;
 window.validateAndDisplayErrors = validateAndDisplayErrors;
 window.onMethChange = onMethChange;
 window.onFundraisingChange = onFundraisingChange;
+window.getFundraiseRound = getFundraiseRound;
+window.getFundraiseTiming = getFundraiseTiming;
+window.getFundraiseNewShareholders = getFundraiseNewShareholders;
+window.updateFundraiseNote = updateFundraiseNote;
 window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;

@@ -174,15 +174,76 @@
             <div class="fi"><label>Option Holders *</label><input type="number" id="i-oh" value="15" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
             <div class="fi" id="fi-gr-wrap"><label>Equity grants per Year *</label><input type="number" id="i-gr" value="10" min="0" step="1" onchange="validateAndUpdateButtonState()"><div class="err-msg">Field required</div></div>
           </div>
-          <div style="margin-top:24px;padding:12px;background:var(--bg-secondary);border-radius:4px">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-              <label for="i-fundraise" style="margin:0;font-weight:500">Planning to Fundraise?</label>
-              <input type="checkbox" id="i-fundraise" style="width:18px;height:18px;cursor:pointer" onchange="onFundraisingChange()">
-              <span style="font-size:12px;color:var(--t3)">Do you plan to fundraise in the next 12 months?</span>
+          <div style="margin-top:24px;padding:16px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--bd)">
+            <!-- Fundraise Toggle -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div>
+                <div style="font-weight:500;font-size:14px;margin-bottom:4px">Planning to fundraise in the next 12 months?</div>
+                <div style="font-size:12px;color:var(--t3)">Helps us model upcoming governance & onboarding workflows.</div>
+              </div>
+              <label style="cursor:pointer;display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="i-fundraise" style="width:20px;height:20px;cursor:pointer" onchange="onFundraisingChange()">
+                <span id="fundraise-status" style="font-size:12px;font-weight:600;color:var(--t3)">NO</span>
+              </label>
             </div>
-            <div id="fundraise-info" style="display:none;font-size:12px;color:var(--t3);margin-bottom:12px;font-style:italic">This helps us estimate governance workflows for your upcoming fundraising activities</div>
-            <div id="new-shareholders-wrapper" style="display:none">
-              <div class="fi"><label>New Shareholders Expected</label><input type="number" id="i-new-sh" value="0" min="0" step="1" placeholder="e.g., 5-10" onchange="lc()" oninput="lc()"><div class="err-msg" id="new-sh-warning" style="display:none;color:#ff6b35">Recommended: specify expected new shareholders</div></div>
+
+            <!-- Fundraise Details (Hidden by default) -->
+            <div id="fundraise-details" style="display:none;padding-top:16px;border-top:1px solid var(--bd)">
+              <!-- Round Type Selection -->
+              <div style="margin-bottom:24px">
+                <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--t2);margin-bottom:12px">Round Type</div>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-round" value="safe" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">SAFE</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-round" value="seed" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">SEED</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-round" value="seriesab" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">SERIES A</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-round" value="seriesbc" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">SERIES B</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-round" value="bridge" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">BRIDGE</div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Expected Timing Selection -->
+              <div style="margin-bottom:24px">
+                <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--t2);margin-bottom:12px">Expected Timing</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-timing" value="3" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">&lt;3 MO</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-timing" value="6" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">3-6 MO</div>
+                  </label>
+                  <label style="cursor:pointer">
+                    <input type="radio" name="fundraise-timing" value="12" style="display:none" onchange="lc()">
+                    <div style="padding:10px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-size:13px;font-weight:500;background:white">6-12 MO</div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- New Shareholders -->
+              <div style="margin-bottom:16px">
+                <div class="fi"><label>New Shareholders</label><input type="number" id="i-new-sh" value="0" min="0" step="1" placeholder="e.g., 8" onchange="lc()" oninput="lc()"><div class="err-msg" id="new-sh-warning" style="display:none;color:#ff6b35">Investors, SAFE conversions, and new ESOP grants all count toward stakeholder load.</div></div>
+              </div>
+
+              <!-- Info Note -->
+              <div id="fundraise-calc-note" style="padding:12px;background:rgba(88,86,214,0.1);border-left:3px solid var(--accent);border-radius:4px;font-size:12px;color:var(--t2);display:none">
+                <strong>📈 Estimate will reflect</strong> <span id="fundraise-note-content">+0 stakeholders</span> <strong>onboarded over ~0 months.</strong>
+              </div>
             </div>
           </div>
         </div>
