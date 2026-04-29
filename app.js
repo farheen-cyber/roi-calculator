@@ -623,7 +623,10 @@ function doCalc() {
       <div class="cb-detail-item">
         <div class="cb-detail-label">
           Compliance
-          <span class="cb-info-btn" title="Baseline hours for your country of incorporation. Covers statutory registers, tax reporting, and grant compliance tracking.">ℹ</span>
+          <div class="cb-info-tooltip-wrapper">
+            <span class="cb-info-btn">ℹ</span>
+            <div class="cb-tooltip">Baseline hours for your country of incorporation. Covers statutory registers, tax reporting, and grant compliance tracking.</div>
+          </div>
         </div>
         <div class="cb-detail-formula">${roiData.compHr} hrs/yr (${(roiData.compHr / 12).toFixed(0)}h/mo, ${geo_inc.toUpperCase()} statutory baseline) × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.cpCost)} <span class="cb-detail-pct">${compliancePct}%</span></div>
@@ -631,7 +634,10 @@ function doCalc() {
       <div class="cb-detail-item">
         <div class="cb-detail-label">
           Cap Table
-          <span class="cb-info-btn" title="Base 3h/mo + scaling hours for ${sh} shareholders. Base increases by 2h/mo for every 50 shareholders above 20. Includes monthly reconciliation, updates, and stakeholder communications.">ℹ</span>
+          <div class="cb-info-tooltip-wrapper">
+            <span class="cb-info-btn">ℹ</span>
+            <div class="cb-tooltip">Base 3h/mo + scaling hours for ${sh} shareholders. Base increases by 2h/mo for every 50 shareholders above 20. Includes monthly reconciliation, updates, and stakeholder communications.</div>
+          </div>
         </div>
         <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.ctCost)} <span class="cb-detail-pct">${capTablePct}%</span></div>
@@ -639,7 +645,10 @@ function doCalc() {
       <div class="cb-detail-item">
         <div class="cb-detail-label">
           Secretarial & Board Operations
-          <span class="cb-info-btn" title="Secretarial & Board Operations Cost Breakdown&#10;This cost includes board meetings, shareholder approvals, and required governance workflows.&#10;&#10;How we calculated it:&#10;Governance Workflows: ${roiData.workflows} per year (based on ${geo_inc.toUpperCase()})&#10;Hours per workflow: 2.5 hours&#10;Shareholder Complexity: ${roiData.shareholderScaling.toFixed(2)}x multiplier (${sh} shareholders)&#10;Management Method: ${roiData.mult}x (${meth === 'in-house' ? 'In-house' : 'Outsourced'})&#10;&#10;Why it varies by geography:&#10;India: Legally requires 4+ board meetings/year minimum&#10;USA: No legal minimum; investor-driven governance&#10;UK & Singapore: Annual AGM required; quarterly boards expected&#10;&#10;Why shareholder count matters:&#10;20 shareholders: Standard approval process (1.0x)&#10;100 shareholders: 1.4x effort (more documents, signatures)&#10;200 shareholders: 1.9x effort (significantly more coordination)">ℹ</span>
+          <div class="cb-info-tooltip-wrapper">
+            <span class="cb-info-btn">ℹ</span>
+            <div class="cb-tooltip">This cost includes board meetings, shareholder approvals, and required governance workflows.</div>
+          </div>
         </div>
         <div class="cb-detail-formula">${roiData.workflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.secCost)} <span class="cb-detail-pct">${secretarialPct}%</span></div>
