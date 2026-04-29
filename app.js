@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS, VALUATION_TYPES_BY_GEO, VALUATION_INTERNAL_HOURS } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -117,6 +117,15 @@ function validateInputs() {
   if (!oh) errors.oh = 'Field required';
   if (!gr) errors.gr = 'Field required';
   if (!stage) errors.st = 'Field required';
+
+  // Validate valuation fields if toggle is checked
+  const valuationCheckbox = document.getElementById('i-valuation');
+  if (valuationCheckbox?.checked) {
+    const valFrequency = getValuationFrequency();
+    const valType = getValuationType();
+    if (!valFrequency) errors.val_frequency = 'Select frequency';
+    if (!valType) errors.val_type = 'Select report type';
+  }
 
   return { valid: Object.keys(errors).length === 0, errors };
 }
@@ -540,6 +549,119 @@ function updateFundraiseNote() {
   }
 }
 
+function onValuationChange() {
+  const checkbox = document.getElementById('i-valuation');
+  const details = document.getElementById('valuation-details');
+  const status = document.getElementById('valuation-status');
+  const card = document.getElementById('valuation-card');
+
+  if (checkbox.checked) {
+    if (details) details.style.display = 'block';
+    if (status) status.textContent = 'YES';
+    if (card) card.classList.add('expanded');
+  } else {
+    if (details) details.style.display = 'none';
+    if (status) status.textContent = 'NO';
+    if (card) card.classList.remove('expanded');
+    // Reset fields
+    const freqSelect = document.getElementById('i-val-frequency');
+    const typeSelect = document.getElementById('i-val-type');
+    if (freqSelect) freqSelect.value = '';
+    if (typeSelect) typeSelect.value = '';
+    const impact = document.getElementById('valuation-impact');
+    if (impact) impact.style.display = 'none';
+  }
+
+  setResultsStale(true);
+  lc();
+}
+
+function getValuationFrequency() {
+  return document.getElementById('i-val-frequency')?.value || '';
+}
+
+function getValuationType() {
+  return document.getElementById('i-val-type')?.value || '';
+}
+
+function updateValuationNote() {
+  const frequency = getValuationFrequency();
+  const typeSelect = document.getElementById('i-val-type');
+  const typeLabel = typeSelect ? typeSelect.options[typeSelect.selectedIndex]?.text || '' : '';
+  const impact = document.getElementById('valuation-impact');
+  const impactText = document.getElementById('valuation-impact-text');
+
+  if (!frequency || !typeLabel) {
+    if (impact) impact.style.display = 'none';
+    return;
+  }
+
+  const n = frequency === 'quarterly' ? 4 : 1;
+  if (impactText) {
+    impactText.textContent = `Estimate will include ${n} valuation event(s)/yr (${typeLabel}).`;
+  }
+  if (impact) impact.style.display = 'block';
+}
+
+function rebuildValuationTypeOptions() {
+  const geoIncSelect = document.getElementById('i-geo-inc');
+  const typeSelect = document.getElementById('i-val-type');
+  const geoTag = document.getElementById('valuation-geo-tag');
+  const helperText = document.getElementById('val-helper-text');
+
+  if (!typeSelect) return;
+
+  const geoInc = geoIncSelect?.value || 'usa';
+  const options = VALUATION_TYPES_BY_GEO[geoInc] || [];
+
+  // Clear existing options
+  typeSelect.innerHTML = '<option value="">Select report type...</option>';
+  const dropdown = typeSelect.parentElement?.querySelector('.select-dropdown');
+  if (dropdown) {
+    dropdown.innerHTML = '';
+  }
+
+  // Add new options
+  options.forEach(opt => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.name;
+    optionEl.textContent = opt.name;
+    typeSelect.appendChild(optionEl);
+
+    if (dropdown) {
+      const li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.setAttribute('data-value', opt.name);
+      li.innerHTML = `${opt.name}<span class="option-sub">${opt.sub}</span>`;
+      dropdown.appendChild(li);
+    }
+  });
+
+  // If only one option, pre-select it
+  if (options.length === 1) {
+    typeSelect.value = options[0].name;
+    if (helperText) {
+      helperText.textContent = `Standard report type for ${geoInc.toUpperCase()} — pre-selected. Tap to confirm.`;
+      helperText.style.display = 'block';
+    }
+  } else {
+    if (helperText) helperText.style.display = 'none';
+  }
+
+  // Update geo tag
+  if (geoTag) {
+    geoTag.textContent = geoInc.toUpperCase();
+  }
+
+  // Reset dropdown display if needed
+  if (typeSelect.parentElement?.querySelector('.SelectField')) {
+    const sf = typeSelect.parentElement.SelectField;
+    if (sf) sf.updateDisplay();
+  }
+
+  updateValuationNote();
+}
+
 // ==================== HELPER FUNCTIONS ====================
 
 function fN(n) {
@@ -612,9 +734,21 @@ function doCalc() {
     calculationStage = fundraiseRound;
   }
 
+  // Get valuation parameters
+  const valuationFrequency = getValuationFrequency();
+  const valuationType = getValuationType();
+  let valuationCostMarket = 0;
+  if (valuationType) {
+    const geoTypes = VALUATION_TYPES_BY_GEO[geo_inc] || [];
+    const selected = geoTypes.find(t => t.name === valuationType);
+    if (selected) {
+      valuationCostMarket = selected.cost;
+    }
+  }
+
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise },
+    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise, valuationFrequency, valuationType, valuationCostMarket },
     RATES,
     COMPLIANCE,
     EXT,
@@ -697,6 +831,7 @@ function doCalc() {
   const capTablePct = roiData.annCost > 0 ? Math.round((roiData.ctCost / roiData.annCost) * 100) : 0;
   const secretarialPct = roiData.annCost > 0 ? Math.round((roiData.secCost / roiData.annCost) * 100) : 0;
   const externalPct = roiData.annCost > 0 ? Math.round((roiData.methodExtCost / roiData.annCost) * 100) : 0;
+  const valuationPct = roiData.annCost > 0 ? Math.round((roiData.valuationCost / roiData.annCost) * 100) : 0;
 
   const costBreakdownDetails = `
     <div class="cb-detail">
@@ -764,6 +899,13 @@ function doCalc() {
         <div class="cb-detail-label">External Service</div>
         <div class="cb-detail-formula">Fixed annual cost</div>
         <div class="cb-detail-value">${sym}${fN(roiData.methodExtCost)} <span class="cb-detail-pct">${externalPct}%</span></div>
+      </div>
+      ` : ''}
+      ${roiData.valuationCost > 0 ? `
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">Valuation Reports</div>
+        <div class="cb-detail-formula">${valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr'}</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.valuationCost)} <span class="cb-detail-pct">${valuationPct}%</span></div>
       </div>
       ` : ''}
     </div>
@@ -884,6 +1026,15 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.custom-select').forEach((selectElement) => {
       new SelectField(selectElement);
     });
+
+    // Initialize valuation report type options based on current geo_inc
+    rebuildValuationTypeOptions();
+
+    // Add listener for geo_inc changes to rebuild valuation options
+    const geoIncSelect = document.getElementById('i-geo-inc');
+    if (geoIncSelect) {
+      geoIncSelect.addEventListener('change', rebuildValuationTypeOptions);
+    }
   }, 0);
 
   // Initialize stepper
@@ -947,6 +1098,11 @@ window.getFundraiseRound = getFundraiseRound;
 window.getFundraiseTiming = getFundraiseTiming;
 window.getFundraiseNewShareholders = getFundraiseNewShareholders;
 window.updateFundraiseNote = updateFundraiseNote;
+window.onValuationChange = onValuationChange;
+window.getValuationFrequency = getValuationFrequency;
+window.getValuationType = getValuationType;
+window.updateValuationNote = updateValuationNote;
+window.rebuildValuationTypeOptions = rebuildValuationTypeOptions;
 window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;

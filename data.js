@@ -192,3 +192,21 @@ export const FUNDRAISING_WORKFLOWS = {
   capTable: 1,
   secretarial: 3
 };
+
+export const VALUATION_TYPES_BY_GEO = {
+  usa: [
+    { name: '409A Valuation', sub: 'Black-Scholes', cost: 6000, elCost: 400 }
+  ],
+  india: [
+    { name: 'Registered Valuer Assessment', sub: 'IBBI-registered', cost: 200000, elCost: 25000 },
+    { name: 'Merchant Banker Assessment', sub: 'SEBI-registered', cost: 300000, elCost: 50000 }
+  ],
+  uk: [
+    { name: 'Fair Market Value Appraisal', sub: 'Chartered Surveyor', cost: 5000, elCost: 350 }
+  ],
+  singapore: [
+    { name: 'Fair Market Value Appraisal', sub: 'Registered Valuer', cost: 5000, elCost: 450 }
+  ]
+};
+
+export const VALUATION_INTERNAL_HOURS = 6;

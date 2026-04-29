@@ -25,7 +25,7 @@
  * @returns {Object} ROI calculation results
  */
 export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, fundraisingWorkflows, overrides) {
-  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0 } = inputs;
+  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '', valuationCostMarket = 0 } = inputs;
 
   // Get blended hourly rate from stage-based staffing matrix (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
@@ -95,8 +95,15 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     methodExtCost = stageRetainer[geo_op]?.[stageKey] || ext[geo_op];
   }
 
+  // Valuation services cost
+  let valuationCost = 0;
+  if (valuationFrequency && valuationType) {
+    const frequencyMultiplier = valuationFrequency === 'quarterly' ? 4 : 1;
+    valuationCost = valuationCostMarket * frequencyMultiplier;
+  }
+
   // Total annual cost
-  const annCost = grCost + cpCost + ctCost + secCost + methodExtCost;
+  const annCost = grCost + cpCost + ctCost + secCost + methodExtCost + valuationCost;
 
   // Calculate efficiency metrics
   const manualHTotal = grHrs + cpRaw + ctRaw + secRaw;
@@ -146,6 +153,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     planningToFundraise,
     newShareholdersFromFundraise,
     methodExtCost: Math.round(methodExtCost),
+    valuationCost: Math.round(valuationCost),
     elOverhead: Math.round(elOverhead),
     grHr,
     compHr,

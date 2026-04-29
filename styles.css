@@ -1654,14 +1654,50 @@ body.state-overview #res-status {
 /* ── Fundraise Section Styling ─────────────────────────────── */
 
 /* Toggle switch styling */
+.toggle-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 22px;
+  background: #D5D2E0;
+  border: 1px solid #D5D2E0;
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  margin: 0;
+  padding: 0;
+}
+
+.toggle-switch:checked {
+  background-color: #6D28D9;
+  border-color: #6D28D9;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s ease;
+}
+
+.toggle-switch:checked::before {
+  left: 20px;
+}
+
 #i-fundraise {
   appearance: none;
   -webkit-appearance: none;
-  width: 56px;
-  height: 32px;
-  background: rgba(195, 190, 230, 0.5);
-  border: 1px solid rgba(195, 190, 230, 0.7);
-  border-radius: 16px;
+  width: 40px;
+  height: 22px;
+  background: #D5D2E0;
+  border: 1px solid #D5D2E0;
+  border-radius: 11px;
   cursor: pointer;
   position: relative;
   transition: all 0.3s ease;
@@ -1670,24 +1706,24 @@ body.state-overview #res-status {
 }
 
 #i-fundraise:checked {
-  background-color: var(--accent);
-  border-color: var(--accent);
+  background-color: #6D28D9;
+  border-color: #6D28D9;
 }
 
 #i-fundraise::before {
   content: '';
   position: absolute;
-  width: 26px;
-  height: 26px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: white;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   transition: left 0.3s ease;
 }
 
 #i-fundraise:checked::before {
-  left: 27px;
+  left: 20px;
 }
 
 #i-fundraise:hover {
@@ -1748,4 +1784,215 @@ input[name="fundraise-timing"]:checked + div {
   border-radius: 12px !important;
   padding: 24px !important;
   margin-top: 16px !important;
+}
+
+/* ── Valuation Section Styling ─────────────────────────────── */
+
+/* Valuation card container */
+.valuation-card {
+  border: 1px solid rgba(109, 40, 217, 0.22);
+  background: rgba(109, 40, 217, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.valuation-card.expanded {
+  border-color: #6D28D9;
+  background: rgba(109, 40, 217, 0.1);
+}
+
+/* Valuation toggle row */
+.valuation-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 18px;
+  gap: 16px;
+}
+
+.valuation-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+  margin-bottom: 4px;
+}
+
+.valuation-subtitle {
+  font-size: 13px;
+  color: var(--t2);
+  line-height: 1.4;
+}
+
+.valuation-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#i-valuation {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 22px;
+  background: #D5D2E0;
+  border: 1px solid #D5D2E0;
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  margin: 0;
+  padding: 0;
+}
+
+#i-valuation:checked {
+  background-color: #6D28D9;
+  border-color: #6D28D9;
+}
+
+#i-valuation::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s ease;
+}
+
+#i-valuation:checked::before {
+  left: 20px;
+}
+
+#valuation-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+  min-width: 28px;
+}
+
+/* Valuation details panel */
+#valuation-details {
+  padding: 4px 18px 20px 18px;
+}
+
+.valuation-subsection {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.valuation-subsection:last-child {
+  margin-bottom: 0;
+}
+
+/* Chip styling for subsection headers */
+.valuation-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9.5px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--t1);
+}
+
+.chip-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 1px solid #E8E6F0;
+  border-radius: 3px;
+  color: #6D28D9;
+  font-weight: 700;
+  position: relative;
+}
+
+.chip-number::before {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #6D28D9;
+  border-radius: 50%;
+  left: -8px;
+}
+
+.chip-label {
+  color: var(--t1);
+}
+
+.chip-tag {
+  margin-left: auto;
+  font-size: 9px;
+  padding: 2px 6px;
+  background: rgba(109, 40, 217, 0.1);
+  border: 1px solid rgba(109, 40, 217, 0.22);
+  border-radius: 4px;
+  color: #6D28D9;
+}
+
+/* Impact preview */
+.valuation-impact {
+  background: rgba(109, 40, 217, 0.08);
+  border: 1px dashed rgba(109, 40, 217, 0.3);
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #6D28D9;
+  margin-top: 8px;
+}
+
+#valuation-impact-text {
+  font-weight: 500;
+}
+
+/* Helper text for pre-selected options */
+.val-helper-text {
+  font-size: 12px;
+  color: var(--t2);
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(195, 190, 230, 0.15);
+  border-radius: 4px;
+  font-style: italic;
+}
+
+/* Option subtitle styling in dropdowns */
+.option-sub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--t3);
+  margin-top: 2px;
+}
+
+/* Dark mode support for valuation */
+.dark-theme .valuation-card {
+  border-color: rgba(109, 40, 217, 0.4);
+  background: rgba(109, 40, 217, 0.08);
+}
+
+.dark-theme .valuation-card.expanded {
+  border-color: #6D28D9;
+  background: rgba(109, 40, 217, 0.15);
+}
+
+.dark-theme .chip-number {
+  background: var(--bg-secondary);
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+.dark-theme .valuation-impact {
+  background: rgba(109, 40, 217, 0.12);
+  border-color: rgba(109, 40, 217, 0.4);
 }

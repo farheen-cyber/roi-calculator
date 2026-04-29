@@ -249,6 +249,78 @@
         </div>
       </div>
 
+      <!-- Valuation Reports Card -->
+      <div class="valuation-card" id="valuation-card">
+        <!-- Toggle Row -->
+        <div class="valuation-toggle-row">
+          <div>
+            <div class="valuation-title">Do you need valuation reports?</div>
+            <div class="valuation-subtitle">Required for ESOP grant pricing, fundraising, and exit events.</div>
+          </div>
+          <label class="valuation-label">
+            <input type="checkbox" id="i-valuation" class="toggle-switch" onchange="onValuationChange()">
+            <span id="valuation-status">NO</span>
+          </label>
+        </div>
+
+        <!-- Expanded Details Panel -->
+        <div id="valuation-details" style="display:none">
+          <!-- Subsection 1: Needs Assessment -->
+          <div class="valuation-subsection">
+            <div class="valuation-chip">
+              <span class="chip-number">1</span>
+              <span class="chip-label">NEEDS ASSESSMENT</span>
+            </div>
+            <div class="form-field">
+              <label for="i-val-frequency">How often?</label>
+              <div class="custom-select-wrapper">
+                <select id="i-val-frequency" class="custom-select" onchange="lc()">
+                  <option value="">Select frequency...</option>
+                  <option value="annually">Annually</option>
+                  <option value="quarterly">Quarterly</option>
+                </select>
+                <div class="select-display">
+                  <span class="select-label">Select frequency...</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox">
+                  <li role="option" data-value="annually">Annually<span class="option-sub">1× per year</span></li>
+                  <li role="option" data-value="quarterly">Quarterly<span class="option-sub">4× per year</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 2: Report Type -->
+          <div class="valuation-subsection">
+            <div class="valuation-chip">
+              <span class="chip-number">2</span>
+              <span class="chip-label">REPORT TYPE</span>
+              <span class="chip-tag" id="valuation-geo-tag"></span>
+            </div>
+            <div class="form-field">
+              <label for="i-val-type">What type of valuation do you need?</label>
+              <div class="custom-select-wrapper">
+                <select id="i-val-type" class="custom-select" onchange="lc()">
+                  <option value="">Select report type...</option>
+                </select>
+                <div class="select-display">
+                  <span class="select-label">Select report type...</span>
+                  <span class="select-chevron">▼</span>
+                </div>
+                <ul class="select-dropdown" role="listbox"></ul>
+              </div>
+              <div class="val-helper-text" id="val-helper-text" style="display:none"></div>
+            </div>
+          </div>
+
+          <!-- Impact Preview -->
+          <div class="valuation-impact" id="valuation-impact" style="display:none">
+            <span id="valuation-impact-text"></span>
+          </div>
+        </div>
+      </div>
+
       <div class="sec" id="sec-3">
         <span class="sec-n">03 — CURRENT OPERATIONS</span>
         <fieldset style="border:none;padding:0;margin:0">
