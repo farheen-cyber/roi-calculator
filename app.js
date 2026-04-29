@@ -897,6 +897,7 @@ window.onCalculateClick = onCalculateClick;
 window.resetO = resetO;
 window.validateAndDisplayErrors = validateAndDisplayErrors;
 window.onMethChange = onMethChange;
+window.onFundraisingChange = onFundraisingChange;
 window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;
