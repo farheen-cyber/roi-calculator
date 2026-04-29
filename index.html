@@ -228,12 +228,14 @@
 
       <div class="r-s" id="res-status" style="display:none" aria-live="polite" aria-atomic="true"></div>
 
-      <!-- Results Outdated Banner -->
-      <div id="results-outdated-banner" class="results-outdated-banner hidden" style="display:none;margin-bottom:16px;padding:10px 14px;background:rgba(95,23,234,0.06);border:1px solid rgba(95,23,234,0.25);border-radius:4px;font-size:12px;color:var(--accent);text-align:center;font-weight:500;letter-spacing:0.01em;">
-        Your inputs have changed. Click <strong>Calculate</strong> to update.
+      <!-- Results wrapper: relative so banner can be centered over blurred content -->
+      <div id="results-wrapper" style="position:relative;">
+        <!-- Results Outdated Banner — centered overlay -->
+        <div id="results-outdated-banner" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;width:calc(100% - 32px);padding:16px 20px;background:rgb(243,227,232);border-radius:6px;font-size:13px;color:#5f17ea;text-align:center;font-weight:500;letter-spacing:0.01em;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+          Your inputs have changed. Click <strong>Calculate</strong> to update.
+        </div>
+        <div id="r-body" aria-live="assertive" aria-atomic="true"></div>
       </div>
-
-      <div id="r-body" aria-live="assertive" aria-atomic="true"></div>
     </div>
   </div>
 </div>
