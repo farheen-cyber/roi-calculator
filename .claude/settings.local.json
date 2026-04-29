@@ -16,7 +16,10 @@
       "Bash(curl -s http://localhost:3000/)",
       "Bash(awk '/<div class=\"main\">/,/<\\\\/div>/{if\\(/<\\\\/div>/\\)exit} END{print NR}' /Users/farheenshaikh/Documents/roi-calculator/roi-calculator.html)",
       "Bash(grep -n '^</div>$' /Users/farheenshaikh/Documents/roi-calculator/roi-calculator.html)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

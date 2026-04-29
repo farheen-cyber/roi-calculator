@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -539,6 +539,7 @@ function doCalc() {
     STAGE_HOURLY_RATES,
     STAGE_RETAINER,
     STAFFING_MATRIX,
+    SECRETARIAL_WORKFLOWS_BY_GEO,
     overrides
   );
 
@@ -595,16 +596,21 @@ function doCalc() {
   const ctMonthlyScaling = Math.max(0, (sh - 20) / 50) * 2;
   const ctMonthlyTotal = ctMonthlyBase + ctMonthlyScaling;
 
+  // Calculate secretarial hours (based on workflows and shareholder scaling)
+  const secHrs = roiData.secRaw * roiData.mult;
+
   // Calculate hours for each component
   const grHrs = roiData.grHr * gr;
   const compHrs = roiData.compHr;
   const capTableHrs = ctRaw;
-  const totalEquityMgmtHrs = grHrs + compHrs + capTableHrs;
+  const secretarialHrs = roiData.secRaw;
+  const totalEquityMgmtHrs = grHrs + compHrs + capTableHrs + secretarialHrs;
 
   // Calculate cost breakdown percentages
   const grantAdminPct = roiData.annCost > 0 ? Math.round((roiData.grCost / roiData.annCost) * 100) : 0;
   const compliancePct = roiData.annCost > 0 ? Math.round((roiData.cpCost / roiData.annCost) * 100) : 0;
   const capTablePct = roiData.annCost > 0 ? Math.round((roiData.ctCost / roiData.annCost) * 100) : 0;
+  const secretarialPct = roiData.annCost > 0 ? Math.round((roiData.secCost / roiData.annCost) * 100) : 0;
   const externalPct = roiData.annCost > 0 ? Math.round((roiData.methodExtCost / roiData.annCost) * 100) : 0;
 
   const costBreakdownDetails = `
@@ -629,6 +635,14 @@ function doCalc() {
         </div>
         <div class="cb-detail-formula">${Math.round(ctMonthlyBase)}h/mo base + ${Math.max(0, (sh - 20) / 50).toFixed(2)}h/mo scaling = ${ctMonthlyTotal.toFixed(1)}h/mo × 12 = ${Math.round(ctRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.rate}/hr</div>
         <div class="cb-detail-value">${sym}${fN(roiData.ctCost)} <span class="cb-detail-pct">${capTablePct}%</span></div>
+      </div>
+      <div class="cb-detail-item">
+        <div class="cb-detail-label">
+          Secretarial & Board Operations
+          <span class="cb-info-btn" title="Secretarial & Board Operations Cost Breakdown&#10;This cost includes board meetings, shareholder approvals, and required governance workflows.&#10;&#10;How we calculated it:&#10;Governance Workflows: ${roiData.workflows} per year (based on ${geo_inc.toUpperCase()})&#10;Hours per workflow: 2.5 hours&#10;Shareholder Complexity: ${roiData.shareholderScaling.toFixed(2)}x multiplier (${sh} shareholders)&#10;Management Method: ${roiData.mult}x (${meth === 'in-house' ? 'In-house' : 'Outsourced'})&#10;&#10;Why it varies by geography:&#10;India: Legally requires 4+ board meetings/year minimum&#10;USA: No legal minimum; investor-driven governance&#10;UK & Singapore: Annual AGM required; quarterly boards expected&#10;&#10;Why shareholder count matters:&#10;20 shareholders: Standard approval process (1.0x)&#10;100 shareholders: 1.4x effort (more documents, signatures)&#10;200 shareholders: 1.9x effort (significantly more coordination)">ℹ</span>
+        </div>
+        <div class="cb-detail-formula">${roiData.workflows} workflows/yr × 2.5 hrs/workflow × ${roiData.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(roiData.secRaw)} hrs/yr × ${roiData.mult} × ${sym}${roiData.secRate}/hr</div>
+        <div class="cb-detail-value">${sym}${fN(roiData.secCost)} <span class="cb-detail-pct">${secretarialPct}%</span></div>
       </div>
       ${roiData.methodExtCost > 0 ? `
       <div class="cb-detail-item">

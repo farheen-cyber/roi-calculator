@@ -139,7 +139,37 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
 - **Baseline**: 3 hrs/month minimum.
 - **Scaling**: Additional 2 hrs/month per 50 shareholders above a base of 20.
 
-### 4.4 External Service Cost (Outsourced Only)
+### 4.4 Secretarial & Board Operations Cost
+**Formula**: `workflows[geo_inc][stage] × 2.5 × (1 + max(0, (sh - 20) / 100) × 0.5) × mult × legal_secretarial_rate[geo_op][stage]`
+
+**Governance Workflows by Geography and Stage** (required by law):
+- **India** (Companies Act 2013): 1, 8, 12, 20, 30 workflows/yr for preseed, seed, series a/b, series b/c, series c+
+- **US** (No legal minimum, investor-driven): 0, 4, 8, 12, 16 workflows/yr
+- **UK** (Companies Act 2006 AGM requirement): 1, 4, 6, 10, 14 workflows/yr
+- **Singapore** (Companies Act AGM requirement): 1, 4, 6, 10, 14 workflows/yr
+
+**Calculation Breakdown**:
+1. **Base hours**: workflows × 2.5 hours per workflow (average for documentation, approvals, meetings)
+2. **Shareholder complexity multiplier**: 1 + max(0, (sh - 20) / 100) × 0.5
+   - 20 shareholders: 1.0x (standard)
+   - 100 shareholders: 1.4x (more documents, more signatures)
+   - 200 shareholders: 1.9x (significantly more coordination)
+3. **Method multiplier**: 1.0 (in-house) or 0.4 (outsourced)
+4. **Hourly rate**: Legal/Secretarial role rate from STAGE_HOURLY_RATES
+
+**Why It Varies by Geography**:
+- **India**: Legally requires minimum 4 board meetings/year + material change shareholder approvals
+- **USA**: No legal minimum for private companies; investor-driven (typically quarterly boards)
+- **UK & Singapore**: Annual AGM required; quarterly boards expected for investor companies
+
+**Example Calculation** (Series A/B, India, 100 shareholders, in-house):
+- Base workflows: 12/year
+- Shareholder scaling: 1 + (100 - 20) / 100 × 0.5 = 1.4x
+- Hours: 12 × 2.5 × 1.4 = 42 hours/year
+- Legal/Secretarial rate (India, Series A/B): ₹875/hr
+- Cost: 42 × 1.0 × ₹875 = ₹36,750/year
+
+### 4.5 External Service Cost (Outsourced Only)
 **Formula**: `STAGE_RETAINER[geo_op][stage]` (Only if Method = Outsourced)
 
 **Stage-Based Retainer by Geography**:
@@ -172,9 +202,9 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
 
 ---
 
-## 5. Blended Hourly Rate Calculation
+## 6. Blended Hourly Rate Calculation
 
-### 5.1 In-House Method
+### 6.1 In-House Method
 The blended hourly rate is calculated as the sum of FTE-weighted hourly rates for the stage:
 
 ```javascript
@@ -194,19 +224,19 @@ blended_rate = (0.8 × $288) + (1.0 × $156) + (1.0 × $131) + (0.5 × $119)
 
 This represents the effective hourly cost for equity administration across the full team.
 
-### 5.2 Outsourced Method
-No blended rate calculation. Use stage-based retainer directly (see §4.4).
+### 6.2 Outsourced Method
+No blended rate calculation. Use stage-based retainer directly (see §4.5).
 
 ---
 
-## 6. Summary Formulas
+## 7. Summary Formulas
 
-### 6.1 Total Annual Ops Cost (Manual)
+### 7.1 Total Annual Ops Cost (Manual)
 ```javascript
-ops_total = grant_admin_cost + compliance_cost + cap_table_cost + external_cost
+ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_cost + external_cost
 ```
 
-### 6.2 EquityList Annual Cost
+### 7.2 EquityList Annual Cost
 ```javascript
 el_platform = stakeholders × 1200 × FX[geo_op]
 // 1200 = ₹1,200 per stakeholder per year (India base price, converted at live rates)
@@ -224,27 +254,28 @@ el_cost = el_platform + el_overhead
 
 ---
 
-## 7. Derived Output Metrics
+## 8. Derived Output Metrics
 
-### 7.1 Annual Savings
+### 8.1 Annual Savings
 ```javascript
 savings = ops_total - el_cost
 // Positive = EquityList is cheaper; negative = ops already cheaper than EL
 ```
 
-### 7.2 Internal Effort (Manual Baseline)
+### 8.2 Internal Effort (Manual Baseline)
 ```javascript
-manual_hours = (gr × grHr) + compliance_hours[geo_inc] + ((3 + max(0,(sh-20)/50)×2) × 12)
+manual_hours = (gr × grHr) + compliance_hours[geo_inc] + ((3 + max(0,(sh-20)/50)×2) × 12) + (workflows[geo_inc][stage] × 2.5 × shareholder_scaling)
 // Full unaffected-by-method hours — what 100% manual execution would cost in time
+// shareholder_scaling = 1 + max(0, (sh - 20) / 100) × 0.5
 ```
 
-### 7.3 Internal Effort (Method-Adjusted)
+### 8.3 Internal Effort (Method-Adjusted)
 ```javascript
-adjusted_hours = (gr × grHr × mult) + (compliance_hours[geo_inc] × mult) + (cap_table_hours × mult)
+adjusted_hours = (gr × grHr × mult) + (compliance_hours[geo_inc] × mult) + (cap_table_hours × mult) + (secretarial_hours × mult)
 // Actual internal hours after applying method multiplier
 ```
 
-### 7.4 Time Saved %
+### 8.4 Time Saved %
 ```javascript
 time_saved_pct = round((manual_hours - adjusted_hours) / manual_hours × 100)
 // Represents the % of total equity ops effort that the current method eliminates vs. pure in-house

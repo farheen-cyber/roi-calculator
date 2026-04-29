@@ -17,10 +17,11 @@
  * @param {Object} stageRates - STAGE_HOURLY_RATES lookup table (stage-based rates by geography and role)
  * @param {Object} stageRetainer - STAGE_RETAINER lookup table (stage-based retainer costs by geography and stage)
  * @param {Object} staffingMatrix - STAFFING_MATRIX lookup table (FTE allocations by stage and role)
+ * @param {Object} secretarialWorkflows - SECRETARIAL_WORKFLOWS_BY_GEO lookup table (workflows by geography and stage)
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, overrides) {
+export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, overrides) {
   const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0 } = inputs;
 
   // Get blended hourly rate from stage-based staffing matrix (with override if provided)
@@ -62,9 +63,19 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   const cpRaw = compHr;
   const cpCost = cpRaw * mult * rate;
 
+  // Cap table maintenance cost
   const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
   const ctHrs = ctRaw * mult;
   const ctCost = ctHrs * rate;
+
+  // Calculate secretarial & board operations cost based on geography-specific workflows
+  const workflows = secretarialWorkflows?.[geo_inc]?.[stageKey] || 0;
+  const secBaseHours = workflows * 2.5;
+  const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
+  const secRaw = secBaseHours * shareholderScaling;
+  const secHrs = secRaw * mult;
+  const secRate = stageRates[geo_op]?.[stageKey]?.cs || 0;
+  const secCost = secHrs * secRate;
 
   // External costs based on method
   let methodExtCost = toolCost;
@@ -74,11 +85,11 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   }
 
   // Total annual cost
-  const annCost = grCost + cpCost + ctCost + methodExtCost;
+  const annCost = grCost + cpCost + ctCost + secCost + methodExtCost;
 
   // Calculate efficiency metrics
-  const manualHTotal = grHrs + cpRaw + ctRaw;
-  const internalHTotal = grHrs * mult + cpRaw * mult + ctHrs;
+  const manualHTotal = grHrs + cpRaw + ctRaw + secRaw;
+  const internalHTotal = grHrs * mult + cpRaw * mult + ctHrs + secHrs;
   const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
 
   // EquityList overhead (10% of manual baseline)
@@ -112,6 +123,11 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     grCost: Math.round(grCost),
     cpCost: Math.round(cpCost),
     ctCost: Math.round(ctCost),
+    secCost: Math.round(secCost),
+    secRaw,
+    secRate,
+    workflows,
+    shareholderScaling,
     methodExtCost: Math.round(methodExtCost),
     elOverhead: Math.round(elOverhead),
     grHr,

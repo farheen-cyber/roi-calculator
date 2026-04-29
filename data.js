@@ -156,3 +156,34 @@ export const STAFFING_MATRIX = {
   seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, cs: 1.0 },
   seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, cs: 1.5 }
 };
+
+export const SECRETARIAL_WORKFLOWS_BY_GEO = {
+  india: {
+    preseed: 1,
+    seed: 8,
+    seriesab: 12,
+    seriesbc: 20,
+    seriesc: 30
+  },
+  us: {
+    preseed: 0,
+    seed: 4,
+    seriesab: 8,
+    seriesbc: 12,
+    seriesc: 16
+  },
+  uk: {
+    preseed: 1,
+    seed: 4,
+    seriesab: 6,
+    seriesbc: 10,
+    seriesc: 14
+  },
+  singapore: {
+    preseed: 1,
+    seed: 4,
+    seriesab: 6,
+    seriesbc: 10,
+    seriesc: 14
+  }
+};
