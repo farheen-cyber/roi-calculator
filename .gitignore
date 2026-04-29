@@ -2,3 +2,11 @@ node_modules/
 .env
 .DS_Store
 research_reports_exec-comp/
+
+# Test artifacts
+test-results.log
+test-run*.log
+test-runner-output.txt
+
+# Backups
+*.bak

@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, FX, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS, VALUATION_TYPES_BY_GEO, VALUATION_INTERNAL_HOURS } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS, VALUATION_TYPES_BY_GEO, VALUATION_INTERNAL_HOURS } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -761,11 +761,10 @@ function doCalc() {
 
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise, valuationFrequency, valuationType, valuationCostMarket, valuationCostEl },
+    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, fundraiseRound, newShareholdersFromFundraise, valuationFrequency, valuationType, valuationCostMarket, valuationCostEl },
     RATES,
     COMPLIANCE,
     EXT,
-    FX,
     PRICING,
     STAGE_HOURLY_RATES,
     STAGE_RETAINER,
@@ -1087,21 +1086,6 @@ window.addEventListener('DOMContentLoaded', () => {
     field.addEventListener('input', handleChange);
   });
 
-  // Fetch live FX rates
-  fetch('https://open.er-api.com/v6/latest/INR')
-    .then((r) => r.json())
-    .then((d) => {
-      if (d.rates) {
-        FX.us = d.rates.USD;
-        FX.singapore = d.rates.SGD;
-        FX.uk = d.rates.GBP;
-        // Only recalculate if user has already started entering data
-        if (userInputStarted) {
-          doCalc();
-        }
-      }
-    })
-    .catch((e) => console.warn('FX update failed'));
 });
 
 // ==================== GLOBAL FUNCTION EXPORTS ====================

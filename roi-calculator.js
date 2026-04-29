@@ -10,6 +10,7 @@
  * @param {string} inputs.meth - Administrative method (in-house, outsourced)
  * @param {number} inputs.toolCost - Annual tool cost (unused, kept for compatibility)
  * @param {boolean} inputs.planningToFundraise - Planning to fundraise in next 12 months
+ * @param {string} inputs.fundraiseRound - Round type (safe, seed, seriesab, seriesbc, bridge)
  * @param {number} inputs.newShareholdersFromFundraise - Expected new shareholders from fundraise
  * @param {string} inputs.valuationFrequency - Valuation frequency (annually, quarterly, or empty)
  * @param {string} inputs.valuationType - Selected valuation type name
@@ -18,7 +19,6 @@
  * @param {Object} rates - RATES lookup table (legacy, used as fallback)
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
- * @param {Object} fx - FX lookup table
  * @param {Object} pricing - PRICING lookup table (per-stakeholder cost by geography)
  * @param {Object} stageRates - STAGE_HOURLY_RATES lookup table (stage-based rates by geography and role)
  * @param {Object} stageRetainer - STAGE_RETAINER lookup table (stage-based retainer costs by geography and stage)
@@ -28,30 +28,54 @@
  * @param {Object} overrides - { rate, grHr, compHr } for editable assumptions
  * @returns {Object} ROI calculation results
  */
-export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, fundraisingWorkflows, overrides) {
-  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '', valuationCostMarket = 0, valuationCostEl = 0 } = inputs;
+export function computeROI(inputs, rates, compliance, ext, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, fundraisingWorkflows, overrides) {
+  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, fundraiseRound = '', newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '', valuationCostMarket = 0, valuationCostEl = 0 } = inputs;
 
-  // Get blended hourly rate from stage-based staffing matrix (with override if provided)
+  const VALID_GEOS = ['india', 'us', 'singapore', 'uk'];
+  const VALID_STAGES = ['preseed', 'seed', 'seriesab', 'seriesbc', 'seriesc'];
+  const VALID_METHODS = ['in-house', 'outsourced'];
+
+  if (!VALID_GEOS.includes(geo_inc)) throw new Error(`Invalid geo_inc: "${geo_inc}". Must be one of ${VALID_GEOS.join(', ')}`);
+  if (!VALID_GEOS.includes(geo_op)) throw new Error(`Invalid geo_op: "${geo_op}". Must be one of ${VALID_GEOS.join(', ')}`);
+  if (!VALID_METHODS.includes(meth)) throw new Error(`Invalid meth: "${meth}". Must be one of ${VALID_METHODS.join(', ')}`);
+  if (stage && !VALID_STAGES.includes(stage)) throw new Error(`Invalid stage: "${stage}". Must be one of ${VALID_STAGES.join(', ')}`);
+  if (typeof sh !== 'number' || sh < 0) throw new Error(`Invalid sh: must be non-negative number, got ${sh}`);
+  if (typeof oh !== 'number' || oh < 0) throw new Error(`Invalid oh: must be non-negative number, got ${oh}`);
+  if (typeof gr !== 'number' || gr < 0) throw new Error(`Invalid gr: must be non-negative number, got ${gr}`);
+
+  if (!compliance?.[geo_inc]) throw new Error(`COMPLIANCE missing entry for geo_inc="${geo_inc}"`);
+  if (!pricing?.[geo_op]) throw new Error(`PRICING missing entry for geo_op="${geo_op}"`);
+  if (!stageRates?.[geo_op]) throw new Error(`STAGE_HOURLY_RATES missing entry for geo_op="${geo_op}"`);
+  if (!stageRetainer?.[geo_op]) throw new Error(`STAGE_RETAINER missing entry for geo_op="${geo_op}"`);
+  if (!secretarialWorkflows?.[geo_inc]) throw new Error(`SECRETARIAL_WORKFLOWS_BY_GEO missing entry for geo_inc="${geo_inc}"`);
+  if (!staffingMatrix) throw new Error('STAFFING_MATRIX is required');
+  if (!fundraisingWorkflows) throw new Error('FUNDRAISING_WORKFLOWS is required');
+
   const stakeholders = Math.min(sh + oh, 10000);
-  const stageKey = stage || 'seriesab'; // default to Series A/B if not specified
+  const stageKey = stage || 'seriesab';
+
+  if (!staffingMatrix[stageKey]) throw new Error(`STAFFING_MATRIX missing entry for stage="${stageKey}"`);
+  if (!stageRates[geo_op][stageKey]) throw new Error(`STAGE_HOURLY_RATES missing entry for geo_op="${geo_op}", stage="${stageKey}"`);
+  if (!stageRetainer[geo_op][stageKey]) throw new Error(`STAGE_RETAINER missing entry for geo_op="${geo_op}", stage="${stageKey}"`);
 
   let rate = overrides.rate;
   if (!rate) {
-    // Calculate blended rate based on staffing matrix for the stage
     if (meth === 'in-house') {
-      const matrix = staffingMatrix[stageKey] || staffingMatrix['seriesab'];
-      const roles = ['founder', 'hr', 'finance', 'cs']; // 'cs' = Legal/Company Secretary
+      const matrix = staffingMatrix[stageKey];
+      const roles = ['founder', 'hr', 'finance', 'cs'];
       rate = 0;
 
       for (const role of roles) {
         const fte = matrix[role] || 0;
         if (fte > 0) {
-          const roleRate = stageRates[geo_op]?.[stageKey]?.[role] || 0;
+          const roleRate = stageRates[geo_op][stageKey][role];
+          if (typeof roleRate !== 'number') {
+            throw new Error(`STAGE_HOURLY_RATES missing rate for geo_op="${geo_op}", stage="${stageKey}", role="${role}"`);
+          }
           rate += fte * roleRate;
         }
       }
     } else if (meth === 'outsourced') {
-      // For outsourced, we don't use hourly rate; we use retainer instead
       rate = 0;
     }
   }
@@ -75,9 +99,11 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   const ctHrs = ctRaw * mult;
   const ctCost = ctHrs * rate;
 
-  // Cap table fundraising cost (separate)
+  // Cap table fundraising cost (one-time per fundraise event, scaled by round complexity)
+  const ROUND_COMPLEXITY = { safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
+  const roundMultiplier = planningToFundraise ? (ROUND_COMPLEXITY[fundraiseRound] || 1.0) : 0;
   const ctFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.capTable || 0) : 0;
-  const ctFundraisingHours = ctFundraisingWorkflows * 2.5 * 12;
+  const ctFundraisingHours = ctFundraisingWorkflows * 2.5 * roundMultiplier;
   const ctFundraisingHrs = ctFundraisingHours * mult;
   const ctFundraisingCost = ctFundraisingHrs * rate;
 
@@ -89,12 +115,13 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
   const secRaw = secBaseHours * shareholderScaling;
   const secHrs = secRaw * mult;
-  const secRate = stageRates[geo_op]?.[stageKey]?.cs || 0;
+  const secRate = stageRates[geo_op][stageKey].cs;
+  if (typeof secRate !== 'number') throw new Error(`STAGE_HOURLY_RATES missing 'cs' rate for geo_op="${geo_op}", stage="${stageKey}"`);
   const secCost = secHrs * secRate;
 
-  // Secretarial fundraising cost (separate)
+  // Secretarial fundraising cost (one-time per fundraise event, scaled by round complexity)
   const secFundraisingWorkflows = planningToFundraise ? (fundraisingWorkflows?.secretarial || 0) : 0;
-  const secFundraisingHours = secFundraisingWorkflows * 2.5;
+  const secFundraisingHours = secFundraisingWorkflows * 2.5 * roundMultiplier;
   const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
   const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
   const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
@@ -104,8 +131,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   // External costs based on method
   let methodExtCost = toolCost;
   if (meth === 'outsourced') {
-    // Stage-based external service cost (CA/Law Firm retainer)
-    methodExtCost = stageRetainer[geo_op]?.[stageKey] || ext[geo_op];
+    methodExtCost = stageRetainer[geo_op][stageKey];
   }
 
   // Valuation services cost

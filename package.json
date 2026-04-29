@@ -1,22 +1,10 @@
 {
-  "name": "equitylist-cap-table-parser",
-  "version": "1.0.0",
-  "description": "EquityList — Cap table file upload + Claude AI extraction backend",
+  "name": "equitylist-roi-calculator",
+  "version": "3.3.0",
+  "description": "EquityList ROI Calculator — equity administration cost comparison",
   "type": "module",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.26.0",
-    "dotenv": "^16.4.0",
-    "express": "^4.19.0",
-    "multer": "^1.4.5-lts.1",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "test": "node test-calculator.js"
   },
   "engines": {
     "node": ">=18.0.0"

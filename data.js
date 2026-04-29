@@ -142,13 +142,6 @@ export const STAGE_HOURLY_RATES = {
   }
 };
 
-export let FX = {
-  india: 1,
-  us: 0.01205,
-  singapore: 0.01613,
-  uk: 0.00943
-};
-
 export const STAFFING_MATRIX = {
   preseed: { founder: 1.0, hr: 0, finance: 0, cs: 0 },
   seed: { founder: 1.0, hr: 0.5, finance: 0.5, cs: 0 },

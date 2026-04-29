@@ -509,7 +509,16 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 
 ## 9. Key Changes from Previous Versions
 
-### Version 3.2 (Current)
+### Version 3.3 (Current)
+- **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
+- **Removed**: Unused FX conversion table (PRICING and rates are already in each geography's local currency)
+- **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 421,120 input combinations
+- **Added**: Input validation in `computeROI()` — throws explicit errors on missing geography/stage tables instead of silent zeros
+- **Added**: Round-complexity multiplier for fundraising costs (SAFE 0.5×, Bridge 0.75×, Seed 1.0×, Series A/B 1.5×, Series B/C 2.0×, Series C+ 2.5×)
+- **Fixed**: Cap-table fundraising hours no longer multiplied by 12 (was incorrectly modeling one-time event as monthly recurring)
+- **Updated**: PRD reflects current implementation state
+
+### Version 3.2
 - **Implemented**: EquityList valuation cost integration into ROI calculation
 - **Changed**: `elAnn` (EquityList cost) now includes discounted valuation pricing
 - **Added**: Extract and pass both `valuationCostMarket` and `valuationCostEl` to ROI function
