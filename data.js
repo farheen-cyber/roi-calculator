@@ -194,7 +194,7 @@ export const FUNDRAISING_WORKFLOWS = {
 };
 
 export const VALUATION_TYPES_BY_GEO = {
-  usa: [
+  us: [
     { name: '409A Valuation', sub: 'Black-Scholes', cost: 6000, elCost: 400 }
   ],
   india: [

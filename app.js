@@ -608,20 +608,23 @@ function rebuildValuationTypeOptions() {
   const typeSelect = document.getElementById('i-val-type');
   const geoTag = document.getElementById('valuation-geo-tag');
   const helperText = document.getElementById('val-helper-text');
+  const wrapper = typeSelect?.parentElement;
 
-  if (!typeSelect) return;
+  if (!typeSelect || !wrapper) return;
 
   const geoInc = geoIncSelect?.value || 'usa';
   const options = VALUATION_TYPES_BY_GEO[geoInc] || [];
 
-  // Clear existing options
+  // Clear existing options from native select
   typeSelect.innerHTML = '<option value="">Select report type...</option>';
-  const dropdown = typeSelect.parentElement?.querySelector('.select-dropdown');
+
+  // Clear existing options from custom dropdown list
+  const dropdown = wrapper.querySelector('.select-dropdown');
   if (dropdown) {
     dropdown.innerHTML = '';
   }
 
-  // Add new options
+  // Add new options to both native select and custom dropdown
   options.forEach(opt => {
     const optionEl = document.createElement('option');
     optionEl.value = opt.name;
@@ -645,6 +648,7 @@ function rebuildValuationTypeOptions() {
       helperText.style.display = 'block';
     }
   } else {
+    typeSelect.value = '';
     if (helperText) helperText.style.display = 'none';
   }
 
@@ -653,10 +657,28 @@ function rebuildValuationTypeOptions() {
     geoTag.textContent = geoInc.toUpperCase();
   }
 
-  // Reset dropdown display if needed
-  if (typeSelect.parentElement?.querySelector('.SelectField')) {
-    const sf = typeSelect.parentElement.SelectField;
-    if (sf) sf.updateDisplay();
+  // Reinitialize SelectField to pick up new options
+  const display = wrapper.querySelector('.select-display');
+  if (display && dropdown && typeSelect._selectField) {
+    // Update the SelectField instance's cached references
+    typeSelect._selectField.options = wrapper.querySelectorAll('[role="option"]');
+
+    // Re-attach event listeners to new options
+    typeSelect._selectField.options.forEach((option) => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        typeSelect.value = option.dataset.value;
+        typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+
+      option.addEventListener('mouseenter', () => {
+        typeSelect._selectField.options.forEach((o) => o.setAttribute('aria-selected', 'false'));
+        option.setAttribute('aria-selected', 'true');
+      });
+    });
+
+    // Update display
+    typeSelect._selectField.updateDisplay();
   }
 
   updateValuationNote();
@@ -1024,7 +1046,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize custom select components
   setTimeout(() => {
     document.querySelectorAll('.custom-select').forEach((selectElement) => {
-      new SelectField(selectElement);
+      const instance = new SelectField(selectElement);
+      // Store reference on select element for later access
+      selectElement._selectField = instance;
     });
 
     // Initialize valuation report type options based on current geo_inc
@@ -1103,6 +1127,7 @@ window.getValuationFrequency = getValuationFrequency;
 window.getValuationType = getValuationType;
 window.updateValuationNote = updateValuationNote;
 window.rebuildValuationTypeOptions = rebuildValuationTypeOptions;
+window.VALUATION_TYPES_BY_GEO = VALUATION_TYPES_BY_GEO;
 window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;
