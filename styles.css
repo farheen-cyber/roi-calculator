@@ -1657,11 +1657,11 @@ body.state-overview #res-status {
 #i-fundraise {
   appearance: none;
   -webkit-appearance: none;
-  width: 44px;
-  height: 24px;
-  background: var(--bd);
+  width: 56px;
+  height: 32px;
+  background: rgba(195, 190, 230, 0.5);
   border: none;
-  border-radius: 12px;
+  border-radius: 16px;
   cursor: pointer;
   position: relative;
   transition: background-color 0.3s ease;
@@ -1676,17 +1676,17 @@ body.state-overview #res-status {
 #i-fundraise::before {
   content: '';
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: white;
-  top: 2px;
-  left: 2px;
+  top: 3px;
+  left: 3px;
   transition: left 0.3s ease;
 }
 
 #i-fundraise:checked::before {
-  left: 22px;
+  left: 27px;
 }
 
 #i-fundraise:hover {
@@ -1701,22 +1701,22 @@ input[name="fundraise-timing"] {
 
 input[name="fundraise-round"] + div,
 input[name="fundraise-timing"] + div {
-  padding: 10px;
-  border: 1px solid var(--bd);
-  border-radius: 6px;
+  padding: 12px 20px;
+  border: 1px solid rgba(195, 190, 230, 0.6);
+  border-radius: 20px;
   text-align: center;
   font-size: 13px;
   font-weight: 500;
-  background: white;
+  background: rgba(195, 190, 230, 0.25);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--t2);
+  color: var(--t1);
 }
 
 input[name="fundraise-round"] + div:hover,
 input[name="fundraise-timing"] + div:hover {
   border-color: var(--accent);
-  background: rgba(88, 86, 214, 0.05);
+  background: rgba(195, 190, 230, 0.35);
 }
 
 input[name="fundraise-round"]:checked + div,
@@ -1738,4 +1738,13 @@ input[name="fundraise-timing"]:checked + div {
 .dark-theme input[name="fundraise-timing"]:checked + div {
   background-color: var(--accent);
   color: white;
+}
+
+/* Fundraise details card styling */
+#fundraise-details {
+  background: rgba(195, 190, 230, 0.2) !important;
+  border: 1px solid rgba(195, 190, 230, 0.5) !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  margin-top: 16px !important;
 }
