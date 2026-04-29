@@ -760,17 +760,19 @@ function doCalc() {
   const valuationFrequency = getValuationFrequency();
   const valuationType = getValuationType();
   let valuationCostMarket = 0;
+  let valuationCostEl = 0;
   if (valuationType) {
     const geoTypes = VALUATION_TYPES_BY_GEO[geo_inc] || [];
     const selected = geoTypes.find(t => t.name === valuationType);
     if (selected) {
       valuationCostMarket = selected.cost;
+      valuationCostEl = selected.elCost;
     }
   }
 
   // Call pure ROI calculation function
   const roiData = computeROI(
-    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise, valuationFrequency, valuationType, valuationCostMarket },
+    { sh, oh, gr, stage: calculationStage, geo_inc, geo_op, meth, toolCost, planningToFundraise, newShareholdersFromFundraise, valuationFrequency, valuationType, valuationCostMarket, valuationCostEl },
     RATES,
     COMPLIANCE,
     EXT,

@@ -11,6 +11,10 @@
  * @param {number} inputs.toolCost - Annual tool cost (unused, kept for compatibility)
  * @param {boolean} inputs.planningToFundraise - Planning to fundraise in next 12 months
  * @param {number} inputs.newShareholdersFromFundraise - Expected new shareholders from fundraise
+ * @param {string} inputs.valuationFrequency - Valuation frequency (annually, quarterly, or empty)
+ * @param {string} inputs.valuationType - Selected valuation type name
+ * @param {number} inputs.valuationCostMarket - Market cost per valuation event
+ * @param {number} inputs.valuationCostEl - EquityList cost per valuation event
  * @param {Object} rates - RATES lookup table (legacy, used as fallback)
  * @param {Object} compliance - COMPLIANCE lookup table
  * @param {Object} ext - EXT lookup table
@@ -25,7 +29,7 @@
  * @returns {Object} ROI calculation results
  */
 export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRates, stageRetainer, staffingMatrix, secretarialWorkflows, fundraisingWorkflows, overrides) {
-  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '', valuationCostMarket = 0 } = inputs;
+  const { sh, oh, gr, stage, geo_inc, geo_op, meth, toolCost = 0, planningToFundraise = false, newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '', valuationCostMarket = 0, valuationCostEl = 0 } = inputs;
 
   // Get blended hourly rate from stage-based staffing matrix (with override if provided)
   const stakeholders = Math.min(sh + oh, 10000);
@@ -97,9 +101,11 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
 
   // Valuation services cost
   let valuationCost = 0;
+  let elValuationCost = 0;
   if (valuationFrequency && valuationType) {
     const frequencyMultiplier = valuationFrequency === 'quarterly' ? 4 : 1;
     valuationCost = valuationCostMarket * frequencyMultiplier;
+    elValuationCost = valuationCostEl * frequencyMultiplier;
   }
 
   // Total annual cost
@@ -113,8 +119,8 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
   // EquityList overhead (10% of manual baseline)
   const elOverhead = manualHTotal * 0.1 * rate;
 
-  // EquityList annual cost (pricing is per-stakeholder in local currency)
-  const elAnn = stakeholders * pricing[geo_op] + elOverhead;
+  // EquityList annual cost (pricing is per-stakeholder in local currency, includes discounted valuation cost)
+  const elAnn = stakeholders * pricing[geo_op] + elOverhead + elValuationCost;
 
   // ROI calculation
   const diff = annCost - elAnn;
@@ -154,6 +160,7 @@ export function computeROI(inputs, rates, compliance, ext, fx, pricing, stageRat
     newShareholdersFromFundraise,
     methodExtCost: Math.round(methodExtCost),
     valuationCost: Math.round(valuationCost),
+    elValuationCost: Math.round(elValuationCost),
     elOverhead: Math.round(elOverhead),
     grHr,
     compHr,
