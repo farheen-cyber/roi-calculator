@@ -260,33 +260,17 @@ function validateStep(step) {
 }
 
 function updateStepVisibility() {
-  // For single-page form, show all sections
+  // Single-page form: show all sections, never dim any
   document.querySelectorAll('#input-state .sec').forEach((sec) => {
     sec.classList.add('active');
     sec.classList.remove('hidden');
     sec.classList.remove('dim');
   });
 
-  // Update step indicator
-  document.getElementById('current-step').textContent = currentStep;
-
-  // Update button states
-  const backBtn = document.getElementById('btn-back');
-  backBtn.style.display = currentStep === 1 ? 'none' : 'inline-flex';
-  backBtn.disabled = false;
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.style.display = currentStep === 3 ? 'none' : 'inline-flex';
-  nextBtn.disabled = !validateStep(currentStep);
-
-  // Show Calculate button only on Step 3
+  // Always show the Calculate button
   const calculateBtnWrap = document.getElementById('calculate-btn-wrap');
-  if (calculateBtnWrap) {
-    calculateBtnWrap.style.display = currentStep === 3 ? 'block' : 'none';
-    // Update button enabled/disabled state when showing on Step 3
-    if (currentStep === 3) {
-      validateAndUpdateButtonState();
-    }
-  }
+  if (calculateBtnWrap) calculateBtnWrap.style.display = 'block';
+  validateAndUpdateButtonState();
 }
 
 function stepNext() {
@@ -536,10 +520,6 @@ function doCalc() {
     document.getElementById('res-status').style.display = 'none';
     document.getElementById('r-body').innerHTML =
       '<div style="padding:40px 0;text-align:center;color:var(--t2)">Fill in all required fields (*) to see estimate.</div>';
-    // Clear cost table when invalid
-    document.getElementById('cost-you').textContent = '$0';
-    document.getElementById('cost-el').textContent = '$0';
-    document.getElementById('cost-savings').textContent = '$0';
     document.getElementById('mobile-summary').style.display = 'none';
     return;
   }
@@ -753,38 +733,7 @@ function doCalc() {
 // Modal functions removed - Cost Breakdown is now inline in main results panel
 
 // ==================== SECTION OBSERVER ====================
-
-const sectionObs = new IntersectionObserver(
-  (entries) => {
-    let closestSection = null;
-    let maxRatio = -1;
-
-    entries.forEach((entry) => {
-      if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-        maxRatio = entry.intersectionRatio;
-        closestSection = entry.target;
-      }
-    });
-
-    if (!closestSection) {
-      entries.forEach((entry) => {
-        const rect = entry.target.getBoundingClientRect();
-        if (!closestSection || Math.abs(rect.top) < Math.abs(closestSection.getBoundingClientRect().top)) {
-          closestSection = entry.target;
-        }
-      });
-    }
-
-    document.querySelectorAll('.sec').forEach((s) => {
-      if (s === closestSection) {
-        s.classList.remove('dim');
-      } else {
-        s.classList.add('dim');
-      }
-    });
-  },
-  { threshold: [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1], rootMargin: '-20% 0px -20% 0px' }
-);
+// Section dimming removed — all sections are always fully visible.
 
 // ==================== INITIALIZATION ====================
 
@@ -807,23 +756,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }, 0);
 
-  // Initialize section 01 as active
-  const sec1 = document.getElementById('sec-1');
-  if (sec1) sec1.classList.remove('dim');
-
-  // Observe all sections
-  document.querySelectorAll('.sec').forEach((s) => sectionObs.observe(s));
-
-  // Click/focus handlers for field interaction
-  document.querySelectorAll('.fi input, .fi select').forEach((f) => {
-    const focus = () => {
-      const targetSec = f.closest('.sec');
-      document.querySelectorAll('.sec').forEach((s) => s.classList.toggle('dim', s !== targetSec));
-    };
-    f.addEventListener('focus', focus);
-    f.addEventListener('click', focus);
-  });
-
   // Initialize stepper
   currentStep = 1;
   formStateData = {};
@@ -834,22 +766,18 @@ window.addEventListener('DOMContentLoaded', () => {
   initialMethod = document.getElementById('i-meth').value;
   doCalc();
 
-  // Add field change detection to mark results as stale
+  // Add field change detection: validate, clamp negatives, mark results stale
   document.querySelectorAll('#input-state input, #input-state select').forEach((field) => {
-    field.addEventListener('change', () => {
-      // Validate numeric inputs are non-negative
+    const handleChange = () => {
       if (field.type === 'number' && field.value !== '' && parseFloat(field.value) < 0) {
         field.value = '0';
       }
+      // Show/clear per-field errors immediately on change
+      displayFieldErrors(validateInputs());
       setResultsStale(true);
-    });
-    field.addEventListener('input', () => {
-      // Validate numeric inputs are non-negative
-      if (field.type === 'number' && field.value !== '' && parseFloat(field.value) < 0) {
-        field.value = '0';
-      }
-      setResultsStale(true);
-    });
+    };
+    field.addEventListener('change', handleChange);
+    field.addEventListener('input', handleChange);
   });
 
   // Fetch live FX rates

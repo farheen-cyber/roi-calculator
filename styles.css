@@ -453,9 +453,6 @@ body {
   transition: opacity 0.3s;
 }
 
-.sec.dim {
-  opacity: 0.3;
-}
 
 .sec-n {
   font-family: var(--mono);
