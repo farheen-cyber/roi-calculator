@@ -1,25 +1,71 @@
 # EquityList ROI Calculator — Logic & Calculation Specification
 
-**Version**: 3.0  
-**Last Updated**: April 28, 2026  
-**Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine.
+**Version**: 3.2  
+**Last Updated**: April 29, 2026 (Evening)  
+**Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine. Complete documentation of the calculator's workflow, cost components, ROI logic, and all features including valuation reports.
+
+---
+
+## OVERVIEW: Calculator Architecture & User Flow
+
+### What is the Calculator?
+The EquityList ROI Calculator is a financial estimation tool that compares the total annual cost of in-house or outsourced equity administration against EquityList's platform cost, showing companies their potential savings and operational efficiency gains.
+
+### Primary Goal
+Display a clear ROI case: how much a company spends annually managing equity, cap tables, and compliance, versus how much they'd spend on EquityList + minimal internal oversight.
+
+### User Journey
+1. **Input Phase** (Step 1 & 2): User enters company fundamentals (shareholders, grants, geography, stage, method)
+2. **Valuation Assessment** (Step 2, optional): If company needs third-party valuations, define frequency and type
+3. **Results Phase**: Calculator displays:
+   - Annual cost of current method (in-house or outsourced)
+   - Annual EquityList cost
+   - Savings or overspend
+   - ROI multiple
+   - Detailed cost breakdown
+   - Hours saved annually
+
+### Key Concepts
+- **Blended Hourly Rate**: For in-house method, the cost of equity operations is based on the sum of (FTE × role hourly rate) for the company stage. This accounts for multi-person effort (founder, HR, Finance, Legal).
+- **Method Multiplier**: The fraction of work retained internally (1.0 for in-house, 0.4 for outsourced with CA/Legal help).
+- **Geographic Duality**: Two geography inputs serve different purposes:
+  - `geo_inc` (incorporation): Determines compliance requirements
+  - `geo_op` (operations): Determines hourly rates, retainer costs, and EquityList pricing
+- **Stage-Based Staffing**: Equity admin workload scales predictably with funding stage. A preseed founder does everything; a Series C company has dedicated teams.
 
 ---
 
 ## 1. Input Mapping & Normalization
 
-| UI Input | Variable | Range / Type | Default | Required |
-|:---|:---|:---|:---|:---|
-| Shareholders | `sh` | Positive number | 30 | Yes |
-| Option Holders | `oh` | Positive number | 15 | Yes |
-| Equity grants issued / year | `gr` | Positive number | 10 | Yes |
-| Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Yes |
-| Country of Operation | `geo_op` | India, US, Singapore, UK | India | Yes |
-| Current Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Yes |
-| Administrative Method | `meth` | In-house, Outsourced | In-house | Yes |
-| Legal Entity Name | `co` | String | — | No (display only) |
+### Required Inputs (Step 1 & 2)
 
-**Note**: The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.4).
+| UI Input | Variable | Range / Type | Default | Notes |
+|:---|:---|:---|:---|:---|
+| Legal Entity Name | `co` | String | — | Display only, no calculation impact |
+| Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements & valuation types |
+| Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, EL pricing |
+| Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
+| Shareholders Count | `sh` | Positive integer ≥ 1 | 30 | Affects cap table and secretarial scaling |
+| Option Holders Count | `oh` | Positive integer ≥ 0 | 15 | Counted toward total stakeholders for pricing |
+| Annual Equity Grants | `gr` | Positive integer ≥ 1 | 10 | Number of grant issuance events per year |
+| Administration Method | `meth` | In-house \| Outsourced | In-house | Determines cost model (blended rate vs. retainer) |
+
+### Optional Inputs (Step 2)
+
+| UI Input | Variable | Range / Type | Default | Notes |
+|:---|:---|:---|:---|:---|
+| Planning to Fundraise | `planningToFundraise` | Boolean | No (OFF) | If YES, unlocks fundraising subsection |
+| Fundraising Round | `fundraiseRound` | Seed, Series A, Series B, Series C, SAFE/Bridge | — | Only if planning to fundraise; overrides stage if specific round |
+| Fundraising Timing | `fundraiseTiming` | 3, 6, 9, or 12 months | — | Only if planning to fundraise; for impact messaging |
+| Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
+| Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
+| Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
+| Valuation Report Type | `valuationType` | Country-specific options | — | Only if valuations needed; determines cost per event |
+
+**Notes:** 
+- The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
+- Optional inputs don't require user interaction unless explicitly enabled via toggle.
+- When optional inputs are disabled, their parameters pass as empty/zero to `computeROI()` and are excluded from calculations.
 
 ---
 
@@ -41,12 +87,19 @@ Determines FTE (Full-Time Equivalent) allocation by role for each company stage.
 
 ```javascript
 const STAFFING_MATRIX = {
-  preseed: { founder: 1.0, hr: 0, finance: 0, secretarial: 0 },
-  seed: { founder: 1.0, hr: 0.5, finance: 0.5, secretarial: 0 },
-  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, secretarial: 0.5 },
-  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, secretarial: 1.0 },
-  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, secretarial: 1.5 }
+  preseed: { founder: 1.0, hr: 0, finance: 0, cs: 0 },
+  seed: { founder: 1.0, hr: 0.5, finance: 0.5, cs: 0 },
+  seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, cs: 0.5 },
+  seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, cs: 1.0 },
+  seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, cs: 1.5 }
 };
+```
+
+**Role Definitions:**
+- `founder`: CEO/Founder equity oversight
+- `hr`: HR/People Operations managing cap table and option grants
+- `finance`: Finance/CFO managing equity accounting and reporting
+- `cs`: Company Secretary/Legal handling governance and regulatory compliance
 ```
 
 **Staffing Allocation Rationale:**
@@ -135,14 +188,29 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
     - **Europe/Asia**: IFRS 2 Share-based Payment.
 
 ### 4.3 Cap Table Maintenance Cost
-**Formula**: `((3 + max(0, (sh - 20) / 50) × 2) × 12) × mult × blended_rate`
-- **Baseline**: 3 hrs/month minimum.
-- **Scaling**: Additional 2 hrs/month per 50 shareholders above a base of 20.
+**Formula**: `monthly_hours × 12 months × mult × blended_rate`
+
+Where `monthly_hours = 3 + max(0, (sh - 20) / 50) × 2`
+
+**Breakdown:**
+- **Base**: 3 hours/month (standard monthly reconciliation, board updates, record-keeping)
+- **Scaling**: +2 hours/month for every 50 shareholders above 20
+  - 20 shareholders: 3 hrs/month = 36 hrs/yr
+  - 70 shareholders: 3 + (50/50) × 2 = 5 hrs/month = 60 hrs/yr
+  - 120 shareholders: 3 + (100/50) × 2 = 7 hrs/month = 84 hrs/yr
+  - 220 shareholders: 3 + (200/50) × 2 = 11 hrs/month = 132 hrs/yr
+
+**Rationale**: Cap table complexity grows with stakeholder count. Beyond 20 shareholders, coordination overhead increases non-linearly due to shareholder notifications, approval tracking, and amendment management.
 
 ### 4.4 Secretarial & Board Operations Cost
-**Formula**: `workflows[geo_inc][stage] × 2.5 × (1 + max(0, (sh - 20) / 100) × 0.5) × mult × legal_secretarial_rate[geo_op][stage]`
+**Formula**: `(base_workflows + fundraising_workflows) × 2.5 × (1 + max(0, (sh - 20) / 100) × 0.5) × mult × cs_rate[geo_op][stage]`
 
-**Governance Workflows by Geography and Stage** (required by law):
+Where:
+- `base_workflows` = governance workflows required by law in that country
+- `fundraising_workflows` = 3 additional workflows if planning to fundraise (cap table + secretarial prep); 0 otherwise
+- `cs_rate` = Company Secretary/Legal role hourly rate for geo_op and stage
+
+**Base Governance Workflows by Geography and Stage** (required by law):
 - **India** (Companies Act 2013): 1, 8, 12, 20, 30 workflows/yr for preseed, seed, series a/b, series b/c, series c+
 - **US** (No legal minimum, investor-driven): 0, 4, 8, 12, 16 workflows/yr
 - **UK** (Companies Act 2006 AGM requirement): 1, 4, 6, 10, 14 workflows/yr
@@ -200,6 +268,86 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
 
 > For outsourced method, this retainer cost replaces hourly-based calculation. No staffing matrix or blended rate is applied.
 
+### 4.6 Valuation Services Cost (Optional)
+**Formula**: `valuation_cost = cost_per_event × frequency_multiplier` (Only if user enables valuation reports)
+
+**How It's Triggered:**
+1. User toggles "Do you need valuation reports?" checkbox (default: OFF)
+2. If enabled, user selects:
+   - **Frequency**: Annually (1×/yr) or Quarterly (4×/yr)
+   - **Report Type**: Country-gated options based on `geo_inc` (country of incorporation)
+3. System calculates valuation cost and adds it to total annual cost
+
+**Valuation Types by Country** (cost per event in local currency):
+
+| Country | Report Type | Market Cost | EquityList Cost |
+|:---|:---|---:|---:|
+| **United States** | 409A Valuation (Black-Scholes) | $6,000 | $400 |
+| **India** | Registered Valuer Assessment (IBBI-registered) | ₹200,000 | ₹25,000 |
+| **India** | Merchant Banker Assessment (SEBI-registered) | ₹300,000 | ₹50,000 |
+| **United Kingdom** | Fair Market Value Appraisal (Chartered Surveyor) | £5,000 | £350 |
+| **Singapore** | Fair Market Value Appraisal (Registered Valuer) | S$5,000 | S$450 |
+
+EquityList Cost represents the discounted rate available through EquityList's platform (already integrated into ROI calculation).
+
+**Cost Calculation:**
+
+*Current Method Annual Cost (annCost):*
+- `valuation_cost = market_cost × frequency_multiplier`
+- For **Annually**: `cost = market_cost × 1`
+- For **Quarterly**: `cost = market_cost × 4`
+- Reflects what company pays without EquityList
+
+*EquityList Annual Cost (elAnn):*
+- `elValuationCost = el_cost × frequency_multiplier`
+- For **Annually**: `cost = el_cost × 1`
+- For **Quarterly**: `cost = el_cost × 4`
+- Added to EquityList's total cost: `elAnn = platform_fee + overhead + elValuationCost`
+
+**Example: Singapore Quarterly Valuations**
+```
+Market Cost:
+  S$5,000 × 4 = S$20,000/year (included in annCost)
+
+EquityList Cost:
+  S$450 × 4 = S$1,800/year (added to elAnn)
+  
+Valuation Savings:
+  S$20,000 - S$1,800 = S$18,200/year
+```
+
+This integration gives EquityList credit for offering discounted valuation services, significantly improving ROI for companies with regular valuation needs.
+
+**Example Calculations:**
+
+*US Company, Quarterly 409A Valuations:*
+```
+Market cost per event: $6,000
+Frequency multiplier: 4 (quarterly)
+Annual cost: $6,000 × 4 = $24,000/year
+```
+
+*India Company, Annual Registered Valuer Assessment:*
+```
+Market cost per event: ₹200,000
+Frequency multiplier: 1 (annually)
+Annual cost: ₹200,000 × 1 = ₹200,000/year
+```
+
+**Why Valuations Matter:**
+- **ESOP Grant Pricing**: Indian companies must document fair market value when granting ESOPs
+- **Fundraising**: Investors require independent third-party valuations
+- **Exit Events**: Acquirers need audited, validated valuations
+- **Tax Compliance**: Regulatory bodies in some jurisdictions require periodic valuations
+- **Risk Mitigation**: Third-party valuations reduce legal exposure from shareholder disputes
+
+**Integration into ROI:**
+Valuation cost is added to the total annual operational cost (`annCost`), directly impacting:
+- Annual spend comparison
+- ROI calculation
+- Savings estimation
+- Cost breakdown visibility
+
 ---
 
 ## 6. Blended Hourly Rate Calculation
@@ -209,7 +357,7 @@ The blended hourly rate is calculated as the sum of FTE-weighted hourly rates fo
 
 ```javascript
 blended_rate = 0
-for each role in ['founder', 'hr', 'finance', 'secretarial']:
+for each role in ['founder', 'hr', 'finance', 'cs']:
   fte = STAFFING_MATRIX[stage][role]
   rate = STAGE_HOURLY_RATES[geo_op][stage][role]
   blended_rate += (fte × rate)
@@ -233,8 +381,16 @@ No blended rate calculation. Use stage-based retainer directly (see §4.5).
 
 ### 7.1 Total Annual Ops Cost (Manual)
 ```javascript
-ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_cost + external_cost
+ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_cost + external_cost + valuation_cost
 ```
+
+**Component Breakdown:**
+- `grant_admin_cost`: Hours to issue annual equity grants
+- `compliance_cost`: Statutory/regulatory reporting hours by country of incorporation
+- `cap_table_cost`: Cap table maintenance and updates
+- `secretarial_cost`: Board meetings, shareholder approvals, governance workflows
+- `external_cost`: CA/Legal retainer (if outsourced) or tool cost
+- `valuation_cost`: Third-party valuation reports (if enabled, 0 otherwise)
 
 ### 7.2 EquityList Annual Cost
 ```javascript
@@ -246,10 +402,15 @@ el_overhead = manual_hours × 0.1 × blended_rate[geo_op][stage]
 // Internal oversight still required even with EquityList (10% of full manual baseline)
 // Blended rate determined by stage and country of operation
 
-el_cost = el_platform + el_overhead
+el_valuation_cost = el_cost_per_event × frequency_multiplier (if valuations enabled, else 0)
+// Discounted valuation cost through EquityList platform
+// frequency_multiplier = 4 (quarterly) or 1 (annually)
+
+el_annual = el_platform + el_overhead + el_valuation_cost
 ```
 
 > *Pricing calculated using country of operation. Applies blended hourly rates from geo_op for internal oversight cost.*
+> *Valuation costs reflect EquityList's discounted rates for bundled services.*
 > *\* Pricing may vary based on reporting complexity and requirements.*
 
 ---
@@ -331,7 +492,26 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 
 ## 9. Key Changes from Previous Versions
 
-### Version 3.0 (Current)
+### Version 3.2 (Current)
+- **Implemented**: EquityList valuation cost integration into ROI calculation
+- **Changed**: `elAnn` (EquityList cost) now includes discounted valuation pricing
+- **Added**: Extract and pass both `valuationCostMarket` and `valuationCostEl` to ROI function
+- **Added**: Calculate `elValuationCost = valuationCostEl × frequency_multiplier`
+- **Improved**: ROI now reflects EquityList's advantage in bundled valuation services
+- **Example**: Singapore quarterly valuations save S$18,200/year (S$5K market vs S$450 EL cost × 4)
+
+### Version 3.1
+- **Added**: Valuation Reports subsection in Step 2 (Equity Structure)
+- **Added**: Toggle to enable/disable third-party valuation services
+- **Added**: Frequency selector (Annually vs. Quarterly)
+- **Added**: Country-gated valuation type dropdown (US, India, UK, Singapore)
+- **Added**: Impact preview showing number of annual valuation events
+- **Added**: Valuation cost calculation with frequency multiplier (1× or 4×)
+- **Added**: Validation requiring both frequency and type if valuation is enabled
+- **Improved**: Cost breakdown now includes valuation services line item
+- **Fixed**: Dropdown properly rebuilds and syncs SelectField instances when geography changes
+
+### Version 3.0
 - **Removed**: Persona-based approach ("Managed By" field)
 - **Added**: Stage-based staffing matrix with FTE allocations
 - **Changed**: Hourly rate calculation from persona selection to blended rate (sum of FTE × role_rate)
@@ -347,7 +527,88 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 
 ---
 
-## 10. Implementation Notes
+## 10. User Interface Features & Components
+
+### Step 1: Founders & Company Basics
+**Inputs:**
+- Legal Entity Name (optional, display only)
+- Country of Incorporation (geo_inc)
+- Country of Operation (geo_op)
+- Current Funding Stage
+
+**Purpose:** Define the regulatory and operational context for equity management.
+
+### Step 2: Equity Structure
+**Subsection A: Cap Table Composition**
+- Shareholders count
+- Option holders count
+- Equity grants issued per year
+
+**Subsection B: Administration Method**
+- In-House (full internal staffing)
+- Outsourced (CA/Legal firm retainer)
+
+**Subsection C: Planning to Fundraise** (Optional)
+- Toggle: "Are you planning to fundraise in the next 12 months?"
+- If YES:
+  - Select funding round (Seed, Series A, Series B, Series C, or SAFE/Bridge)
+  - Select timing (3, 6, 9, or 12 months)
+  - Enter expected new shareholders
+  - **Effect**: If fundraising with a specific round, that stage's staffing is used for calculation. Increases secretarial workflows. Updates cap table and shareholder scaling assumptions.
+
+**Subsection D: Valuation Reports** (Optional)
+- Toggle: "Do you need valuation reports?"
+- If YES:
+  - **Needs Assessment**: Select frequency (Annually or Quarterly)
+  - **Report Type**: Dropdown with country-specific valuation options (gated by geo_inc)
+  - **Impact Preview**: "Estimate will include N valuation event(s)/yr (Type Name)."
+  - **Helper Text** (for single-option countries): "Standard report type for [COUNTRY] — pre-selected."
+
+**Validation:**
+- If valuation toggle is ON, both frequency and report type must be selected before calculating
+
+### Results Display
+**Key Metrics Section:**
+1. Your Annual Spend (annCost) — formatted in local currency
+2. EquityList Annual Cost (elAnn) — formatted in local currency
+3. Annual Savings/Overspend (diff) — green for savings, red for overspend
+4. ROI Multiple — "Xx savings" (e.g., "2.5x savings")
+
+**Messaging Zones:**
+- **Positive Savings**: "You're currently overspending... You could save [amount]/year"
+- **Negative Savings**: "Your current setup is cost-efficient — for now. As you scale, risks increase."
+- **Breakeven**: "Cost isn't the deciding factor. The real difference is reliability as complexity increases."
+
+**Cost Breakdown Panel** (Collapsible):
+- Lists all cost components with amounts and percentages:
+  - Grant administration
+  - Compliance & reporting
+  - Cap table maintenance
+  - Secretarial & board operations
+  - External services (CA/Law firm or tools)
+  - Valuation services (if enabled)
+  - EquityList overhead (10% of manual baseline)
+  
+- **Editable Assumptions**:
+  - Blended hourly rate (auto-calculated or manual override)
+  - Grant hours per equity action
+  - Compliance hours per year
+  - Additional cost multipliers
+
+- **Efficiency Metrics**:
+  - Manual baseline hours (if 100% internal)
+  - Adjusted hours (after method multiplier)
+  - Time saved percentage
+  - Hours saved annually with EquityList
+
+**Sample Data Banner:**
+- Shows when calculator is using default sample values
+- Toggles between "SAMPLE DATA" (blue) and "LIVE · YOUR INPUTS" (gray) states
+- User can click to edit inputs
+
+---
+
+## 11. Implementation Notes
 
 ### Calculation Flow
 1. User selects: stage, geo_inc, geo_op, shareholders, option holders, grants, method
@@ -358,15 +619,56 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 4. For **outsourced** method:
    - Use STAGE_RETAINER[geo_op][stage] directly
    - Skip hourly calculation
-5. Compare to EquityList cost and show ROI
+5. If fundraising enabled:
+   - Override stage with fundraise round (if not SAFE/Bridge)
+   - Add fundraising workflows to cap table and secretarial workloads
+   - Scale shareholder count by new shareholders from fundraise
+6. If valuation enabled:
+   - Look up VALUATION_TYPES_BY_GEO[geo_inc]
+   - Find selected valuation type and get market cost
+   - Multiply by frequency (1 for annual, 4 for quarterly)
+   - Add to total annual cost
+7. Compare to EquityList cost and show ROI
+
+### Valuation Feature Implementation Details
+
+**SelectField Component Synchronization:**
+The calculator uses a custom SelectField component for accessible dropdown UI. When user changes geography (geo_inc), the valuation report type options must rebuild:
+
+1. **Trigger**: `handleGeoIncChange()` calls `rebuildValuationTypeOptions()`
+2. **Process**:
+   - Clear native `<select>` HTML and custom dropdown list
+   - Rebuild both from VALUATION_TYPES_BY_GEO[geo_inc]
+   - Store SelectField instance reference: `selectElement._selectField = instance`
+   - Update SelectField's cached options: `selectElement._selectField.options = wrapper.querySelectorAll('[role="option"]')`
+   - Re-attach event listeners to new option elements
+   - Call `updateDisplay()` to refresh UI
+3. **Result**: Dropdown correctly shows country-specific valuation types
+
+**Validation Flow:**
+- `validateInputs()` checks if valuation checkbox is enabled
+- If enabled, requires both frequency and type selections
+- Displays error messages on fields if validation fails
+- Calculate button is disabled until validation passes
+
+**Data Synchronization:**
+- When frequency or type changes: `updateValuationNote()` updates impact preview
+- When valuation is toggled off: All fields reset to empty, impact preview hides
+- When geography changes: Type dropdown rebuilds with new options
 
 ### Edge Cases
 - If stage is missing, default to "seriesab" (Series A/B)
 - If role missing from STAGE_HOURLY_RATES, use 0
 - Blended rate is always >= 0 (sum of positive terms)
 - Outsourced method ignores staffing matrix entirely
+- If valuation is disabled, cost is 0 (validation not required)
+- If country has only 1 valuation type, it's pre-selected with helper text
+- If country has multiple types, user must select manually
 
 ### Future Considerations
 - Could add custom staffing matrix per company type (SaaS vs. Hardware, etc.)
 - Could weight blended rate by industry standards
 - Could add role-specific cost adjustments (senior vs. junior)
+- Could add secondary valuation types for companies doing multiple methodologies
+- Could integrate live FX rates for more accurate currency conversion
+- Could track valuation frequency trends over time for portfolio analysis
