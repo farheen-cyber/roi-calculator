@@ -1285,6 +1285,11 @@ body.state-overview #res-status {
   display: block;
 }
 
+/* Progressive blur transition for stale results */
+#r-body {
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
 .sec.hidden {
   display: none;
 }

@@ -165,19 +165,20 @@ function validateAndDisplayErrors() {
 function setResultsStale(isStale) {
   resultsStale = isStale;
   const banner = document.getElementById('results-outdated-banner');
-  if (banner) {
-    if (isStale) {
-      banner.style.display = 'block';
-      const rBody = document.getElementById('r-body');
-      if (rBody) {
-        rBody.style.pointerEvents = 'none';
-      }
-    } else {
-      banner.style.display = 'none';
-      const rBody = document.getElementById('r-body');
-      if (rBody) {
-        rBody.style.pointerEvents = 'auto';
-      }
+  const rBody = document.getElementById('r-body');
+  if (isStale) {
+    if (banner) banner.style.display = 'block';
+    if (rBody) {
+      rBody.style.filter = 'blur(2px)';
+      rBody.style.opacity = '0.55';
+      rBody.style.pointerEvents = 'none';
+    }
+  } else {
+    if (banner) banner.style.display = 'none';
+    if (rBody) {
+      rBody.style.filter = 'none';
+      rBody.style.opacity = '1';
+      rBody.style.pointerEvents = 'auto';
     }
   }
 }
