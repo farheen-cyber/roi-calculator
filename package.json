@@ -2,6 +2,7 @@
   "name": "equitylist-cap-table-parser",
   "version": "1.0.0",
   "description": "EquityList — Cap table file upload + Claude AI extraction backend",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
