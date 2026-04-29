@@ -340,18 +340,18 @@ if (failCount > 0 || errorCount > 0) {
     });
 }
 
-outputStream.end();
+outputStream.end(() => {
+  // Summary to console
+  console.log('\n' + '='.repeat(80));
+  console.log('TEST SUMMARY');
+  console.log('='.repeat(80));
+  console.log(`Total Tests: ${totalTests}`);
+  console.log(`✓ Passed: ${passCount} (${((passCount / totalTests) * 100).toFixed(1)}%)`);
+  console.log(`✗ Failed: ${failCount} (${((failCount / totalTests) * 100).toFixed(1)}%)`);
+  console.log(`⚠ Errors: ${errorCount} (${((errorCount / totalTests) * 100).toFixed(1)}%)`);
+  console.log(`\nResults logged to: ${outputFile}`);
+  console.log('='.repeat(80));
 
-// Summary to console
-console.log('\n' + '='.repeat(80));
-console.log('TEST SUMMARY');
-console.log('='.repeat(80));
-console.log(`Total Tests: ${totalTests}`);
-console.log(`✓ Passed: ${passCount} (${((passCount / totalTests) * 100).toFixed(1)}%)`);
-console.log(`✗ Failed: ${failCount} (${((failCount / totalTests) * 100).toFixed(1)}%)`);
-console.log(`⚠ Errors: ${errorCount} (${((errorCount / totalTests) * 100).toFixed(1)}%)`);
-console.log(`\nResults logged to: ${outputFile}`);
-console.log('='.repeat(80));
-
-// Exit with appropriate code
-process.exit(failCount > 0 || errorCount > 0 ? 1 : 0);
+  // Exit with appropriate code
+  process.exit(failCount > 0 || errorCount > 0 ? 1 : 0);
+});
