@@ -198,9 +198,7 @@ function goInput() {
   flow = 'input';
   userInputStarted = false;
   initialMethod = document.getElementById('i-meth').value;
-  document.body.classList.remove('state-overview');
   document.getElementById('res-status').style.display = 'block';
-  document.getElementById('overview-state').classList.add('hidden');
   document.getElementById('input-state').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -215,10 +213,8 @@ function goInput() {
 
 function goOverview() {
   flow = 'overview';
-  document.body.classList.add('state-overview');
   document.getElementById('res-status').style.display = 'none';
   document.getElementById('input-state').classList.add('hidden');
-  document.getElementById('overview-state').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -312,13 +308,6 @@ function stepBack() {
 }
 
 // ==================== FILE UPLOAD ====================
-
-function onF(files) {
-  if (files.length) {
-    document.getElementById('up-info').classList.remove('hidden');
-    setTimeout(goInput, 600);
-  }
-}
 
 // ==================== FIELD VALIDATION ====================
 
@@ -1050,9 +1039,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize theme from localStorage
   initTheme();
 
-  // Start with form visible (not overview)
-  document.body.classList.remove('state-overview');
-  document.getElementById('overview-state').classList.add('hidden');
+  // Start with form visible
   document.getElementById('input-state').classList.remove('hidden');
   document.getElementById('res-status').style.display = 'block';
   const backHomeBtn = document.querySelector('.back-home-btn');
@@ -1123,7 +1110,6 @@ window.addEventListener('DOMContentLoaded', () => {
 window.track = track;
 window.goInput = goInput;
 window.goOverview = goOverview;
-window.onF = onF;
 window.val = val;
 window.valAndEnableNext = valAndEnableNext;
 window.lc = lc;

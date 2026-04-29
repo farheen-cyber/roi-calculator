@@ -1,8 +1,23 @@
-# EquityList ROI Calculator — Logic & Calculation Specification
+# EquityList ROI Calculator — Complete Specification
 
-**Version**: 3.2  
-**Last Updated**: April 29, 2026 (Evening)  
-**Purpose**: Technical reference for all formulas, assumptions, and research sources used in the ROI calculation engine. Complete documentation of the calculator's workflow, cost components, ROI logic, and all features including valuation reports.
+**Version**: 3.3  
+**Last Updated**: April 29, 2026  
+**Purpose**: Complete technical and functional documentation of the EquityList ROI Calculator, including all features, formulas, assumptions, data sources, and test scenarios.
+
+## What This Calculator Does
+
+The EquityList ROI Calculator is a financial estimation and analysis tool that models the total annual cost of equity administration for companies at different funding stages and geographies. It compares:
+
+- **Current Method Cost**: What companies spend annually on equity management (in-house, outsourced, or hybrid)
+- **EquityList Cost**: What they would spend using EquityList's platform for administration
+- **Savings & ROI**: Annual savings, time saved, and ROI multiple for adopting EquityList
+
+The calculator accounts for:
+- Geographic complexity (4 countries, country-specific regulations and rates)
+- Company stage (5 funding stages with stage-specific staffing models)
+- Equity administration tasks (grants, compliance, cap table, board operations)
+- Optional features (fundraising planning, valuation reports)
+- All cost components including platform fees, internal overhead, and external services
 
 ---
 
@@ -15,8 +30,10 @@ The EquityList ROI Calculator is a financial estimation tool that compares the t
 Display a clear ROI case: how much a company spends annually managing equity, cap tables, and compliance, versus how much they'd spend on EquityList + minimal internal oversight.
 
 ### User Journey
-1. **Input Phase** (Step 1 & 2): User enters company fundamentals (shareholders, grants, geography, stage, method)
-2. **Valuation Assessment** (Step 2, optional): If company needs third-party valuations, define frequency and type
+1. **Input Phase** (Step 1 & 2): User enters company fundamentals (shareholders, grants, geography, stage, method) via manual entry form
+2. **Optional Enhancements**: 
+   - Fundraising planning: If planning to raise capital, enter round type, timing, and expected new shareholders
+   - Valuation Assessment: If company needs third-party valuations, define frequency and type
 3. **Results Phase**: Calculator displays:
    - Annual cost of current method (in-house or outsourced)
    - Annual EquityList cost
@@ -41,13 +58,13 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 
 | UI Input | Variable | Range / Type | Default | Notes |
 |:---|:---|:---|:---|:---|
-| Legal Entity Name | `co` | String | — | Display only, no calculation impact |
+| Legal Entity Name | `co` | String | — | Optional, for reference only |
 | Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements & valuation types |
 | Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, EL pricing |
 | Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
-| Shareholders Count | `sh` | Positive integer ≥ 1 | 30 | Affects cap table and secretarial scaling |
-| Option Holders Count | `oh` | Positive integer ≥ 0 | 15 | Counted toward total stakeholders for pricing |
-| Annual Equity Grants | `gr` | Positive integer ≥ 1 | 10 | Number of grant issuance events per year |
+| Shareholders Count | `sh` | Positive integer: 1–10,000 | 30 | Affects cap table and secretarial scaling |
+| Option Holders Count | `oh` | Positive integer: 0–10,000 | 15 | Counted toward total stakeholders for pricing |
+| Annual Equity Grants | `gr` | Positive integer: 1–365+ | 10 | Number of grant issuance events per year |
 | Administration Method | `meth` | In-house \| Outsourced | In-house | Determines cost model (blended rate vs. retainer) |
 
 ### Optional Inputs (Step 2)
@@ -528,6 +545,8 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 ---
 
 ## 10. User Interface Features & Components
+
+The calculator uses a single entry method: manual data entry via an interactive form with real-time validation and live calculations.
 
 ### Step 1: Founders & Company Basics
 **Inputs:**
