@@ -4,7 +4,10 @@
   "description": "EquityList ROI Calculator — equity administration cost comparison",
   "type": "module",
   "scripts": {
-    "test": "node test-calculator.js"
+    "test": "node test-failures.js && node test-calculator.js",
+    "test:failures": "node test-failures.js",
+    "test:full": "node test-calculator.js",
+    "test:smoke": "node simple-test.js"
   },
   "engines": {
     "node": ">=18.0.0"
