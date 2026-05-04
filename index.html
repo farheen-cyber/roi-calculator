@@ -854,8 +854,8 @@
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(true);
       const [leavingStale, setLeavingStale] = useState(false);
-      const [editedRate, setEditedRate] = useState('');
-      const [editedHours, setEditedHours] = useState('');
+      const [editedRate, setEditedRate] = useState(null);
+      const [editedHours, setEditedHours] = useState(null);
 
       const formatStage = (stage) => {
         const stageMap = {
@@ -1018,7 +1018,7 @@
                     <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>₹</span>
                     <input
                       type="number"
-                      value={editedRate !== '' ? editedRate : Math.round(v.rate)}
+                      value={editedRate !== null ? editedRate : Math.round(v.rate)}
                       onChange={(e) => setEditedRate(e.target.value)}
                       style={{
                         width: 72, textAlign: 'right',
@@ -1037,7 +1037,7 @@
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input
                       type="number"
-                      value={editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
+                      value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
                       onChange={(e) => setEditedHours(e.target.value)}
                       style={{
                         width: 56, textAlign: 'right',
@@ -1054,13 +1054,16 @@
                 <button
                   onClick={() => {
                     const overrides = {};
-                    if (editedRate !== '') {
+                    if (editedRate !== null && editedRate !== '') {
                       overrides.rate = parseInt(editedRate, 10);
+                    }
+                    if (editedHours !== null && editedHours !== '') {
+                      overrides.grHr = parseInt(editedHours, 10);
                     }
                     setLeavingStale(true);
                     onRecalculate && onRecalculate(formData, overrides);
-                    setEditedRate('');
-                    setEditedHours('');
+                    setEditedRate(null);
+                    setEditedHours(null);
                   }}
                   style={{ width: '100%', padding: '10px 16px', background: A.purple, color: '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
                 >
