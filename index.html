@@ -991,6 +991,7 @@
       const [mode, setMode] = useState('sample');
       const [errors, setErrors] = useState({});
       const [dirtyInputs, setDirtyInputs] = useState({});
+      const [currentFormValues, setCurrentFormValues] = useState({});
 
       const isMobile = width < 720;
       const isTablet = width >= 720 && width < 1100;
@@ -1035,6 +1036,7 @@
 
       const handleInputChange = (currentFormData) => {
         if (currentFormData) {
+          setCurrentFormValues(currentFormData);
           setFormData(currentFormData);
         }
         if (mode === 'live') {
@@ -1064,7 +1066,7 @@
             alignItems: 'flex-start',
           }}>
             <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} />}
+            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={currentFormValues} />}
           </div>
 
           <footer style={{
