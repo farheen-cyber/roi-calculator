@@ -1,4 +1,4 @@
-import { CUR, RATES, RATES_META, COMPLIANCE, EXT, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS, VALUATION_TYPES_BY_GEO, VALUATION_INTERNAL_HOURS } from './data.js';
+import { CUR, RATES, RATES_META, COMPLIANCE, EXT, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS, VALUATION_TYPES, VALUATION_INTERNAL_HOURS } from './data.js';
 import { computeROI } from './roi-calculator.js';
 import { SelectField } from './SelectField.js';
 
@@ -601,8 +601,8 @@ function rebuildValuationTypeOptions() {
 
   if (!typeSelect || !wrapper) return;
 
-  const geoInc = geoIncSelect?.value || 'usa';
-  const options = VALUATION_TYPES_BY_GEO[geoInc] || [];
+  // All valuation types are always visible (not country-gated)
+  const options = VALUATION_TYPES;
 
   // Clear existing options from native select
   typeSelect.innerHTML = '<option value="">Select report type...</option>';
@@ -751,8 +751,8 @@ function doCalc() {
   let valuationCostMarket = 0;
   let valuationCostEl = 0;
   if (valuationType) {
-    const geoTypes = VALUATION_TYPES_BY_GEO[geo_inc] || [];
-    const selected = geoTypes.find(t => t.name === valuationType);
+    // All valuation types always available (no country gating)
+    const selected = VALUATION_TYPES.find(t => t.name === valuationType);
     if (selected) {
       valuationCostMarket = selected.cost;
       valuationCostEl = selected.elCost;
@@ -1112,7 +1112,7 @@ window.getValuationFrequency = getValuationFrequency;
 window.getValuationType = getValuationType;
 window.updateValuationNote = updateValuationNote;
 window.rebuildValuationTypeOptions = rebuildValuationTypeOptions;
-window.VALUATION_TYPES_BY_GEO = VALUATION_TYPES_BY_GEO;
+window.VALUATION_TYPES = VALUATION_TYPES;
 window.onRateChange = onRateChange;
 window.onCompHrChange = onCompHrChange;
 window.onTotalMgmtHoursChange = onTotalMgmtHoursChange;

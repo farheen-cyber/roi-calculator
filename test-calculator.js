@@ -7,7 +7,7 @@
  */
 
 import { computeROI } from './roi-calculator.js';
-import { VALUATION_TYPES_BY_GEO, CUR, RATES, RATES_META, COMPLIANCE, EXT, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS } from './data.js';
+import { VALUATION_TYPES, CUR, RATES, RATES_META, COMPLIANCE, EXT, PRICING, STAGE_HOURLY_RATES, STAGE_RETAINER, STAFFING_MATRIX, SECRETARIAL_WORKFLOWS_BY_GEO, FUNDRAISING_WORKFLOWS } from './data.js';
 import fs from 'fs';
 
 // Test configuration
@@ -29,9 +29,9 @@ let failCount = 0;
 let errorCount = 0;
 
 // Helper functions
-function getValuationTypesForCountry(geoInc) {
-  const types = VALUATION_TYPES_BY_GEO[geoInc];
-  return Array.isArray(types) ? types.map((t) => t.name) : [];
+function getAllValuationTypes() {
+  // All valuation types are always available (no country-gating)
+  return VALUATION_TYPES.map((t) => t.name);
 }
 
 function runTest(testCase) {
@@ -58,8 +58,8 @@ function runTest(testCase) {
     let valuationCostEl = 0;
 
     if (needsValuation && valuationType) {
-      const types = VALUATION_TYPES_BY_GEO[geoInc];
-      const selected = Array.isArray(types) ? types.find((t) => t.name === valuationType) : null;
+      // All valuation types always available (no country-gating)
+      const selected = VALUATION_TYPES.find((t) => t.name === valuationType);
       if (selected) {
         valuationCostMarket = selected.cost;
         valuationCostEl = selected.elCost;
@@ -215,8 +215,8 @@ function* generateAllTestCases() {
                   }
                 }
 
-                // With valuations
-                const valuationTypes = getValuationTypesForCountry(geoInc);
+                // With valuations (all types always available)
+                const valuationTypes = getAllValuationTypes();
                 for (const valuationType of valuationTypes) {
                   for (const valuationFrequency of VALUATION_FREQUENCIES) {
                     yield {

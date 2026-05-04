@@ -8,7 +8,7 @@
 
 The EquityList ROI Calculator is a financial estimation and analysis tool that models the total annual cost of equity administration for companies at different funding stages and geographies. It compares:
 
-- **Current Method Cost**: What companies spend annually on equity management (in-house, outsourced, or hybrid)
+- **Current Method Cost**: What companies spend annually on equity management (in-house or outsourced)
 - **EquityList Cost**: What they would spend using EquityList's platform for administration
 - **Savings & ROI**: Annual savings, time saved, and ROI multiple for adopting EquityList
 
@@ -77,7 +77,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
 | Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
 | Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
-| Valuation Report Type | `valuationType` | Country-specific options | — | Only if valuations needed; determines cost per event |
+| Valuation Report Type | `valuationType` | 409A Valuation, Registered Valuer Assessment, Merchant Banker Assessment | — | Only if valuations needed; determines cost per event. All types always available (not country-gated). |
 
 **Notes:** 
 - The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
@@ -233,6 +233,18 @@ Where:
 - **UK** (Companies Act 2006 AGM requirement): 1, 4, 6, 10, 14 workflows/yr
 - **Singapore** (Companies Act AGM requirement): 1, 4, 6, 10, 14 workflows/yr
 
+**What Counts as One "Workflow"** (each represents ~2.5 hours of Company Secretary effort):
+- **Board Meeting**: Agenda prep, notice, circulation, minutes, approval tracking, filing
+- **Shareholder Approval**: Notice of proposed action, voting materials, collection, documentation
+- **Statutory Filing**: SH-6 register update, Form 351, ROC filings, etc.
+- **Equity Amendment**: Documentation for grants, conversions, surrenders, or retirements
+- **Compliance Report**: Annual compliance summary, register reconciliation, statutory certifications
+
+**Why Counts Vary by Country**:
+- **India**: Mandatory minimum 4 board meetings/year + material changes trigger shareholder approvals; frequent SH-6 updates
+- **US**: No legal minimum for private companies; quarterly boards typical but driven by investors
+- **UK/Singapore**: Annual AGM required (1 workflow min) + quarterly boards typical for VC-backed companies
+
 **Calculation Breakdown**:
 1. **Base hours**: workflows × 2.5 hours per workflow (average for documentation, approvals, meetings)
 2. **Shareholder complexity multiplier**: 1 + max(0, (sh - 20) / 100) × 0.5
@@ -283,7 +295,14 @@ Where:
   - Series B/C: £22,000/yr
   - Series C+: £40,000/yr
 
-> For outsourced method, this retainer cost replaces hourly-based calculation. No staffing matrix or blended rate is applied.
+> For outsourced method, the total cost combines:
+> 1. **External Service Retainer**: Fixed annual fee to CA/Law firm (STAGE_RETAINER[geo_op][stage])
+> 2. **Internal Effort Cost**: 40% of blended hourly rate × hours (for review, approvals, coordination)
+>
+> Example: If blended rate = $500/hr and cap table hours = 100 hrs
+> - External retainer: $18,000/year
+> - Internal effort cost: 100 hrs × 0.4 × $500 = $20,000/year
+> - Total: $38,000/year (vs. pure in-house: 100 hrs × 1.0 × $500 = $50,000/year)
 
 ### 4.6 Valuation Services Cost (Optional)
 **Formula**: `valuation_cost = cost_per_event × frequency_multiplier` (Only if user enables valuation reports)
@@ -295,15 +314,17 @@ Where:
    - **Report Type**: Country-gated options based on `geo_inc` (country of incorporation)
 3. System calculates valuation cost and adds it to total annual cost
 
-**Valuation Types by Country** (cost per event in local currency):
+**Valuation Types** (cost per event in local currency):
 
-| Country | Report Type | Market Cost | EquityList Cost |
-|:---|:---|---:|---:|
-| **United States** | 409A Valuation (Black-Scholes) | $6,000 | $400 |
-| **India** | Registered Valuer Assessment (IBBI-registered) | ₹200,000 | ₹25,000 |
-| **India** | Merchant Banker Assessment (SEBI-registered) | ₹300,000 | ₹50,000 |
-| **United Kingdom** | Fair Market Value Appraisal (Chartered Surveyor) | £5,000 | £350 |
-| **Singapore** | Fair Market Value Appraisal (Registered Valuer) | S$5,000 | S$450 |
+All valuation types are always available in the calculator dropdown (not country-gated).
+
+| Report Type | Market Cost | EquityList Cost | Currency |
+|:---|---:|---:|:---|
+| **409A Valuation** (Black-Scholes) | $1,500 | $1,200 | USD |
+| **Registered Valuer Assessment** (IBBI-registered) | ₹50,000 | ₹42,000 | INR |
+| **Merchant Banker Assessment** (SEBI-registered) | ₹90,000 | ₹70,000 | INR |
+
+**Note**: Singapore and UK valuation types are not currently supported. To add them, contact EquityList with verified market rate data.
 
 EquityList Cost represents the discounted rate available through EquityList's platform (already integrated into ROI calculation).
 
@@ -443,15 +464,30 @@ savings = ops_total - el_cost
 
 ### 8.2 Internal Effort (Manual Baseline)
 ```javascript
-manual_hours = (gr × grHr) + compliance_hours[geo_inc] + ((3 + max(0,(sh-20)/50)×2) × 12) + (workflows[geo_inc][stage] × 2.5 × shareholder_scaling)
+manual_hours = (gr × grHr) 
+  + compliance_hours[geo_inc] 
+  + ((3 + max(0,(sh-20)/50)×2) × 12)                              // cap table base
+  + (workflows[geo_inc][stage] × 2.5 × shareholder_scaling)       // secretarial base
+  + (fundraising_capTable_hours × roundMultiplier)                // if planning to fundraise
+  + (fundraising_secretarial_hours × roundMultiplier)             // if planning to fundraise
+
 // Full unaffected-by-method hours — what 100% manual execution would cost in time
+// Includes both recurring operations and one-time fundraising effort
 // shareholder_scaling = 1 + max(0, (sh - 20) / 100) × 0.5
+// roundMultiplier = {safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5}
 ```
 
 ### 8.3 Internal Effort (Method-Adjusted)
 ```javascript
-adjusted_hours = (gr × grHr × mult) + (compliance_hours[geo_inc] × mult) + (cap_table_hours × mult) + (secretarial_hours × mult)
-// Actual internal hours after applying method multiplier
+adjusted_hours = (gr × grHr × mult) 
+  + (compliance_hours[geo_inc] × mult) 
+  + (cap_table_hours × mult) 
+  + (secretarial_hours × mult)
+  + (fundraising_capTable_hours × roundMultiplier × mult)    // if planning to fundraise
+  + (fundraising_secretarial_hours × roundMultiplier × mult)  // if planning to fundraise
+
+// Actual internal hours after applying method multiplier (1.0 for in-house, 0.4 for outsourced)
+// Reflects the effort retained internally after outsourcing
 ```
 
 ### 8.4 Time Saved %
@@ -483,28 +519,15 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 
 ---
 
-## 8. Data Sources
+## 8. Data Sources & References
 
-Industry-standard hourly rates by stage, geography, and role. Rates reflect market compensation for equity administration professionals at each funding stage. Annual salary ÷ 2,080 working hours.
+**Hourly Rate Tables**: See §3 (Hourly Rate Assumptions) for complete industry-standard rates by stage, geography, and role. Rates reflect market compensation for equity administration professionals at each funding stage, calculated as: Annual Salary ÷ 2,080 working hours.
 
-| Geography | Role | Preseed | Seed | Series A/B | Series B/C | Series C+ |
-|:---|:---|---:|---:|---:|---:|---:|
-| **US** | Founder/CEO | $113 | $181 | $288 | $356 | $431 |
-| **US** | Finance/CFO | $69 | $110 | $156 | $200 | $250 |
-| **US** | HR Lead | $63 | $94 | $131 | $169 | $219 |
-| **US** | Legal/Secretarial | $56 | $88 | $119 | $150 | $200 |
-| **India** | Founder/CEO | ₹500 | ₹1,000 | ₹1,875 | ₹2,750 | ₹4,000 |
-| **India** | Finance/CFO | ₹325 | ₹650 | ₹1,188 | ₹1,688 | ₹2,313 |
-| **India** | HR Lead | ₹288 | ₹563 | ₹1,025 | ₹1,438 | ₹2,000 |
-| **India** | Legal/Secretarial | ₹250 | ₹475 | ₹875 | ₹1,225 | ₹1,688 |
-| **Singapore** | Founder/CEO | $100 | $188 | $331 | $431 | $563 |
-| **Singapore** | Finance/CFO | $69 | $119 | $200 | $275 | $375 |
-| **Singapore** | HR Lead | $63 | $103 | $181 | $250 | $325 |
-| **Singapore** | Legal/Secretarial | $54 | $85 | $150 | $213 | $288 |
-| **UK** | Founder/CEO | £63 | £110 | £181 | £225 | £281 |
-| **UK** | Finance/CFO | £44 | £70 | £110 | £138 | £188 |
-| **UK** | HR Lead | £40 | £63 | £98 | £125 | £169 |
-| **UK** | Legal/Secretarial | £31 | £55 | £85 | £113 | £150 |
+**Valuation Type Costs**: See §4.6 for current valuation market and EquityList rates.
+
+**Compliance Hours**: See §4.2 for baseline compliance hours by country of incorporation.
+
+**Retainer Costs**: See §4.5 for stage-based outsourced retainer costs by geography.
 
 ---
 
@@ -513,13 +536,19 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 ### Version 3.3 (Current)
 - **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
 - **Removed**: Unused FX conversion table (PRICING and rates are already in each geography's local currency)
-- **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 421,120 input combinations
-- **Added**: Failure-path test suite (`test-failures.js`) — 36 negative-path assertions covering invalid geographies, invalid stages, invalid methods, negative/null/string numeric inputs, missing data tables, plus 9 edge-case successes (zero stakeholders, max cap, cross-geo) and a SAFE-vs-Series-C complexity differential check
-- **Fixed**: `test-calculator.js` was reading non-existent `.market` and `.el` fields on valuation types (silently passing $0 valuation costs); now correctly reads `.cost` and `.elCost` and resolves valuation by name from the array structure
-- **Added**: Input validation in `computeROI()` — throws explicit errors on missing geography/stage tables instead of silent zeros
+- **Removed**: Singapore and UK valuation types (market rates not yet verified)
+- **Removed**: "Hybrid" method option from PRD (not implemented)
+- **Changed**: Valuation types now always visible (not country-gated) — dropdown shows 409A, Registered Valuer, and Merchant Banker options at all times
+- **Updated**: Valuation market costs: 409A ($1,500 vs. $6,000), Registered Valuer (₹50,000 vs. ₹200,000), Merchant Banker (₹90,000 vs. ₹300,000)
+- **Fixed**: Outsourced method now correctly includes 40% internal effort cost (review, approvals, coordination) + external retainer (was only charging retainer)
+- **Fixed**: `computeROI()` now calculates blended rate for BOTH in-house and outsourced methods (previously set rate=0 for outsourced, making 0.4 multiplier meaningless)
+- **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 483,840 input combinations (increase from 421,120 due to all valuation types now available)
+- **Added**: Failure-path test suite (`test-failures.js`) — 36 negative-path assertions
+- **Added**: Input validation in `computeROI()` — throws explicit errors on missing geography/stage tables
 - **Added**: Round-complexity multiplier for fundraising costs (SAFE 0.5×, Bridge 0.75×, Seed 1.0×, Series A/B 1.5×, Series B/C 2.0×, Series C+ 2.5×)
-- **Fixed**: Cap-table fundraising hours no longer multiplied by 12 (was incorrectly modeling one-time event as monthly recurring)
-- **Updated**: PRD reflects current implementation state
+- **Added**: Workflow definitions explaining what counts as one "governance workflow" (board meetings, shareholder approvals, statutory filings, equity amendments, compliance reports)
+- **Fixed**: §8.2 and §8.3 (Internal Effort formulas) now include fundraising hours
+- **Consolidated**: §8 (Data Sources) now references §3 instead of duplicating hourly rate tables
 
 ### Version 3.2
 - **Implemented**: EquityList valuation cost integration into ROI calculation

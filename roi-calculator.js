@@ -60,23 +60,21 @@ export function computeROI(inputs, rates, compliance, ext, pricing, stageRates, 
 
   let rate = overrides.rate;
   if (!rate) {
-    if (meth === 'in-house') {
-      const matrix = staffingMatrix[stageKey];
-      const roles = ['founder', 'hr', 'finance', 'cs'];
-      rate = 0;
+    // Calculate blended hourly rate for both in-house and outsourced methods
+    // For outsourced, this represents the 40% internal effort (review, approvals, coordination)
+    const matrix = staffingMatrix[stageKey];
+    const roles = ['founder', 'hr', 'finance', 'cs'];
+    rate = 0;
 
-      for (const role of roles) {
-        const fte = matrix[role] || 0;
-        if (fte > 0) {
-          const roleRate = stageRates[geo_op][stageKey][role];
-          if (typeof roleRate !== 'number') {
-            throw new Error(`STAGE_HOURLY_RATES missing rate for geo_op="${geo_op}", stage="${stageKey}", role="${role}"`);
-          }
-          rate += fte * roleRate;
+    for (const role of roles) {
+      const fte = matrix[role] || 0;
+      if (fte > 0) {
+        const roleRate = stageRates[geo_op][stageKey][role];
+        if (typeof roleRate !== 'number') {
+          throw new Error(`STAGE_HOURLY_RATES missing rate for geo_op="${geo_op}", stage="${stageKey}", role="${role}"`);
         }
+        rate += fte * roleRate;
       }
-    } else if (meth === 'outsourced') {
-      rate = 0;
     }
   }
 
