@@ -97,8 +97,8 @@ function renderForm() {
   state.formElements.stage = stageField;
 
   const methodField = Dropdown('How do you administer equity?', 'field-method', [
-    ['in-house', 'In-house (with HR/Finance staff)'],
-    ['outsourced', 'Outsourced (CA or law firm)'],
+    ['in-house', 'In-house (Spreadsheets)'],
+    ['outsourced', 'Outsourced (CA/Law Firm)'],
   ]);
   step1.appendChild(methodField);
   state.formElements.method = methodField;
