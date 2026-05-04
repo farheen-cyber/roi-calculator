@@ -858,11 +858,53 @@
         }
       }, [mode, leavingStale]);
 
+      const grantPct = v.annCost > 0 ? Math.round((v.grCost / v.annCost) * 100) : 0;
+      const compliancePct = v.annCost > 0 ? Math.round((v.cpCost / v.annCost) * 100) : 0;
+      const capTablePct = v.annCost > 0 ? Math.round((v.ctCost / v.annCost) * 100) : 0;
+      const secretarialPct = v.annCost > 0 ? Math.round((v.secCost / v.annCost) * 100) : 0;
+      const valuationPct = v.annCost > 0 ? Math.round((v.valuationCost / v.annCost) * 100) : 0;
+
       const items = [
-        { key: 'grant', label: 'Grant Admin', formula: '1.5 hrs/grant × 10 grants/yr × rate', value: '₹62,258', pct: '7%', tip: null },
-        { key: 'compliance', label: 'Compliance', formula: '72 hrs/yr (statutory baseline) × rate', value: '₹298,836', pct: '35%', tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.' },
-        { key: 'captable', label: 'Cap Table', formula: '3h/mo base + scaling = 41 hrs/yr × rate', value: '₹169,340', pct: '20%', tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.' },
-        { key: 'secretarial', label: 'Secretarial & Board Operations', formula: '12 workflows/yr × 2.5 hrs/workflow × rate', value: '₹27,563', pct: '3%', tip: 'Board meetings, shareholder resolutions, and statutory filings.' },
+        {
+          key: 'grant',
+          label: 'Grant Admin',
+          formula: `${v.grHr} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
+          value: `₹${v.grCost.toLocaleString('en-IN')}`,
+          pct: `${grantPct}%`,
+          tip: null
+        },
+        {
+          key: 'compliance',
+          label: 'Compliance',
+          formula: `${v.compHr} hrs/yr (${Math.round(v.compHr / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
+          value: `₹${v.cpCost.toLocaleString('en-IN')}`,
+          pct: `${compliancePct}%`,
+          tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.'
+        },
+        {
+          key: 'captable',
+          label: 'Cap Table',
+          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = 41 hrs/yr × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
+          value: `₹${v.ctCost.toLocaleString('en-IN')}`,
+          pct: `${capTablePct}%`,
+          tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
+        },
+        {
+          key: 'secretarial',
+          label: 'Secretarial & Board Operations',
+          formula: `${v.baseWorkflows} workflows/yr × 2.5 hrs/workflow × ${v.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(v.baseWorkflows * 2.5 * v.shareholderScaling)} hrs/yr × ${v.mult} × ₹${Math.round(v.secRate)}/hr`,
+          value: `₹${v.secCost.toLocaleString('en-IN')}`,
+          pct: `${secretarialPct}%`,
+          tip: 'Board meetings, shareholder resolutions, and statutory filings.'
+        },
+        ...(v.valuationCost > 0 ? [{
+          key: 'valuation',
+          label: 'Valuation Reports',
+          formula: `${formData?.valFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr'}`,
+          value: `₹${v.valuationCost.toLocaleString('en-IN')}`,
+          pct: `${valuationPct}%`,
+          tip: null
+        }] : []),
       ];
 
       return (
@@ -944,6 +986,26 @@
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {breakdownOpen && (
+              <div style={{ padding: '12px 18px 18px', borderTop: `1px solid ${A.lineSoft}`, marginTop: 12 }}>
+                <MonoLabel size={10} color={A.ink} style={{ marginBottom: 12, display: 'block' }}>Assumptions</MonoLabel>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${A.lineSoft}` }}>
+                  <MonoLabel size={9.5}>Blended Hourly Rate</MonoLabel>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontFamily: A.mono, fontSize: 13, color: A.ink }}>₹</span>
+                    <span style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink, minWidth: 60 }}>{Math.round(v.rate)}</span>
+                    <MonoLabel size={9.5} color={A.mute}>{v.stage?.toUpperCase() || 'SERIESAB'} MIX</MonoLabel>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <MonoLabel size={9.5}>Total Equity Management Hours</MonoLabel>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink }}>{Math.round(v.manualHTotal)}</span>
+                    <MonoLabel size={9.5} color={A.mute}>HRS/YR</MonoLabel>
+                  </div>
+                </div>
               </div>
             )}
           </div>
