@@ -530,9 +530,11 @@
       return (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {options.map((o) => {
-            const sel = value === o;
+            const val = typeof o === 'string' ? o : o.value;
+            const label = typeof o === 'string' ? o : o.label;
+            const sel = value === val;
             return (
-              <button key={o} onClick={() => onChange(o)} style={{
+              <button key={val} onClick={() => onChange(val)} style={{
                 padding: '6px 12px', borderRadius: 14, cursor: 'pointer',
                 border: `1px solid ${sel ? A.purple : A.line}`,
                 background: sel ? A.purple : '#fff', color: sel ? '#fff' : A.inkSoft,
@@ -541,7 +543,7 @@
                 letterSpacing: mono ? 0.6 : 0,
                 textTransform: mono ? 'uppercase' : 'none',
                 transition: 'all .15s',
-              }}>{o}</button>
+              }}>{label}</button>
             );
           })}
         </div>
@@ -874,7 +876,13 @@
             <div>
               <MonoLabel>Round type</MonoLabel>
               <div style={{ marginTop: 8 }}>
-                <ChipSelect value={round} onChange={setRound} options={['safe', 'seed', 'seriesab', 'seriesbc', 'bridge']} />
+                <ChipSelect value={round} onChange={setRound} options={[
+                  { value: 'safe', label: 'SAFE' },
+                  { value: 'seed', label: 'Seed' },
+                  { value: 'seriesab', label: 'Series A/B' },
+                  { value: 'seriesbc', label: 'Series B/C' },
+                  { value: 'bridge', label: 'Bridge' }
+                ]} />
               </div>
             </div>
             <div>
