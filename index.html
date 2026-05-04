@@ -978,8 +978,16 @@
         ...(v.valuationCost > 0 ? [{
           key: 'valuation',
           label: 'Valuation Reports',
-          formula: `${formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : formData?.valuationFrequency === 'as-needed' ? '2 events/yr' : '1 event/yr'} × ₹${formData?.valuationType === 'rv' ? '25,000' : formData?.valuationType === 'mb' ? '60,000' : '0'} per event`,
-          value: `₹${(v.valuationCost || 0).toLocaleString('en-IN')}`,
+          formula: (() => {
+            const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : formData?.valuationFrequency === 'as-needed' ? '2 events/yr' : '1 event/yr';
+            const costPerEvent = VALUATION_PRICING[formData?.geoInc]?.[formData?.valuationType] || 0;
+            const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
+            return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString()} per event`;
+          })(),
+          value: (() => {
+            const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
+            return `${currencySymbol}${(v.valuationCost || 0).toLocaleString()}`;
+          })(),
           pct: `${valuationPct}%`,
           tip: null
         }] : []),
