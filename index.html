@@ -637,6 +637,23 @@
       const [adminMethod, setAdminMethod] = useState('in-house');
 
       const oneColumn = width < 720;
+
+      // Update parent's formData with current form values whenever inputs change
+      useEffect(() => {
+        onInputChange && onInputChange({
+          sh: shareholders,
+          oh: optionHolders,
+          gr: grants,
+          geoInc,
+          geoOp,
+          stage,
+          adminMethod,
+          legalEntity,
+          fundraise,
+          valuation,
+          valFreq
+        });
+      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod]);
       const grantsNum = parseInt(grants, 10) || 0;
       const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
       const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
@@ -1019,7 +1036,10 @@
         }
       };
 
-      const handleInputChange = () => {
+      const handleInputChange = (currentFormData) => {
+        if (currentFormData) {
+          setFormData(currentFormData);
+        }
         if (mode === 'live') {
           setMode('stale');
           setDirtyInputs({ ...dirtyInputs, changed: true });
