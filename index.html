@@ -883,7 +883,7 @@
             </div>
           </div>
 
-          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(formData); }} />}
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, gr: formData?.gr, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise }); }} />}
 
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
