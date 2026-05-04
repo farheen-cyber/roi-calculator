@@ -4,7 +4,7 @@ node_modules/
 research_reports_exec-comp/
 
 # Test artifacts
-test-results.log
+test-results-detailed.log
 test-run*.log
 test-runner-output.txt
 
