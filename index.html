@@ -188,8 +188,15 @@
       secretarial: 4
     };
 
+    const VALUATION_PRICING = {
+      india: { rv: 25000, mb: 60000 },
+      us: { rv: 5000, mb: 15000 },
+      singapore: { rv: 4000, mb: 12000 },
+      uk: { rv: 3000, mb: 10000 }
+    };
+
     function computeROI(inputs, overrides = {}) {
-      const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '' } = inputs;
+      const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
 
       const stageKey = stage;
       let rate = overrides.rate;
@@ -246,7 +253,14 @@
         methodExtCost = STAGE_RETAINER[geoOp][stageKey];
       }
 
-      const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost;
+      let valuationCost = 0;
+      if (valuationFrequency && valuationType) {
+        const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : valuationFrequency === 'as-needed' ? 2 : 0;
+        const pricePerEvent = VALUATION_PRICING[geoInc]?.[valuationType] || 0;
+        valuationCost = events * pricePerEvent;
+      }
+
+      const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
       const manualHTotal = grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingHours;
       const internalHTotal = grHrs * mult + compHr * mult + ctHrs + secHrs + ctFundraisingHrs + secFundraisingHrs;
       const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
@@ -271,6 +285,7 @@
         manualHTotal: Math.round(manualHTotal * 10) / 10,
         internalHTotal: Math.round(internalHTotal * 10) / 10,
         timeSavedPct,
+        valuationCost: Math.round(valuationCost),
       };
     }
 
@@ -640,6 +655,7 @@
       const [fundraise, setFundraise] = useState(false);
       const [valuation, setValuation] = useState(false);
       const [valFreq, setValFreq] = useState(null);
+      const [valType, setValType] = useState(null);
       const [adminMethod, setAdminMethod] = useState('in-house');
 
       const oneColumn = width < 720;
@@ -654,9 +670,11 @@
           geoOp,
           stage,
           meth: adminMethod,
-          planningToFundraise: fundraise
+          planningToFundraise: fundraise,
+          valuationFrequency: valuation ? valFreq : null,
+          valuationType: valuation ? valType : null
         });
-      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise]);
+      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise, valuation, valFreq, valType]);
       const grantsNum = parseInt(grants, 10) || 0;
       const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
       const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
@@ -691,7 +709,7 @@
                 <FundraiseExpanded oneColumn={oneColumn} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
-                <ValuationExpanded oneColumn={oneColumn} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} />
+                <ValuationExpanded oneColumn={oneColumn} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
               </SwitchCard>
             </div>
           </FormSection>
@@ -700,7 +718,7 @@
             <Dropdown label="Administrative Method" value={adminMethod} required options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
-          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise })}>
+          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
           </PrimaryBtn>
@@ -789,8 +807,7 @@
       );
     }
 
-    function ValuationExpanded({ oneColumn, freq, setFreq }) {
-      const [type, setType] = useState(null);
+    function ValuationExpanded({ oneColumn, freq, setFreq, type, setType }) {
       const opts = [
         { value: 'rv', label: 'Registered Valuer Assessment' },
         { value: 'mb', label: 'Merchant Banker Assessment' },
@@ -919,7 +936,7 @@
         ...(v.valuationCost > 0 ? [{
           key: 'valuation',
           label: 'Valuation Reports',
-          formula: `${formData?.valFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr'}`,
+          formula: `${formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : formData?.valuationFrequency === 'as-needed' ? '2 events/yr' : '1 event/yr'} × ₹${formData?.valuationType === 'rv' ? '25,000' : formData?.valuationType === 'mb' ? '60,000' : '0'} per event`,
           value: `₹${(v.valuationCost || 0).toLocaleString('en-IN')}`,
           pct: `${valuationPct}%`,
           tip: null
