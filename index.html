@@ -647,13 +647,10 @@
           geoInc,
           geoOp,
           stage,
-          adminMethod,
-          legalEntity,
-          fundraise,
-          valuation,
-          valFreq
+          meth: adminMethod,
+          planningToFundraise: fundraise
         });
-      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod]);
+      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise]);
       const grantsNum = parseInt(grants, 10) || 0;
       const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
       const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
@@ -878,7 +875,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <MonoLabel size={11} color={A.ink}>Live Estimate</MonoLabel>
                 <span style={{ width: 1, height: 14, background: A.line }} />
-                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate(formData)} />
+                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, gr: formData?.gr, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise })} />
               </div>
             </div>
             <div style={{ fontSize: 12.5, color: A.mute, marginTop: 6 }}>
