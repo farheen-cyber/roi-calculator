@@ -849,7 +849,7 @@
       const [breakdownOpen, setBreakdownOpen] = useState(true);
       const [leavingStale, setLeavingStale] = useState(false);
 
-      const v = results || { annCost: 857997, elAnn: 170118, diff: 687879, roi: 4, manualHTotal: 159, internalHTotal: 16 };
+      const v = results || { annCost: 857997, elAnn: 170118, diff: 687879, roi: 4, manualHTotal: 159, internalHTotal: 16, grCost: 62258, cpCost: 298836, ctCost: 169340, secCost: 27563, valuationCost: 0, grHr: 1.5, compHr: 72, rate: 4150, secRate: 875, mult: 1, baseWorkflows: 12, shareholderScaling: 1.05 };
       const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
 
       useEffect(() => {
