@@ -320,6 +320,13 @@
     function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText }) {
       const borderColor = error ? A.redLight : A.line;
       const labelColor = error ? A.redLight : A.mute;
+      const handleChange = (e) => {
+        let val = e.target.value;
+        if (type === 'number') {
+          val = val.replace(/[^\d]/g, '');
+        }
+        onChange && onChange(val);
+      };
       return (
         <div>
           <MonoLabel color={labelColor}>
@@ -330,7 +337,7 @@
               type={type === 'number' ? 'text' : type}
               inputMode={type === 'number' ? 'numeric' : undefined}
               value={value || ''}
-              onChange={(e) => onChange && onChange(e.target.value)}
+              onChange={handleChange}
               placeholder={placeholder}
               aria-invalid={error ? 'true' : 'false'}
               style={{
@@ -1037,7 +1044,7 @@
                       type="text"
                       inputMode="numeric"
                       value={editedRate !== null ? editedRate : Math.round(v.rate)}
-                      onChange={(e) => setEditedRate(e.target.value)}
+                      onChange={(e) => setEditedRate(e.target.value.replace(/[^\d]/g, ''))}
                       style={{
                         width: 72, textAlign: 'right',
                         border: 'none', borderBottom: `1px solid ${A.line}`,
@@ -1057,7 +1064,7 @@
                       type="text"
                       inputMode="numeric"
                       value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
-                      onChange={(e) => setEditedHours(e.target.value)}
+                      onChange={(e) => setEditedHours(e.target.value.replace(/[^\d]/g, ''))}
                       style={{
                         width: 56, textAlign: 'right',
                         border: 'none', borderBottom: `1px solid ${A.line}`,
