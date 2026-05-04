@@ -317,12 +317,17 @@
       );
     }
 
-    function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText }) {
+    function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText, onNumericError }) {
       const borderColor = error ? A.redLight : A.line;
       const labelColor = error ? A.redLight : A.mute;
       const handleChange = (e) => {
         let val = e.target.value;
         if (type === 'number') {
+          if (val && /[^\d]/.test(val)) {
+            onNumericError && onNumericError(true);
+            return;
+          }
+          onNumericError && onNumericError(false);
           val = val.replace(/[^\d]/g, '');
         }
         onChange && onChange(val);
@@ -664,6 +669,7 @@
       const [valFreq, setValFreq] = useState(null);
       const [valType, setValType] = useState(null);
       const [adminMethod, setAdminMethod] = useState('in-house');
+      const [numericErrors, setNumericErrors] = useState({});
 
       const oneColumn = width < 720;
 
@@ -706,9 +712,9 @@
 
           <FormSection number={2} title="Equity Structure" subtitle="Stakeholder volume scales your cap table reconciliation and grant overhead.">
             <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
-              <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={errors?.shareholders} />
-              <FormField label={<>Option holders <InfoTip text="Employees and advisors with vested or unvested options outstanding." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={errors?.optionHolders} />
-              <FormField label={<>Grants per year <InfoTip text="New ESOP grants you issue annually — drives grant-admin overhead." /></>} required value={grants} onChange={(v) => { handleGrantsChange(v); onInputChange && onInputChange(); }} type="number" error={errors?.grants} helperText={grantsHelper} />
+              <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.shareholders ? 'Only numbers allowed' : errors?.shareholders} onNumericError={(hasError) => setNumericErrors({...numericErrors, shareholders: hasError})} />
+              <FormField label={<>Option holders <InfoTip text="Employees and advisors with vested or unvested options outstanding." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.optionHolders ? 'Only numbers allowed' : errors?.optionHolders} onNumericError={(hasError) => setNumericErrors({...numericErrors, optionHolders: hasError})} />
+              <FormField label={<>Grants per year <InfoTip text="New ESOP grants you issue annually — drives grant-admin overhead." /></>} required value={grants} onChange={(v) => { handleGrantsChange(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.grants ? 'Only numbers allowed' : errors?.grants} helperText={grantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, grants: hasError})} />
             </div>
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -805,7 +811,7 @@
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '180px 1fr', gap: 16, alignItems: 'flex-end' }}>
-            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" />
+            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" error={shareholders && /[^\d]/.test(shareholders) ? 'Only numbers allowed' : ''} onNumericError={() => {}} />
             <div style={{ fontSize: 12, color: A.mute, lineHeight: 1.5 }}>
               Investors, SAFE conversions, and new ESOP grants all count toward stakeholder load.
             </div>
@@ -1038,43 +1044,65 @@
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <MonoLabel size={10} color={A.inkSoft}>Blended hourly rate</MonoLabel>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>₹</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={editedRate !== null ? editedRate : Math.round(v.rate)}
-                      onChange={(e) => setEditedRate(e.target.value.replace(/[^\d]/g, ''))}
-                      style={{
-                        width: 72, textAlign: 'right',
-                        border: 'none', borderBottom: `1px solid ${A.line}`,
-                        padding: '4px 0', outline: 'none', background: 'transparent',
-                        fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
-                      onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
-                    />
-                    <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>{formatStage(v.stage)} MIX</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>₹</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={editedRate !== null ? editedRate : Math.round(v.rate)}
+                        onChange={(e) => {
+                          if (e.target.value && /[^\d]/.test(e.target.value)) {
+                            setEditedRate(e.target.value);
+                          } else {
+                            setEditedRate(e.target.value.replace(/[^\d]/g, ''));
+                          }
+                        }}
+                        style={{
+                          width: 72, textAlign: 'right',
+                          border: 'none', borderBottom: `1px solid ${editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.line}`,
+                          padding: '4px 0', outline: 'none', background: 'transparent',
+                          fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                        }}
+                        onFocus={(e) => e.currentTarget.style.borderBottomColor = editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.purple}
+                        onBlur={(e) => e.currentTarget.style.borderBottomColor = editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.line}
+                      />
+                      <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>{formatStage(v.stage)} MIX</span>
+                    </div>
+                    {editedRate && /[^\d]/.test(editedRate) && (
+                      <div style={{ fontSize: 11, color: A.redLight, fontFamily: A.mono, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Only numbers allowed</div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                   <MonoLabel size={10} color={A.inkSoft}>Total equity management hours</MonoLabel>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
-                      onChange={(e) => setEditedHours(e.target.value.replace(/[^\d]/g, ''))}
-                      style={{
-                        width: 56, textAlign: 'right',
-                        border: 'none', borderBottom: `1px solid ${A.line}`,
-                        padding: '4px 0', outline: 'none', background: 'transparent',
-                        fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
-                      }}
-                      onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
-                      onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
-                    />
-                    <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>HRS/YR</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
+                        onChange={(e) => {
+                          if (e.target.value && /[^\d]/.test(e.target.value)) {
+                            setEditedHours(e.target.value);
+                          } else {
+                            setEditedHours(e.target.value.replace(/[^\d]/g, ''));
+                          }
+                        }}
+                        style={{
+                          width: 56, textAlign: 'right',
+                          border: 'none', borderBottom: `1px solid ${editedHours && /[^\d]/.test(editedHours) ? A.redLight : A.line}`,
+                          padding: '4px 0', outline: 'none', background: 'transparent',
+                          fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                        }}
+                        onFocus={(e) => e.currentTarget.style.borderBottomColor = editedHours && /[^\d]/.test(editedHours) ? A.redLight : A.purple}
+                        onBlur={(e) => e.currentTarget.style.borderBottomColor = editedHours && /[^\d]/.test(editedHours) ? A.redLight : A.line}
+                      />
+                      <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>HRS/YR</span>
+                    </div>
+                    {editedHours && /[^\d]/.test(editedHours) && (
+                      <div style={{ fontSize: 11, color: A.redLight, fontFamily: A.mono, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Only numbers allowed</div>
+                    )}
                   </div>
                 </div>
                 <button
