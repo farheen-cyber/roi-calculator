@@ -1020,8 +1020,12 @@
                 </div>
                 <button
                   onClick={() => {
+                    const overrides = {};
+                    if (editedRate !== null) {
+                      overrides.rate = parseInt(editedRate, 10);
+                    }
                     setLeavingStale(true);
-                    onRecalculate && onRecalculate(formData);
+                    onRecalculate && onRecalculate(formData, overrides);
                     setEditedRate(null);
                     setEditedHours(null);
                   }}
@@ -1092,7 +1096,7 @@
         return null;
       };
 
-      const handleCalculate = (inputs) => {
+      const handleCalculate = (inputs, overrides = {}) => {
         const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
         const holdersErr = validateField('optionHolders', String(inputs?.oh || ''));
         const grantsErr = validateField('grants', String(inputs?.gr || ''));
@@ -1111,7 +1115,7 @@
             oh: parseInt(inputs.oh, 10),
             gr: parseInt(inputs.gr, 10),
           };
-          const calcs = computeROI(validatedInputs);
+          const calcs = computeROI(validatedInputs, overrides);
           setResults(calcs);
           setFormData(validatedInputs);
           setMode('live');
