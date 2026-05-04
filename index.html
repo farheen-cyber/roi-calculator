@@ -728,6 +728,8 @@
       const [geoOp, setGeoOp] = useState('india');
       const [legalEntity, setLegalEntity] = useState('');
       const [fundraise, setFundraise] = useState(false);
+      const [fundraiseRound, setFundraiseRound] = useState('seed');
+      const [newShareholdersFromFundraise, setNewShareholdersFromFundraise] = useState('0');
       const [valuation, setValuation] = useState(false);
       const [valFreq, setValFreq] = useState(null);
       const [valType, setValType] = useState(null);
@@ -747,10 +749,12 @@
           stage,
           meth: adminMethod,
           planningToFundraise: fundraise,
+          fundraiseRound,
+          newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0,
           valuationFrequency: valuation ? valFreq : null,
           valuationType: valuation ? valType : null
         });
-      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise, valuation, valFreq, valType]);
+      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise, fundraiseRound, newShareholdersFromFundraise, valuation, valFreq, valType]);
       const grantsNum = parseInt(grants, 10) || 0;
       const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
       const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
@@ -782,7 +786,7 @@
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <SwitchCard on={fundraise} onChange={(v) => { setFundraise(v); onInputChange && onInputChange(); }} title="Planning to fundraise in the next 12 months?" subtitle="Helps us model upcoming governance & onboarding workflows.">
-                <FundraiseExpanded oneColumn={oneColumn} />
+                <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
                 <ValuationExpanded oneColumn={oneColumn} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
@@ -794,7 +798,7 @@
             <Dropdown label="Administrative Method" value={adminMethod} required options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
-          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
+          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
           </PrimaryBtn>
@@ -853,10 +857,8 @@
       );
     }
 
-    function FundraiseExpanded({ oneColumn }) {
-      const [round, setRound] = useState('seed');
+    function FundraiseExpanded({ oneColumn, round, setRound, shareholders, setShareholders }) {
       const [timing, setTiming] = useState('3–6 mo');
-      const [shareholders, setShareholders] = useState('');
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
@@ -997,7 +999,7 @@
         {
           key: 'captable',
           label: 'Cap Table',
-          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)) * 12)} hrs/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          formula: `3h/mo base + ${Math.max(0, ((formData?.sh || 30) - 20) / 50).toFixed(2)} × 2 = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2) * 12)} hrs/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
           value: `₹${(v.ctCost || 0).toLocaleString('en-IN')}`,
           pct: `${capTablePct}%`,
           tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
