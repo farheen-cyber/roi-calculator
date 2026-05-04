@@ -848,6 +848,8 @@
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(true);
       const [leavingStale, setLeavingStale] = useState(false);
+      const [editedRate, setEditedRate] = useState(null);
+      const [editedHours, setEditedHours] = useState(null);
 
       const v = results || { annCost: 857997, elAnn: 170118, diff: 687879, roi: 4, manualHTotal: 159, internalHTotal: 16, grCost: 62258, cpCost: 298836, ctCost: 169340, secCost: 27563, valuationCost: 0, grHr: 1.5, compHr: 72, rate: 4150, secRate: 875, mult: 1, baseWorkflows: 12, shareholderScaling: 1.05 };
       const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
@@ -995,17 +997,38 @@
                   <MonoLabel size={9.5}>Blended Hourly Rate</MonoLabel>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontFamily: A.mono, fontSize: 13, color: A.ink }}>₹</span>
-                    <span style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink, minWidth: 60 }}>{Math.round(v.rate)}</span>
+                    <input
+                      type="number"
+                      value={editedRate !== null ? editedRate : Math.round(v.rate)}
+                      onChange={(e) => setEditedRate(e.target.value ? parseInt(e.target.value) : null)}
+                      style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink, width: 70, padding: '4px 8px', border: `1px solid ${A.line}`, borderRadius: 4 }}
+                    />
                     <MonoLabel size={9.5} color={A.mute}>{v.stage?.toUpperCase() || 'SERIESAB'} MIX</MonoLabel>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                   <MonoLabel size={9.5}>Total Equity Management Hours</MonoLabel>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink }}>{Math.round(v.manualHTotal)}</span>
+                    <input
+                      type="number"
+                      value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
+                      onChange={(e) => setEditedHours(e.target.value ? parseInt(e.target.value) : null)}
+                      style={{ fontFamily: A.mono, fontSize: 13, fontWeight: 600, color: A.ink, width: 60, padding: '4px 8px', border: `1px solid ${A.line}`, borderRadius: 4 }}
+                    />
                     <MonoLabel size={9.5} color={A.mute}>HRS/YR</MonoLabel>
                   </div>
                 </div>
+                <button
+                  onClick={() => {
+                    setLeavingStale(true);
+                    onRecalculate && onRecalculate(formData);
+                    setEditedRate(null);
+                    setEditedHours(null);
+                  }}
+                  style={{ width: '100%', padding: '10px 16px', background: A.purple, color: '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Apply
+                </button>
               </div>
             )}
           </div>
