@@ -677,7 +677,7 @@
           </FormSection>
 
           <FormSection number={3} title="Current Operations" subtitle="How you currently manage equity administration.">
-            <Dropdown label="Administrative Method" value={adminMethod} required options={['in-house', 'outsourced']} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
+            <Dropdown label="Administrative Method" value={adminMethod} required options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
           <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise })}>
