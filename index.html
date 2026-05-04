@@ -311,8 +311,10 @@
       }
 
       const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
-      const manualHTotal = grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingHours;
-      const internalHTotal = grHrs * mult + compHr * mult + ctHrs + secHrs + ctFundraisingHrs + secFundraisingHrs;
+      const manualHTotal = grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw;
+      const adjustedHTotal = (grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw) * mult;
+      const elOversightHours = manualHTotal * 0.1;
+      const internalHTotal = adjustedHTotal - elOversightHours;
       const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
 
       const elOverhead = manualHTotal * 0.1 * rate;
