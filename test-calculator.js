@@ -31,7 +31,7 @@ let errorCount = 0;
 // Helper functions
 function getValuationTypesForCountry(geoInc) {
   const types = VALUATION_TYPES_BY_GEO[geoInc];
-  return types ? Object.keys(types) : [];
+  return Array.isArray(types) ? types.map((t) => t.name) : [];
 }
 
 function runTest(testCase) {
@@ -59,9 +59,10 @@ function runTest(testCase) {
 
     if (needsValuation && valuationType) {
       const types = VALUATION_TYPES_BY_GEO[geoInc];
-      if (types && types[valuationType]) {
-        valuationCostMarket = types[valuationType].market;
-        valuationCostEl = types[valuationType].el;
+      const selected = Array.isArray(types) ? types.find((t) => t.name === valuationType) : null;
+      if (selected) {
+        valuationCostMarket = selected.cost;
+        valuationCostEl = selected.elCost;
       }
     }
 

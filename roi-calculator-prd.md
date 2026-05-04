@@ -132,11 +132,11 @@ The calculator accepts two geography inputs:
   - Determines statutory register requirements (India SH-6, US Rule 701, etc.)
   - Determines baseline compliance hours (COMPLIANCE[geo_inc])
   
-- **`geo_op`** (Country of Operation): Used for hourly rates, external retainer costs, currency conversion, and EL pricing
+- **`geo_op`** (Country of Operation): Used for hourly rates, external retainer costs, and EL pricing
   - Selects industry-standard hourly rates per role and stage (STAGE_HOURLY_RATES[geo_op])
   - Determines stage-based external retainer cost (if method = Outsourced): STAGE_RETAINER[geo_op][stage]
-  - Determines FX conversion rates (INR → local currency)
-  - Used for EquityList platform fee and internal overhead calculations
+  - Determines per-stakeholder EquityList pricing (PRICING[geo_op]) — already in local currency
+  - All cost outputs are denominated in `geo_op`'s local currency; no FX conversion is performed
 
 ---
 
@@ -411,9 +411,10 @@ ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_co
 
 ### 7.2 EquityList Annual Cost
 ```javascript
-el_platform = stakeholders × 1200 × FX[geo_op]
-// 1200 = ₹1,200 per stakeholder per year (India base price, converted at live rates)
-// FX[geo_op] = INR→local rate fetched live; fallbacks: US 0.01205, SG 0.01613, UK 0.00943
+el_platform = stakeholders × PRICING[geo_op]
+// PRICING is per-stakeholder per year, already in local currency:
+//   india: ₹1,200  |  us: $40  |  uk: £30  |  singapore: S$25
+// No FX conversion — every table is denominated in its geography's local currency.
 
 el_overhead = manual_hours × 0.1 × blended_rate[geo_op][stage]
 // Internal oversight still required even with EquityList (10% of full manual baseline)
@@ -513,6 +514,8 @@ Industry-standard hourly rates by stage, geography, and role. Rates reflect mark
 - **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
 - **Removed**: Unused FX conversion table (PRICING and rates are already in each geography's local currency)
 - **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 421,120 input combinations
+- **Added**: Failure-path test suite (`test-failures.js`) — 36 negative-path assertions covering invalid geographies, invalid stages, invalid methods, negative/null/string numeric inputs, missing data tables, plus 9 edge-case successes (zero stakeholders, max cap, cross-geo) and a SAFE-vs-Series-C complexity differential check
+- **Fixed**: `test-calculator.js` was reading non-existent `.market` and `.el` fields on valuation types (silently passing $0 valuation costs); now correctly reads `.cost` and `.elCost` and resolves valuation by name from the array structure
 - **Added**: Input validation in `computeROI()` — throws explicit errors on missing geography/stage tables instead of silent zeros
 - **Added**: Round-complexity multiplier for fundraising costs (SAFE 0.5×, Bridge 0.75×, Seed 1.0×, Series A/B 1.5×, Series B/C 2.0×, Series C+ 2.5×)
 - **Fixed**: Cap-table fundraising hours no longer multiplied by 12 (was incorrectly modeling one-time event as monthly recurring)
@@ -698,5 +701,5 @@ The calculator uses a custom SelectField component for accessible dropdown UI. W
 - Could weight blended rate by industry standards
 - Could add role-specific cost adjustments (senior vs. junior)
 - Could add secondary valuation types for companies doing multiple methodologies
-- Could integrate live FX rates for more accurate currency conversion
+- Could surface a "Not recommended at your scale" message when EquityList annual cost exceeds current spend (today the UI shows ROI as a multiple but doesn't flag the loss case explicitly)
 - Could track valuation frequency trends over time for portfolio analysis
