@@ -19,20 +19,30 @@ Supported geographies: India, US, Singapore, UK. Stages: Preseed → Series C+.
 
 ---
 
-## Repository layout
+## File Guide
 
-```
-index.html                 # Single-page UI
-app.js                     # UI behavior, state, rendering
-roi-calculator.js          # Pure calculation engine (no DOM deps)
-data.js                    # Rates, compliance hours, retainers, pricing tables
-SelectField.js             # Custom dropdown component
-styles.css                 # Design tokens + components
-test-calculator.js         # Automated test suite (421,120 cases)
-simple-test.js             # Single-case smoke test
-roi-calculator-prd.md      # Product Requirements Document (v3.3)
-IMPLEMENTATION_SUMMARY.md  # High-level summary of features and tests
-```
+### Core Files (6 files, ~3,700 lines)
+- **index.html** — Single-page UI structure; form with 2 steps + results panel
+- **app.js** — Frontend logic & state management (~1,200 lines); handles inputs, validation, rendering
+- **roi-calculator.js** — Pure calculation engine (~210 lines); no DOM dependencies; testable in Node.js
+- **data.js** — All lookup tables & constants (~200 lines); valuation types, hourly rates, retainers, workflows, pricing
+- **SelectField.js** — Accessible dropdown component (~150 lines); arrow key navigation, keyboard support
+- **styles.css** — All styling (~800 lines); responsive design, dark mode, print styles
+
+### Documentation (4 files, ~1,400 lines)
+- **roi-calculator-prd.md** — Complete specification (v3.3); inputs, formulas, cost components, outputs
+- **README.md** — This file; quick start and overview
+- **FILES_OVERVIEW.md** — Comprehensive guide to every file; what each does, how to modify
+- **FIXES_SUMMARY.md** — Record of recent audit fixes (outsourced method bug, valuation costs, etc.)
+- **PRD_REVIEW_AUDIT.md** — Detailed audit findings; 10 issues identified and recommended fixes
+
+### Tests (3 files, ~700 lines)
+- **test-calculator.js** — 519,840 happy-path test cases; all input combinations
+- **test-failures.js** — 36 failure-path tests; invalid inputs, missing tables, edge cases
+- **simple-test.js** — Smoke test; single scenario for quick sanity check
+
+### For Detailed File Explanations
+See [FILES_OVERVIEW.md](FILES_OVERVIEW.md) for comprehensive documentation of every file in the repository.
 
 ---
 
@@ -56,12 +66,13 @@ python3 -m http.server 8000
 ```bash
 npm test                # runs failure-path tests then full happy-path sweep
 npm run test:failures   # 36 negative-path assertions (invalid inputs, missing tables)
-npm run test:full       # 421,120-case happy-path sweep
+npm run test:full       # 519,840-case happy-path sweep
 npm run test:smoke      # single-case smoke test
 ```
 
-- **`test-failures.js`** — feeds bad inputs into `computeROI()` and asserts it throws with descriptive errors (invalid geo/stage/method, negative numbers, missing data tables) and that valid edge cases still succeed.
-- **`test-calculator.js`** — exercises every combination of country pair × stage × method × stakeholder count × option holder count × grant frequency × fundraising scenario × valuation scenario. Writes results to `test-results.log` (gitignored; ~200 MB uncompressed). The compressed snapshot of the last full run is checked in as `test-results.log.gz`.
+- **`test-failures.js`** — 36 tests; feeds bad inputs into `computeROI()` and asserts it throws with descriptive errors (invalid geo/stage/method, negative numbers, missing data tables); validates edge cases still succeed.
+- **`test-calculator.js`** — 519,840 tests; exercises every combination of country pair × stage × method × stakeholder count × option holder count × grant frequency × fundraising scenario × valuation scenario. Writes results to `test-results.log` (gitignored; ~500 MB uncompressed). The compressed snapshot is `test-results.log.gz`.
+- **`test-smoke.js`** — 1 test; quick sanity check with Series A/B India company (5 shareholders, 10 grants).
 
 ---
 
