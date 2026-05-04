@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EquityList ROI Calculator — Direction A</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+    }
+
+    #root {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    @keyframes roi-pulse {
+      0% { transform: scale(1); opacity: 0.35; }
+      70% { transform: scale(2.4); opacity: 0; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    @keyframes amber-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideDown {
+      from {
+        max-height: 0;
+        opacity: 0;
+      }
+      to {
+        max-height: 200px;
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        max-height: 200px;
+        opacity: 1;
+      }
+      to {
+        max-height: 0;
+        opacity: 0;
+      }
+    }
+
+    .stale-alert {
+      max-height: 200px;
+      overflow: hidden;
+      animation: slideDown 220ms ease-out;
+    }
+
+    .stale-alert.leaving {
+      animation: slideUp 180ms ease-in;
+    }
+
+    .amber-spin {
+      animation: amber-spin 2.4s linear infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stale-alert,
+      .stale-alert.leaving,
+      .amber-spin {
+        animation: none;
+      }
+    }
+
+    .panel-body--stale {
+      opacity: 0.45;
+      transition: opacity 200ms ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React & ReactDOM from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Shared tokens + primitives + Direction A app with calculation logic -->
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // ============ TOKENS ============
+    window.ROI_TOKENS = {
+      purple: '#6D28D9',
+      purple2: '#5B21B6',
+      purpleDeep: '#4C1D95',
+      purpleTint: 'rgba(109, 40, 217, 0.05)',
+      purpleTint2: 'rgba(109, 40, 217, 0.10)',
+      purpleBorder: 'rgba(109, 40, 217, 0.22)',
+      ink: '#15121F',
+      inkSoft: '#3A3650',
+      mute: '#7B7792',
+      muteSoft: '#9B97AE',
+      line: '#E8E6F0',
+      lineSoft: '#F0EEF5',
+      bg: '#FAFAFB',
+      bgWarm: '#F7F5F0',
+      green: '#0A8C5C',
+      greenTint: 'rgba(10, 140, 92, 0.08)',
+      red: '#C03021',
+      redLight: '#DC2626',
+      amber: '#B45309',
+      amberLight: '#D97706',
+      amberBg: '#FEF3C7',
+      amberBorder: '#FDE68A',
+      mono: '"JetBrains Mono","IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace',
+      sans: '"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,system-ui,sans-serif',
+      serif: '"Fraunces","Tiempos Headline",Georgia,serif',
+    };
+
+    const A = window.ROI_TOKENS;
+
+    // ============ CALCULATION DATA & LOGIC ============
+    const PRICING = {
+      india: 24900,
+      us: 2400,
+      singapore: 1800,
+      uk: 1500
+    };
+
+    const STAGE_HOURLY_RATES = {
+      india: {
+        preseed: { founder: 1500, hr: 1000, finance: 1500, cs: 500 },
+        seed: { founder: 1500, hr: 1000, finance: 1500, cs: 500 },
+        seriesab: { founder: 1500, hr: 1000, finance: 1500, cs: 500 },
+        seriesbc: { founder: 1500, hr: 1200, finance: 1500, cs: 600 },
+        seriesc: { founder: 1500, hr: 1200, finance: 1500, cs: 600 }
+      },
+      us: { preseed: { founder: 75, hr: 55, finance: 75, cs: 35 }, seed: { founder: 75, hr: 55, finance: 75, cs: 35 }, seriesab: { founder: 75, hr: 55, finance: 75, cs: 35 }, seriesbc: { founder: 85, hr: 60, finance: 85, cs: 45 }, seriesc: { founder: 85, hr: 60, finance: 85, cs: 45 } },
+      singapore: { preseed: { founder: 120, hr: 75, finance: 120, cs: 50 }, seed: { founder: 120, hr: 75, finance: 120, cs: 50 }, seriesab: { founder: 120, hr: 75, finance: 120, cs: 50 }, seriesbc: { founder: 140, hr: 85, finance: 140, cs: 60 }, seriesc: { founder: 140, hr: 85, finance: 140, cs: 60 } },
+      uk: { preseed: { founder: 40, hr: 30, finance: 40, cs: 20 }, seed: { founder: 40, hr: 30, finance: 40, cs: 20 }, seriesab: { founder: 40, hr: 30, finance: 40, cs: 20 }, seriesbc: { founder: 45, hr: 35, finance: 45, cs: 25 }, seriesc: { founder: 45, hr: 35, finance: 45, cs: 25 } }
+    };
+
+    const STAGE_RETAINER = {
+      india: { preseed: 50000, seed: 50000, seriesab: 75000, seriesbc: 100000, seriesc: 150000 },
+      us: { preseed: 500, seed: 500, seriesab: 750, seriesbc: 1000, seriesc: 1500 },
+      singapore: { preseed: 800, seed: 800, seriesab: 1200, seriesbc: 1600, seriesc: 2400 },
+      uk: { preseed: 400, seed: 400, seriesab: 600, seriesbc: 800, seriesc: 1200 }
+    };
+
+    const STAFFING_MATRIX = {
+      preseed: { founder: 0.25, hr: 0.05, finance: 0.1, cs: 0 },
+      seed: { founder: 0.25, hr: 0.1, finance: 0.15, cs: 0.05 },
+      seriesab: { founder: 0.2, hr: 0.15, finance: 0.2, cs: 0.1 },
+      seriesbc: { founder: 0.15, hr: 0.15, finance: 0.2, cs: 0.1 },
+      seriesc: { founder: 0.1, hr: 0.15, finance: 0.2, cs: 0.1 }
+    };
+
+    const COMPLIANCE = {
+      india: 72,
+      us: 40,
+      singapore: 48,
+      uk: 32
+    };
+
+    const SECRETARIAL_WORKFLOWS_BY_GEO = {
+      india: { preseed: 4, seed: 6, seriesab: 8, seriesbc: 10, seriesc: 12 },
+      us: { preseed: 3, seed: 5, seriesab: 6, seriesbc: 8, seriesc: 10 },
+      singapore: { preseed: 3, seed: 5, seriesab: 6, seriesbc: 8, seriesc: 10 },
+      uk: { preseed: 3, seed: 5, seriesab: 6, seriesbc: 8, seriesc: 10 }
+    };
+
+    const FUNDRAISING_WORKFLOWS = {
+      capTable: 3,
+      secretarial: 4
+    };
+
+    function computeROI(inputs, overrides = {}) {
+      const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = '', valuationType = '' } = inputs;
+
+      const stageKey = stage;
+      let rate = overrides.rate;
+
+      if (!rate) {
+        const matrix = STAFFING_MATRIX[stageKey];
+        const roles = ['founder', 'hr', 'finance', 'cs'];
+        rate = 0;
+        for (const role of roles) {
+          const fte = matrix[role] || 0;
+          if (fte > 0) {
+            const roleRate = STAGE_HOURLY_RATES[geoOp][stageKey][role];
+            rate += fte * roleRate;
+          }
+        }
+      }
+
+      const mult = meth === 'in-house' ? 1 : 0.4;
+      const grHr = overrides.grHr || 1.5;
+      const compHr = overrides.compHr || COMPLIANCE[geoInc];
+
+      const grHrs = gr * grHr;
+      const grCost = grHrs * mult * rate;
+      const cpCost = compHr * mult * rate;
+
+      const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
+      const ctHrs = ctRaw * mult;
+      const ctCost = ctHrs * rate;
+
+      const ROUND_COMPLEXITY = { safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
+      const roundMultiplier = planningToFundraise ? (ROUND_COMPLEXITY[fundraiseRound] || 1.0) : 0;
+      const ctFundraisingHours = planningToFundraise ? (FUNDRAISING_WORKFLOWS.capTable * 2.5 * roundMultiplier) : 0;
+      const ctFundraisingHrs = ctFundraisingHours * mult;
+      const ctFundraisingCost = ctFundraisingHrs * rate;
+
+      const baseWorkflows = SECRETARIAL_WORKFLOWS_BY_GEO[geoInc][stageKey] || 0;
+      const secBaseHours = baseWorkflows * 2.5;
+      const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
+      const secRaw = secBaseHours * shareholderScaling;
+      const secHrs = secRaw * mult;
+      const secRate = STAGE_HOURLY_RATES[geoOp][stageKey].cs;
+      const secCost = secHrs * secRate;
+
+      const secFundraisingWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
+      const secFundraisingHours = secFundraisingWorkflows * 2.5 * roundMultiplier;
+      const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
+      const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
+      const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
+      const secFundraisingHrs = secFundraisingRaw * mult;
+      const secFundraisingCost = secFundraisingHrs * secRate;
+
+      let methodExtCost = 0;
+      if (meth === 'outsourced') {
+        methodExtCost = STAGE_RETAINER[geoOp][stageKey];
+      }
+
+      const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost;
+      const manualHTotal = grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingHours;
+      const internalHTotal = grHrs * mult + compHr * mult + ctHrs + secHrs + ctFundraisingHrs + secFundraisingHrs;
+      const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
+
+      const elOverhead = manualHTotal * 0.1 * rate;
+      const stakeholders = Math.min(sh + oh, 10000);
+      const elAnn = stakeholders * PRICING[geoOp] + elOverhead;
+
+      const diff = annCost - elAnn;
+      const isSpend = diff >= 0;
+      const absDiff = Math.abs(diff);
+      const roi = elAnn > 0 ? Math.round((absDiff / elAnn) * 10) / 10 : 0;
+
+      return {
+        annCost: Math.round(annCost),
+        elAnn: Math.round(elAnn),
+        diff: Math.round(diff),
+        isSpend,
+        roi,
+        stakeholders,
+        rate,
+        manualHTotal: Math.round(manualHTotal * 10) / 10,
+        internalHTotal: Math.round(internalHTotal * 10) / 10,
+        timeSavedPct,
+      };
+    }
+
+    // ============ PRIMITIVES ============
+    function MonoLabel({ children, size = 10.5, color, style }) {
+      return (
+        <div style={{
+          fontFamily: A.mono, fontSize: size, fontWeight: 700, letterSpacing: 1.4,
+          textTransform: 'uppercase', color: color || A.mute,
+          ...style,
+        }}>{children}</div>
+      );
+    }
+
+    function SectionHeader({ number, title, subtitle, style }) {
+      return (
+        <div style={{ ...style }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+            <span style={{ fontFamily: A.mono, fontSize: 12, fontWeight: 700, letterSpacing: 1.2, color: A.purple }}>
+              {String(number).padStart(2, '0')}
+            </span>
+            <span style={{ width: 12, height: 1, background: A.line, transform: 'translateY(-3px)' }} />
+            <span style={{ fontFamily: A.mono, fontSize: 12, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', color: A.ink }}>
+              {title}
+            </span>
+          </div>
+          {subtitle && <div style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, marginLeft: 28 }}>{subtitle}</div>}
+        </div>
+      );
+    }
+
+    function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText }) {
+      const borderColor = error ? A.redLight : A.line;
+      const labelColor = error ? A.redLight : A.mute;
+      return (
+        <div>
+          <MonoLabel color={labelColor}>
+            {label}{required && <span style={{ color: error ? A.redLight : A.purple, marginLeft: 3 }}>*</span>}
+          </MonoLabel>
+          <div style={{ position: 'relative', marginTop: 6 }}>
+            <input
+              type={type === 'number' ? 'text' : type}
+              inputMode={type === 'number' ? 'numeric' : undefined}
+              value={value || ''}
+              onChange={(e) => onChange && onChange(e.target.value)}
+              placeholder={placeholder}
+              aria-invalid={error ? 'true' : 'false'}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                border: 'none', borderBottom: `1px solid ${borderColor}`,
+                padding: '8px 0', outline: 'none',
+                background: 'transparent', fontFamily: A.sans, fontSize: 16,
+                color: A.ink, fontVariantNumeric: 'tabular-nums',
+                caretColor: error ? A.redLight : 'auto',
+              }}
+              onFocus={(e) => e.currentTarget.style.borderBottomColor = error ? A.redLight : A.purple}
+              onBlur={(e) => e.currentTarget.style.borderBottomColor = borderColor}
+            />
+            {suffix && (
+              <span style={{ position: 'absolute', right: 0, top: 8, fontFamily: A.mono, fontSize: 11, color: A.muteSoft, fontWeight: 600 }}>{suffix}</span>
+            )}
+          </div>
+          {error && (
+            <div role="alert" style={{
+              display: 'flex', alignItems: 'center', gap: 4, marginTop: 6,
+              fontFamily: A.mono, fontSize: 10, fontWeight: 600, letterSpacing: 0.4,
+              textTransform: 'uppercase', color: A.redLight,
+            }}>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="5.5" cy="5.5" r="4.5"/><path d="M5.5 3v3M5.5 7.8v.2"/></svg>
+              {error}
+            </div>
+          )}
+          {helperText && !error && (
+            <div style={{
+              marginTop: 6, fontFamily: A.mono, fontSize: 10, fontWeight: 600, letterSpacing: 0.4,
+              textTransform: 'uppercase', color: A.mute,
+            }}>
+              {helperText}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Dropdown({ label, value, onChange, options, placeholder = 'Select…', required, error }) {
+      const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener('mousedown', onDoc);
+        return () => document.removeEventListener('mousedown', onDoc);
+      }, []);
+      const sel = options.find((o) => (typeof o === 'string' ? o : o.value) === value);
+      const selLabel = sel ? (typeof sel === 'string' ? sel : sel.label) : '';
+      const borderColor = error ? A.redLight : (open ? A.purple : A.line);
+      return (
+        <div ref={ref} style={{ position: 'relative' }}>
+          {label && <MonoLabel color={error ? A.redLight : A.mute}>{label}{required && <span style={{ color: error ? A.redLight : A.purple, marginLeft: 3 }}>*</span>}</MonoLabel>}
+          <button onClick={() => setOpen((o) => !o)} aria-invalid={error ? 'true' : 'false'} style={{
+            width: '100%', textAlign: 'left', marginTop: label ? 6 : 0,
+            padding: '8px 0', background: 'transparent',
+            border: 'none', borderBottom: `1px solid ${borderColor}`,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            fontFamily: A.sans, fontSize: 16, color: sel ? A.ink : A.muteSoft,
+            transition: 'border-color .15s',
+          }}>
+            <span>{selLabel || placeholder}</span>
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke={A.mute} strokeWidth="1.6" strokeLinecap="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
+              <path d="M2 4l3.5 3.5L9 4"/>
+            </svg>
+          </button>
+          {open && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 30,
+              background: '#fff', border: `1px solid ${A.line}`, borderRadius: 6,
+              boxShadow: '0 8px 24px rgba(30,27,46,0.12)', padding: 4, maxHeight: 240, overflow: 'auto',
+            }}>
+              {options.map((o) => {
+                const v = typeof o === 'string' ? o : o.value;
+                const l = typeof o === 'string' ? o : o.label;
+                const isSel = v === value;
+                return (
+                  <button key={v} onClick={() => { onChange && onChange(v); setOpen(false); }} style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '8px 10px', border: 'none', cursor: 'pointer',
+                    background: isSel ? A.purpleTint : 'transparent', borderRadius: 4,
+                    fontFamily: 'inherit', fontSize: 14, color: A.ink, fontWeight: isSel ? 600 : 500,
+                  }}
+                    onMouseEnter={(e) => { if (!isSel) e.currentTarget.style.background = '#F7F6FA'; }}
+                    onMouseLeave={(e) => { if (!isSel) e.currentTarget.style.background = 'transparent'; }}
+                  >{l}</button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Switch({ on, onChange, size = 'md' }) {
+      const w = size === 'sm' ? 34 : 40;
+      const h = size === 'sm' ? 18 : 22;
+      const knob = size === 'sm' ? 14 : 18;
+      return (
+        <button onClick={(e) => { e.preventDefault(); onChange(!on); }} role="switch" aria-checked={on} style={{
+          width: w, height: h, borderRadius: h / 2, border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0,
+          background: on ? A.purple : '#D5D2E0', position: 'relative', transition: 'background .18s',
+        }}>
+          <span style={{
+            position: 'absolute', top: 2, left: on ? w - knob - 2 : 2, width: knob, height: knob, borderRadius: knob / 2,
+            background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,.18)', transition: 'left .18s',
+          }} />
+        </button>
+      );
+    }
+
+    function ChipSelect({ value, onChange, options, mono = true }) {
+      return (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {options.map((o) => {
+            const sel = value === o;
+            return (
+              <button key={o} onClick={() => onChange(o)} style={{
+                padding: '6px 12px', borderRadius: 14, cursor: 'pointer',
+                border: `1px solid ${sel ? A.purple : A.line}`,
+                background: sel ? A.purple : '#fff', color: sel ? '#fff' : A.inkSoft,
+                fontFamily: mono ? A.mono : A.sans,
+                fontSize: mono ? 10.5 : 13, fontWeight: mono ? 700 : 500,
+                letterSpacing: mono ? 0.6 : 0,
+                textTransform: mono ? 'uppercase' : 'none',
+                transition: 'all .15s',
+              }}>{o}</button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function StatusChip({ mode, onEdit }) {
+      if (mode === 'live') {
+        return (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            height: 26, borderRadius: 13, padding: '0 12px',
+            background: A.greenTint, border: `1px solid rgba(10, 140, 92, 0.25)`,
+            fontFamily: A.mono, fontSize: 10, fontWeight: 700, letterSpacing: 0.8,
+            textTransform: 'uppercase', color: A.green,
+          }}>
+            <span style={{ position: 'relative', width: 7, height: 7 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: A.green, opacity: 0.3, animation: 'roi-pulse 1.6s ease-out infinite' }} />
+              <span style={{ position: 'absolute', inset: 1.5, borderRadius: '50%', background: A.green }} />
+            </span>
+            Live
+          </div>
+        );
+      }
+      if (mode === 'stale') {
+        return (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            height: 26, borderRadius: 13, padding: '0 12px',
+            background: A.amberBg, border: `1px solid ${A.amberBorder}`,
+            fontFamily: A.mono, fontSize: 10, fontWeight: 700, letterSpacing: 0.8,
+            textTransform: 'uppercase', color: A.amber,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Outdated
+          </div>
+        );
+      }
+      return (
+        <div style={{
+          display: 'inline-flex', alignItems: 'stretch', height: 26, borderRadius: 13,
+          background: A.purpleTint, border: `1px solid ${A.purpleBorder}`, fontFamily: A.mono,
+        }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0 10px 0 12px', color: A.purple2, fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+            <span style={{ position: 'relative', width: 7, height: 7 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: A.purple, opacity: 0.3, animation: 'roi-pulse 2.2s ease-out infinite' }} />
+              <span style={{ position: 'absolute', inset: 1.5, borderRadius: '50%', background: A.purple }} />
+            </span>
+            Sample
+          </div>
+          <span style={{ width: 1, background: A.purpleBorder, margin: '6px 0' }} />
+          <button onClick={onEdit} style={{
+            all: 'unset', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '0 12px', color: A.purple, fontSize: 10, fontWeight: 700, letterSpacing: 0.8,
+            textTransform: 'uppercase', whiteSpace: 'nowrap',
+          }}>
+            Edit inputs
+            <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 4.5h7M5 1.5l3 3-3 3"/></svg>
+          </button>
+        </div>
+      );
+    }
+
+    function PrimaryBtn({ children, fullWidth, onClick, size = 'md', style, disabled }) {
+      const padding = size === 'lg' ? '16px 28px' : size === 'sm' ? '8px 14px' : '12px 22px';
+      const fontSize = size === 'lg' ? 15 : size === 'sm' ? 12 : 14;
+      return (
+        <button onClick={onClick} disabled={disabled} style={{
+          width: fullWidth ? '100%' : 'auto',
+          background: A.purple, color: '#fff',
+          fontFamily: A.sans, fontSize, fontWeight: 600, letterSpacing: -0.1,
+          border: 'none', padding, borderRadius: 6, cursor: 'pointer',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          boxShadow: '0 1px 0 rgba(255,255,255,0.2) inset, 0 2px 8px rgba(109,40,217,0.25)',
+          transition: 'background .15s',
+          opacity: disabled ? 0.5 : 1,
+          ...style,
+        }}
+          onMouseEnter={(e) => !disabled && (e.currentTarget.style.background = A.purple2)}
+          onMouseLeave={(e) => !disabled && (e.currentTarget.style.background = A.purple)}
+        >{children}</button>
+      );
+    }
+
+    function InfoTip({ text, color }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <span style={{ position: 'relative', display: 'inline-flex', verticalAlign: 'middle', marginLeft: 4 }}>
+          <span
+            tabIndex={0}
+            onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
+            onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}
+            style={{
+              width: 13, height: 13, borderRadius: '50%',
+              border: `1px solid ${color || A.muteSoft}`, color: color || A.mute,
+              fontFamily: A.mono, fontSize: 8.5, fontWeight: 700,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'help', lineHeight: 1, userSelect: 'none',
+            }}
+          >i</span>
+          {open && (
+            <span style={{
+              position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+              background: A.ink, color: '#fff',
+              fontFamily: A.sans, fontSize: 11.5, fontWeight: 500, lineHeight: 1.45, letterSpacing: 0,
+              textTransform: 'none',
+              padding: '8px 10px', borderRadius: 5, width: 220, zIndex: 100,
+              boxShadow: '0 6px 18px rgba(20,18,30,0.22)', pointerEvents: 'none',
+            }}>
+              {text}
+              <span style={{ position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%) rotate(45deg)', width: 8, height: 8, background: A.ink }} />
+            </span>
+          )}
+        </span>
+      );
+    }
+
+    // ============ DIRECTION A COMPONENTS ============
+    function AHeader({ width }) {
+      const compact = width < 720;
+      const tiny = width < 480;
+      return (
+        <header style={{
+          borderBottom: `1px solid ${A.line}`, background: '#fff',
+          padding: compact ? '14px 20px' : '18px 40px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+            <div style={{ fontFamily: A.sans, fontSize: 17, fontWeight: 700, letterSpacing: -0.3, color: A.ink, display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ width: 18, height: 18, borderRadius: 4, background: A.purple, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }}>E</span>
+              EquityList
+            </div>
+            {!compact && (
+              <nav style={{ display: 'flex', gap: 22 }}>
+                {['Products', 'Solutions', 'Customers', 'Pricing', 'Resources'].map((l) => (
+                  <span key={l} style={{ fontSize: 13.5, color: A.inkSoft, cursor: 'pointer' }}>{l}</span>
+                ))}
+              </nav>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: tiny ? 8 : 12 }}>
+            {!tiny && <span style={{ fontSize: 13.5, color: A.inkSoft, cursor: 'pointer' }}>Sign in</span>}
+            <button style={{
+              background: A.ink, color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 4,
+              fontFamily: A.sans, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            }}>Get started</button>
+          </div>
+        </header>
+      );
+    }
+
+    function AHero({ width }) {
+      const compact = width < 720;
+      return (
+        <section style={{
+          padding: compact ? '40px 20px 24px' : '64px 40px 36px',
+          maxWidth: 1280, margin: '0 auto',
+        }}>
+          <div style={{ fontFamily: A.mono, fontSize: 11, fontWeight: 700, letterSpacing: 1.6, textTransform: 'uppercase', color: A.purple, marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: A.purple }} />
+            ROI Calculator · v2.4
+          </div>
+          <h1 style={{
+            fontFamily: A.sans, fontSize: compact ? 32 : 52, fontWeight: 600, letterSpacing: -1.6,
+            color: A.ink, lineHeight: 1.05, margin: 0, maxWidth: 880, textWrap: 'pretty',
+          }}>
+            How much is managing equity on{' '}
+            <span style={{
+              fontStyle: 'italic', fontFamily: A.serif, fontWeight: 500, color: A.purple,
+              background: `linear-gradient(180deg, transparent 60%, ${A.purpleTint2} 60%)`, padding: '0 4px',
+            }}>spreadsheets</span>{' '}
+            costing you?
+          </h1>
+          <p style={{
+            fontSize: compact ? 15 : 17, color: A.inkSoft, lineHeight: 1.5,
+            maxWidth: 620, marginTop: 20, marginBottom: 0,
+          }}>
+            Based on industry benchmarks and real company data — see precisely how much time and capital is wasted on manual administration.
+          </p>
+        </section>
+      );
+    }
+
+    function AForm({ width, onCalculate, onInputChange, showErrors = false, errors, mode }) {
+      const [stage, setStage] = useState('seriesab');
+      const [shareholders, setShareholders] = useState('30');
+      const [optionHolders, setOptionHolders] = useState('15');
+      const [grants, setGrants] = useState('10');
+      const [geoInc, setGeoInc] = useState('india');
+      const [geoOp, setGeoOp] = useState('india');
+      const [legalEntity, setLegalEntity] = useState('');
+      const [fundraise, setFundraise] = useState(false);
+      const [valuation, setValuation] = useState(false);
+      const [valFreq, setValFreq] = useState(null);
+      const [adminMethod, setAdminMethod] = useState('in-house');
+
+      const oneColumn = width < 720;
+      const grantsNum = parseInt(grants, 10) || 0;
+      const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
+      const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
+
+      const handleGrantsChange = (val) => {
+        setGrants(val);
+        if (mode === 'stale') {
+          onCalculate && onCalculate();
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+          <FormSection number={1} title="Company Profile" subtitle="Geography determines compliance requirements and salary benchmarks.">
+            <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: oneColumn ? 20 : 28 }}>
+              <Dropdown label={<>Country of Incorporation <InfoTip text="Determines which valuation reports, tax filings, and statutory compliance apply." /></>} value={geoInc} required options={['india', 'us', 'singapore', 'uk']} onChange={(v) => { setGeoInc(v); onInputChange && onInputChange(); }} />
+              <Dropdown label={<>Country of Operation <InfoTip text="Where your team is based — drives salary benchmarks for in-house equity admin." /></>} value={geoOp} required options={['india', 'us', 'singapore', 'uk']} onChange={(v) => { setGeoOp(v); onInputChange && onInputChange(); }} />
+              <Dropdown label={<>Current Stage <InfoTip text="Used to estimate your blended hourly rate and the typical staffing mix at this stage." /></>} value={stage} required options={['preseed', 'seed', 'seriesab', 'seriesbc', 'seriesc']} onChange={(v) => { setStage(v); onInputChange && onInputChange(); }} />
+              <FormField label="Legal Entity Name" placeholder="Optional" value={legalEntity} onChange={(v) => { setLegalEntity(v); onInputChange && onInputChange(); }} />
+            </div>
+          </FormSection>
+
+          <FormSection number={2} title="Equity Structure" subtitle="Stakeholder volume scales your cap table reconciliation and grant overhead.">
+            <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
+              <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={errors?.shareholders} />
+              <FormField label={<>Option holders <InfoTip text="Employees and advisors with vested or unvested options outstanding." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={errors?.optionHolders} />
+              <FormField label={<>Grants per year <InfoTip text="New ESOP grants you issue annually — drives grant-admin overhead." /></>} required value={grants} onChange={(v) => { handleGrantsChange(v); onInputChange && onInputChange(); }} type="number" error={errors?.grants} helperText={grantsHelper} />
+            </div>
+
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <SwitchCard on={fundraise} onChange={(v) => { setFundraise(v); onInputChange && onInputChange(); }} title="Planning to fundraise in the next 12 months?" subtitle="Helps us model upcoming governance & onboarding workflows.">
+                <FundraiseExpanded oneColumn={oneColumn} />
+              </SwitchCard>
+              <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
+                <ValuationExpanded oneColumn={oneColumn} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} />
+              </SwitchCard>
+            </div>
+          </FormSection>
+
+          <FormSection number={3} title="Current Operations" subtitle="How you currently manage equity administration.">
+            <Dropdown label="Administrative Method" value={adminMethod} required options={['in-house', 'outsourced']} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
+          </FormSection>
+
+          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise })}>
+            Calculate ROI
+            <span style={{ opacity: 0.7 }}>→</span>
+          </PrimaryBtn>
+        </div>
+      );
+    }
+
+    function FormSection({ number, title, subtitle, children }) {
+      return (
+        <section>
+          <SectionHeader number={number} title={title} subtitle={subtitle} style={{ marginBottom: 20 }} />
+          <div style={{ marginLeft: 28 }}>{children}</div>
+        </section>
+      );
+    }
+
+    function SwitchCard({ on, onChange, title, subtitle, children }) {
+      const [animating, setAnimating] = useState(false);
+      const prevOn = useRef(on);
+      useEffect(() => {
+        if (prevOn.current !== on) {
+          setAnimating(true);
+          const t = setTimeout(() => setAnimating(false), 320);
+          prevOn.current = on;
+          return () => clearTimeout(t);
+        }
+      }, [on]);
+      const clipped = !on || animating;
+      return (
+        <div style={{
+          border: `1px solid ${on ? A.purpleBorder : A.line}`,
+          background: on ? A.purpleTint : '#fff',
+          borderRadius: 8, transition: 'all .2s',
+        }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', cursor: 'pointer' }}>
+            <Switch on={on} onChange={onChange} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 600, color: A.ink, letterSpacing: -0.1 }}>{title}</div>
+              <div style={{ fontSize: 12, color: A.mute, marginTop: 2 }}>{subtitle}</div>
+            </div>
+            <div style={{
+              fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+              color: on ? A.purple2 : A.muteSoft,
+            }}>{on ? 'Yes' : 'No'}</div>
+          </label>
+          <div style={{
+            maxHeight: on ? 600 : 0,
+            overflow: clipped ? 'hidden' : 'visible',
+            transition: 'max-height .3s ease',
+          }}>
+            <div style={{ padding: '4px 16px 16px', borderTop: `1px solid ${A.purpleBorder}` }}>
+              <div style={{ paddingTop: 16 }}>{children}</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function FundraiseExpanded({ oneColumn }) {
+      const [round, setRound] = useState('seed');
+      const [timing, setTiming] = useState('3–6 mo');
+      const [shareholders, setShareholders] = useState('');
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
+            <div>
+              <MonoLabel>Round type</MonoLabel>
+              <div style={{ marginTop: 8 }}>
+                <ChipSelect value={round} onChange={setRound} options={['safe', 'seed', 'seriesab', 'seriesbc', 'bridge']} />
+              </div>
+            </div>
+            <div>
+              <MonoLabel>Expected timing</MonoLabel>
+              <div style={{ marginTop: 8 }}>
+                <ChipSelect value={timing} onChange={setTiming} options={['<3 mo', '3–6 mo', '6–12 mo']} />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '180px 1fr', gap: 16, alignItems: 'flex-end' }}>
+            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" />
+            <div style={{ fontSize: 12, color: A.mute, lineHeight: 1.5 }}>
+              Investors, SAFE conversions, and new ESOP grants all count toward stakeholder load.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ValuationExpanded({ oneColumn, freq, setFreq }) {
+      const [type, setType] = useState(null);
+      const opts = [
+        { value: 'rv', label: 'Registered Valuer Assessment' },
+        { value: 'mb', label: 'Merchant Banker Assessment' },
+      ];
+      const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : freq === 'as-needed' ? 2 : 0;
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
+            <Dropdown label="How often?" required value={freq} onChange={setFreq} options={[
+              { value: 'annually', label: 'Annually (1× per year)' },
+              { value: 'quarterly', label: 'Quarterly (4× per year)' },
+              { value: 'as-needed', label: 'As-needed' },
+            ]} placeholder="Select frequency" />
+            <Dropdown label="Report type · for India" required value={type} onChange={setType} options={opts} placeholder="Select report type" />
+          </div>
+          {freq && type && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 14px',
+              background: '#fff', border: `1px dashed ${A.purpleBorder}`, borderRadius: 6,
+              fontSize: 12, color: A.inkSoft,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke={A.purple} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M2 12L6 8l3 3 5-6"/><path d="M10 5h4v4"/>
+              </svg>
+              Estimate will include <strong style={{ color: A.purple2, fontWeight: 700 }}>{events} event{events === 1 ? '' : 's'}/yr</strong>.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function StaleAlert({ dirtyCount, onRecalculate }) {
+      return (
+        <div className="stale-alert" style={{
+          background: A.amberBg, border: `1px solid ${A.amberBorder}`, borderRadius: 10, padding: '14px 16px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          margin: '12px 0 24px',
+        }} role="status" aria-live="polite">
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={A.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="amber-spin" style={{ flexShrink: 0 }}>
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            <div>
+              <div style={{ fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.amber }}>
+                Showing previous results.
+              </div>
+              <div style={{ fontFamily: A.sans, fontSize: 14, fontWeight: 400, color: A.amber, marginTop: 2 }}>
+                {dirtyCount} input{dirtyCount === 1 ? '' : 's'} ha{dirtyCount === 1 ? 's' : 've'} changed.
+              </div>
+            </div>
+          </div>
+          <PrimaryBtn size="sm" onClick={onRecalculate} style={{ background: A.amber, whiteSpace: 'nowrap' }} onMouseEnter={(e) => e.currentTarget.style.background = A.amberLight} onMouseLeave={(e) => e.currentTarget.style.background = A.amber}>
+            Recalculate ↵
+          </PrimaryBtn>
+        </div>
+      );
+    }
+
+    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount }) {
+      const compact = width < 460;
+      const [breakdownOpen, setBreakdownOpen] = useState(true);
+      const [leavingStale, setLeavingStale] = useState(false);
+
+      const v = results || { annCost: 857997, elAnn: 170118, diff: 687879, roi: 4, manualHTotal: 159, internalHTotal: 16 };
+      const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
+
+      useEffect(() => {
+        if (leavingStale && mode !== 'stale') {
+          setLeavingStale(false);
+        }
+      }, [mode, leavingStale]);
+
+      const items = [
+        { key: 'grant', label: 'Grant Admin', formula: '1.5 hrs/grant × 10 grants/yr × rate', value: '₹62,258', pct: '7%', tip: null },
+        { key: 'compliance', label: 'Compliance', formula: '72 hrs/yr (statutory baseline) × rate', value: '₹298,836', pct: '35%', tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.' },
+        { key: 'captable', label: 'Cap Table', formula: '3h/mo base + scaling = 41 hrs/yr × rate', value: '₹169,340', pct: '20%', tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.' },
+        { key: 'secretarial', label: 'Secretarial & Board Operations', formula: '12 workflows/yr × 2.5 hrs/workflow × rate', value: '₹27,563', pct: '3%', tip: 'Board meetings, shareholder resolutions, and statutory filings.' },
+      ];
+
+      return (
+        <aside style={{
+          display: 'flex', flexDirection: 'column', gap: 14,
+          position: 'sticky', top: 24,
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <MonoLabel size={11} color={A.ink}>Live Estimate</MonoLabel>
+                <span style={{ width: 1, height: 14, background: A.line }} />
+                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate()} />
+              </div>
+            </div>
+            <div style={{ fontSize: 12.5, color: A.mute, marginTop: 6 }}>
+              {mode === 'live' ? 'Tailored to your inputs — recalculate any time.' : mode === 'stale' ? 'Previous results — update and recalculate.' : 'Illustrative — based on a typical mid-market scenario.'}
+            </div>
+          </div>
+
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(); }} />}
+
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
+            background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
+            padding: '20px 22px', position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, width: 130, height: 130, background: `radial-gradient(circle at top right, ${A.greenTint}, transparent 70%)`, pointerEvents: 'none' }} />
+            <div style={{ position: 'relative' }}>
+              <MonoLabel size={9.5} color={A.mute} style={{ marginBottom: 6 }}>Your potential savings</MonoLabel>
+              <div style={{
+                fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
+                color: A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+              }}>₹{(v.diff || 0).toLocaleString('en-IN')}</div>
+              <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
+
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                  <MonoLabel size={9.5}>Current spend</MonoLabel>
+                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.inkSoft, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>₹{(v.annCost || 0).toLocaleString('en-IN')}</div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                  <MonoLabel size={9.5}>With EquityList</MonoLabel>
+                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.purple2, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>₹{(v.elAnn || 0).toLocaleString('en-IN')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8 }}>
+            <button
+              onClick={() => setBreakdownOpen((o) => !o)}
+              aria-expanded={breakdownOpen}
+              style={{
+                width: '100%', background: 'transparent', border: 'none', cursor: 'pointer',
+                padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderBottom: breakdownOpen ? `1px solid ${A.lineSoft}` : 'none',
+              }}
+            >
+              <MonoLabel size={10.5} color={A.ink}>Cost breakdown</MonoLabel>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke={A.mute} strokeWidth="1.6" strokeLinecap="round" style={{ transform: breakdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
+                <path d="M2 4l3.5 3.5L9 4"/>
+              </svg>
+            </button>
+            {breakdownOpen && (
+              <div style={{ padding: '4px 18px 18px' }}>
+                {items.map((it, i) => (
+                  <div key={it.key} style={{
+                    padding: '14px 0',
+                    borderBottom: i < items.length - 1 ? `1px solid ${A.lineSoft}` : 'none',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                      <MonoLabel size={10} color={A.inkSoft}>{it.label}</MonoLabel>
+                      {it.tip && <InfoTip text={it.tip} />}
+                    </div>
+                    <div style={{ fontFamily: A.mono, fontSize: 10.5, color: A.muteSoft, lineHeight: 1.5, marginBottom: 6, wordBreak: 'break-word' }}>{it.formula}</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+                      <div style={{ fontFamily: A.sans, fontSize: 17, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3 }}>{it.value}</div>
+                      <div style={{ fontFamily: A.mono, fontSize: 10.5, fontWeight: 700, color: A.muteSoft }}>{it.pct}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8, padding: '4px 18px' }}>
+            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
+              <MonoLabel size={10.5} color={A.ink}>ROI</MonoLabel>
+            </div>
+            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
+              <MonoLabel size={10}>Your ROI with EquityList</MonoLabel>
+              <div style={{ fontFamily: A.sans, fontSize: 18, fontWeight: 700, color: A.ink, letterSpacing: -0.4 }}>{v.roi}×</div>
+            </div>
+            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <MonoLabel size={10}>Hours saved annually</MonoLabel>
+              <div style={{ fontFamily: A.sans, fontSize: 16, fontWeight: 700, color: A.green, fontVariantNumeric: 'tabular-nums' }}>
+                {Math.round(v.manualHTotal - v.internalHTotal)} <span style={{ fontFamily: A.mono, fontSize: 10, color: A.green, fontWeight: 700 }}>hrs/yr</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
+            background: A.purpleTint, border: `1px solid ${A.purpleBorder}`, borderRadius: 8,
+            padding: '16px 18px',
+          }}>
+            <MonoLabel size={9.5} color={A.purple2} style={{ marginBottom: 8 }}>The takeaway</MonoLabel>
+            <p style={{ fontSize: 13, color: A.inkSoft, lineHeight: 1.55, margin: 0, marginBottom: 14 }}>
+              You're currently overspending on equity operations. You could save <strong style={{ color: A.ink, fontWeight: 700 }}>₹{(v.diff || 0).toLocaleString('en-IN')}/year</strong> while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.
+            </p>
+            <PrimaryBtn fullWidth size="md">
+              Book a demo
+              <span style={{ opacity: 0.7 }}>→</span>
+            </PrimaryBtn>
+          </div>
+
+          <div style={{ fontSize: 11, color: A.muteSoft, lineHeight: 1.5 }}>
+            Pricing is indicative — based on benchmarks for companies of your size. Final pricing is tailored.
+          </div>
+        </aside>
+      );
+    }
+
+    function ScreenA({ width, height }) {
+      const [formData, setFormData] = useState(null);
+      const [results, setResults] = useState(null);
+      const [mode, setMode] = useState('sample');
+      const [errors, setErrors] = useState({});
+      const [dirtyInputs, setDirtyInputs] = useState({});
+
+      const isMobile = width < 720;
+      const isTablet = width >= 720 && width < 1100;
+      const isDesktop = width >= 1100;
+
+      const validateField = (field, value) => {
+        const num = parseInt(value, 10);
+        if (!value || value.trim() === '') return 'Field required';
+        if (isNaN(num)) return 'Must be a number';
+        if (field === 'shareholders' && (num < 0 || num > 100000)) return 'Must be 0–100,000';
+        if (field === 'optionHolders' && (num < 0 || num > 100000)) return 'Must be 0–100,000';
+        if (field === 'grants' && (num < 1 || num > 10000)) return 'Must be 1–10,000';
+        return null;
+      };
+
+      const handleCalculate = (inputs) => {
+        const sharesErr = validateField('shareholders', inputs?.sh || '');
+        const holdersErr = validateField('optionHolders', inputs?.oh || '');
+        const grantsErr = validateField('grants', inputs?.gr || '');
+
+        const newErrors = {};
+        if (sharesErr) newErrors.shareholders = sharesErr;
+        if (holdersErr) newErrors.optionHolders = holdersErr;
+        if (grantsErr) newErrors.grants = grantsErr;
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length === 0) {
+          const validatedInputs = {
+            ...inputs,
+            sh: parseInt(inputs.sh, 10),
+            oh: parseInt(inputs.oh, 10),
+            gr: parseInt(inputs.gr, 10),
+          };
+          const calcs = computeROI(validatedInputs);
+          setResults(calcs);
+          setFormData(validatedInputs);
+          setMode('live');
+          setDirtyInputs({});
+        }
+      };
+
+      const handleInputChange = () => {
+        if (mode === 'live') {
+          setMode('stale');
+          setDirtyInputs({ ...dirtyInputs, changed: true });
+        }
+      };
+
+      return (
+        <div style={{
+          width, height, overflow: 'auto',
+          fontFamily: A.sans, color: A.ink, background: '#fff',
+          WebkitFontSmoothing: 'antialiased',
+          position: 'relative',
+        }}>
+          <style>{`@keyframes roi-pulse{0%{transform:scale(1);opacity:.35}70%{transform:scale(2.4);opacity:0}100%{transform:scale(2.4);opacity:0}}`}</style>
+
+          <AHeader width={width} />
+          <AHero width={width} />
+
+          <div style={{
+            maxWidth: 1280, margin: '0 auto',
+            padding: isMobile ? '12px 20px 24px' : '24px 40px 80px',
+            display: 'grid',
+            gridTemplateColumns: isDesktop ? '1fr 380px' : '1fr',
+            gap: isDesktop ? 56 : 32,
+            alignItems: 'flex-start',
+          }}>
+            <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
+            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} />}
+          </div>
+
+          <footer style={{
+            borderTop: `1px solid ${A.line}`, padding: isMobile ? '20px' : '28px 40px',
+            fontSize: 12, color: A.mute, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+          }}>
+            <div>© 2026 EquityList</div>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <span>Privacy</span><span>Terms</span><span>Contact</span>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    function AppWrapper() {
+      const [width, setWidth] = useState(window.innerWidth);
+      const [height, setHeight] = useState(window.innerHeight);
+
+      useEffect(() => {
+        const handleResize = () => {
+          setWidth(window.innerWidth);
+          setHeight(window.innerHeight);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
+
+      return <ScreenA width={width} height={height} />;
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AppWrapper />);
+  </script>
+</body>
+</html>

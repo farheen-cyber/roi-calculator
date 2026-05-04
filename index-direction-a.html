@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EquityList ROI Calculator</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="direction-a-styles.css">
+
+  <style>
+    /* Pulseanimation for status chip */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="roi-calculator">
+    <!-- Header -->
+    <div class="roi-header">
+      <div class="roi-header-title">EquityList ROI Calculator</div>
+      <div class="roi-header-right">
+        <button class="theme-toggle" id="btn-theme">Dark</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="roi-main">
+      <!-- Form Area -->
+      <div class="roi-form-area" id="roi-form-area">
+        <!-- Form will be rendered here by direction-a-app.js -->
+      </div>
+
+      <!-- Live Estimate Panel -->
+      <div class="roi-live-panel" id="roi-live-panel">
+        <!-- Live estimate will be rendered here by direction-a-app.js -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { init } from './direction-a-app.js';
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+
+      // Theme toggle
+      const themeBtn = document.getElementById('btn-theme');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark-theme');
+          localStorage.setItem('theme', document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light');
+          themeBtn.textContent = document.documentElement.classList.contains('dark-theme') ? 'Light' : 'Dark';
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark-theme');
+          themeBtn.textContent = 'Light';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
