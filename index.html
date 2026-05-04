@@ -224,6 +224,24 @@
       }
     };
 
+    const EL_VALUATION_PRICING = {
+      us: {
+        '409a': 1200
+      },
+      india: {
+        '409a': 75000,
+        'blackscholes': 75000,
+        'rv': 42000,
+        'mb': 70000
+      },
+      singapore: {
+        '409a': 1200
+      },
+      uk: {
+        '409a': 1200
+      }
+    };
+
     function computeROI(inputs, overrides = {}) {
       const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
 
@@ -283,10 +301,13 @@
       }
 
       let valuationCost = 0;
+      let elValuationCost = 0;
       if (valuationFrequency && valuationType) {
-        const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : valuationFrequency === 'as-needed' ? 2 : 0;
+        const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : 0;
         const pricePerEvent = VALUATION_PRICING[geoInc]?.[valuationType] || 0;
+        const elPricePerEvent = EL_VALUATION_PRICING[geoInc]?.[valuationType] || 0;
         valuationCost = events * pricePerEvent;
+        elValuationCost = events * elPricePerEvent;
       }
 
       const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
@@ -296,7 +317,7 @@
 
       const elOverhead = manualHTotal * 0.1 * rate;
       const stakeholders = Math.min(sh + oh, 10000);
-      const elAnn = stakeholders * PRICING[geoOp] + elOverhead;
+      const elAnn = stakeholders * PRICING[geoOp] + elOverhead + elValuationCost;
 
       const diff = annCost - elAnn;
       const isSpend = diff >= 0;
@@ -315,6 +336,7 @@
         internalHTotal: Math.round(internalHTotal * 10) / 10,
         timeSavedPct,
         valuationCost: Math.round(valuationCost),
+        elValuationCost: Math.round(elValuationCost),
       };
     }
 
