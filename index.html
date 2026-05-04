@@ -1007,9 +1007,9 @@
       };
 
       const handleCalculate = (inputs) => {
-        const sharesErr = validateField('shareholders', inputs?.sh || '');
-        const holdersErr = validateField('optionHolders', inputs?.oh || '');
-        const grantsErr = validateField('grants', inputs?.gr || '');
+        const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
+        const holdersErr = validateField('optionHolders', String(inputs?.oh || ''));
+        const grantsErr = validateField('grants', String(inputs?.gr || ''));
 
         const newErrors = {};
         if (sharesErr) newErrors.shareholders = sharesErr;
