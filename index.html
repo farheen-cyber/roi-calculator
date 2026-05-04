@@ -995,7 +995,7 @@
         {
           key: 'captable',
           label: 'Cap Table',
-          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = 41 hrs/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)) * 12)} hrs/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
           value: `₹${(v.ctCost || 0).toLocaleString('en-IN')}`,
           pct: `${capTablePct}%`,
           tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
