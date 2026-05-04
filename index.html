@@ -868,32 +868,32 @@
         {
           key: 'grant',
           label: 'Grant Admin',
-          formula: `${v.grHr} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
-          value: `₹${v.grCost.toLocaleString('en-IN')}`,
+          formula: `${v.grHr || 1.5} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          value: `₹${(v.grCost || 0).toLocaleString('en-IN')}`,
           pct: `${grantPct}%`,
           tip: null
         },
         {
           key: 'compliance',
           label: 'Compliance',
-          formula: `${v.compHr} hrs/yr (${Math.round(v.compHr / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
-          value: `₹${v.cpCost.toLocaleString('en-IN')}`,
+          formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          value: `₹${(v.cpCost || 0).toLocaleString('en-IN')}`,
           pct: `${compliancePct}%`,
           tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.'
         },
         {
           key: 'captable',
           label: 'Cap Table',
-          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = 41 hrs/yr × ${v.mult} × ₹${Math.round(v.rate)}/hr`,
-          value: `₹${v.ctCost.toLocaleString('en-IN')}`,
+          formula: `3h/mo base + ${((formData?.sh || 30) - 20) / 50 > 0 ? ((formData?.sh || 30) - 20) / 50 : 0}h/mo scaling = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50)).toFixed(1)}h/mo × 12 = 41 hrs/yr × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          value: `₹${(v.ctCost || 0).toLocaleString('en-IN')}`,
           pct: `${capTablePct}%`,
           tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
         },
         {
           key: 'secretarial',
           label: 'Secretarial & Board Operations',
-          formula: `${v.baseWorkflows} workflows/yr × 2.5 hrs/workflow × ${v.shareholderScaling.toFixed(2)} (shareholder scaling) = ${Math.round(v.baseWorkflows * 2.5 * v.shareholderScaling)} hrs/yr × ${v.mult} × ₹${Math.round(v.secRate)}/hr`,
-          value: `₹${v.secCost.toLocaleString('en-IN')}`,
+          formula: `${v.baseWorkflows || 12} workflows/yr × 2.5 hrs/workflow × ${(v.shareholderScaling || 1).toFixed(2)} (shareholder scaling) = ${Math.round((v.baseWorkflows || 12) * 2.5 * (v.shareholderScaling || 1))} hrs/yr × ${v.mult || 1} × ₹${Math.round(v.secRate || 0)}/hr`,
+          value: `₹${(v.secCost || 0).toLocaleString('en-IN')}`,
           pct: `${secretarialPct}%`,
           tip: 'Board meetings, shareholder resolutions, and statutory filings.'
         },
@@ -901,7 +901,7 @@
           key: 'valuation',
           label: 'Valuation Reports',
           formula: `${formData?.valFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr'}`,
-          value: `₹${v.valuationCost.toLocaleString('en-IN')}`,
+          value: `₹${(v.valuationCost || 0).toLocaleString('en-IN')}`,
           pct: `${valuationPct}%`,
           tip: null
         }] : []),
