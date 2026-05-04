@@ -861,7 +861,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <MonoLabel size={11} color={A.ink}>Live Estimate</MonoLabel>
                 <span style={{ width: 1, height: 14, background: A.line }} />
-                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate()} />
+                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, adminMethod })} />
               </div>
             </div>
             <div style={{ fontSize: 12.5, color: A.mute, marginTop: 6 }}>
@@ -869,7 +869,7 @@
             </div>
           </div>
 
-          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(); }} />}
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, adminMethod }); }} />}
 
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
