@@ -965,7 +965,7 @@
 
     function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData }) {
       const compact = width < 460;
-      const [breakdownOpen, setBreakdownOpen] = useState(true);
+      const [breakdownOpen, setBreakdownOpen] = useState(false);
       const [leavingStale, setLeavingStale] = useState(false);
       const [editedRate, setEditedRate] = useState(null);
       const [editedHours, setEditedHours] = useState(null);
