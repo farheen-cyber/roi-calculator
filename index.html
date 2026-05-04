@@ -981,6 +981,18 @@
         return stageMap[stage?.toLowerCase()] || 'SERIESAB';
       };
 
+      const formatRound = (round) => {
+        const roundMap = {
+          'safe': 'SAFE',
+          'seed': 'SEED',
+          'seriesab': 'SERIES A/B',
+          'seriesbc': 'SERIES B/C',
+          'seriesc': 'SERIES C+',
+          'bridge': 'BRIDGE'
+        };
+        return roundMap[round?.toLowerCase()] || 'SEED';
+      };
+
       const v = results || { annCost: 857997, elAnn: 170118, diff: 687879, roi: 4, manualHTotal: 159, internalHTotal: 16, grCost: 62258, cpCost: 298836, ctCost: 169340, secCost: 27563, valuationCost: 0, elValuationCost: 0, grHr: 1.5, compHr: 72, rate: 4150, secRate: 875, mult: 1, baseWorkflows: 12, shareholderScaling: 1.05 };
       const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
 
@@ -1032,7 +1044,7 @@
         ...(v.ctFundraisingCost > 0 ? [{
           key: 'fundraising-captable',
           label: 'Fundraising — Cap Table',
-          formula: `${v.ctFundraisingHours || 0} hrs/yr (${v.fundraiseRound?.toUpperCase() || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          formula: `${v.ctFundraisingHours || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
           value: `₹${(v.ctFundraisingCost || 0).toLocaleString('en-IN')}`,
           pct: `${v.annCost > 0 ? Math.round((v.ctFundraisingCost / v.annCost) * 100) : 0}%`,
           tip: 'Cap table updates, new shareholder onboarding, and fundraising coordination.'
@@ -1040,7 +1052,7 @@
         ...(v.secFundraisingCost > 0 ? [{
           key: 'fundraising-secretarial',
           label: 'Fundraising — Secretarial & Board',
-          formula: `${v.secFundraisingRaw || 0} hrs/yr (${v.fundraiseRound?.toUpperCase() || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ₹${Math.round(v.secRate || 0)}/hr`,
+          formula: `${v.secFundraisingRaw || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ₹${Math.round(v.secRate || 0)}/hr`,
           value: `₹${(v.secFundraisingCost || 0).toLocaleString('en-IN')}`,
           pct: `${v.annCost > 0 ? Math.round((v.secFundraisingCost / v.annCost) * 100) : 0}%`,
           tip: 'Board meetings, shareholder communications, and governance around the fundraising event.'
