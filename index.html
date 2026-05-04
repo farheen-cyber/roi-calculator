@@ -1012,14 +1012,16 @@
           key: 'valuation',
           label: 'Valuation Reports',
           formula: (() => {
-            const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : formData?.valuationFrequency === 'as-needed' ? '2 events/yr' : '1 event/yr';
+            const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
             const costPerEvent = VALUATION_PRICING[formData?.geoInc]?.[formData?.valuationType] || 0;
             const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
-            return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString()} per event`;
+            const locale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
+            return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString(locale)} per event`;
           })(),
           value: (() => {
             const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
-            return `${currencySymbol}${(v.valuationCost || 0).toLocaleString()}`;
+            const locale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
+            return `${currencySymbol}${(v.valuationCost || 0).toLocaleString(locale)}`;
           })(),
           pct: `${valuationPct}%`,
           tip: null
