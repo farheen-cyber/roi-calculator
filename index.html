@@ -851,19 +851,20 @@
 
     function ValuationExpanded({ oneColumn, freq, setFreq, type, setType }) {
       const opts = [
+        { value: '409a', label: '409A Valuation' },
+        { value: 'blackscholes', label: 'Black Scholes Valuation' },
         { value: 'rv', label: 'Registered Valuer Assessment' },
         { value: 'mb', label: 'Merchant Banker Assessment' },
       ];
-      const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : freq === 'as-needed' ? 2 : 0;
+      const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : 0;
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
             <Dropdown label="How often?" required value={freq} onChange={setFreq} options={[
               { value: 'annually', label: 'Annually (1× per year)' },
               { value: 'quarterly', label: 'Quarterly (4× per year)' },
-              { value: 'as-needed', label: 'As-needed' },
             ]} placeholder="Select frequency" />
-            <Dropdown label="Report type · for India" required value={type} onChange={setType} options={opts} placeholder="Select report type" />
+            <Dropdown label="Report type" required value={type} onChange={setType} options={opts} placeholder="Select report type" />
           </div>
           {freq && type && (
             <div style={{
