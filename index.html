@@ -875,12 +875,12 @@
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
             padding: '20px 22px', position: 'relative', overflow: 'hidden',
           }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, width: 130, height: 130, background: `radial-gradient(circle at top right, ${A.greenTint}, transparent 70%)`, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 0, width: 130, height: 130, background: `radial-gradient(circle at top right, ${v.diff < 0 ? 'rgba(192, 48, 33, 0.08)' : A.greenTint}, transparent 70%)`, pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}>
-              <MonoLabel size={9.5} color={A.mute} style={{ marginBottom: 6 }}>Your potential savings</MonoLabel>
+              <MonoLabel size={9.5} color={A.mute} style={{ marginBottom: 6 }}>{v.diff < 0 ? 'Estimated cost increase' : 'Your potential savings'}</MonoLabel>
               <div style={{
                 fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
-                color: A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+                color: v.diff < 0 ? A.red : A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
               }}>₹{(v.diff || 0).toLocaleString('en-IN')}</div>
               <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
 
