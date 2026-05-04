@@ -342,6 +342,9 @@
         cpCost: Math.round(cpCost),
         ctCost: Math.round(ctCost),
         secCost: Math.round(secCost),
+        ctFundraisingCost: Math.round(ctFundraisingCost),
+        secFundraisingCost: Math.round(secFundraisingCost),
+        methodExtCost: Math.round(methodExtCost),
         valuationCost: Math.round(valuationCost),
         elValuationCost: Math.round(elValuationCost),
         grHr,
@@ -349,6 +352,12 @@
         mult,
         baseWorkflows,
         shareholderScaling,
+        planningToFundraise,
+        fundraiseRound,
+        roundMultiplier,
+        ctFundraisingHours,
+        secFundraisingRaw,
+        meth,
       };
     }
 
@@ -1012,6 +1021,30 @@
           pct: `${secretarialPct}%`,
           tip: 'Board meetings, shareholder resolutions, and statutory filings.'
         },
+        ...(v.ctFundraisingCost > 0 ? [{
+          key: 'fundraising-captable',
+          label: 'Fundraising — Cap Table',
+          formula: `${v.ctFundraisingHours || 0} hrs/yr (${v.fundraiseRound?.toUpperCase() || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ₹${Math.round(v.rate || 0)}/hr`,
+          value: `₹${(v.ctFundraisingCost || 0).toLocaleString('en-IN')}`,
+          pct: `${v.annCost > 0 ? Math.round((v.ctFundraisingCost / v.annCost) * 100) : 0}%`,
+          tip: 'Cap table updates, new shareholder onboarding, and fundraising coordination.'
+        }] : []),
+        ...(v.secFundraisingCost > 0 ? [{
+          key: 'fundraising-secretarial',
+          label: 'Fundraising — Secretarial & Board',
+          formula: `${v.secFundraisingRaw || 0} hrs/yr (${v.fundraiseRound?.toUpperCase() || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ₹${Math.round(v.secRate || 0)}/hr`,
+          value: `₹${(v.secFundraisingCost || 0).toLocaleString('en-IN')}`,
+          pct: `${v.annCost > 0 ? Math.round((v.secFundraisingCost / v.annCost) * 100) : 0}%`,
+          tip: 'Board meetings, shareholder communications, and governance around the fundraising event.'
+        }] : []),
+        ...(v.methodExtCost > 0 ? [{
+          key: 'retainer',
+          label: 'Outsourced Administration Retainer',
+          formula: `Annual retainer for ${v.meth === 'outsourced' ? formData?.stage?.toUpperCase() || 'SERIES A/B' : 'N/A'} stage (external provider)`,
+          value: `₹${(v.methodExtCost || 0).toLocaleString('en-IN')}`,
+          pct: `${v.annCost > 0 ? Math.round((v.methodExtCost / v.annCost) * 100) : 0}%`,
+          tip: 'Fixed annual fee to external law firm or CA for ongoing equity administration.'
+        }] : []),
         ...(v.valuationCost > 0 ? [{
           key: 'valuation',
           label: 'Valuation Reports',
