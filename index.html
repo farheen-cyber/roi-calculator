@@ -1017,7 +1017,8 @@
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>₹</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={editedRate !== null ? editedRate : Math.round(v.rate)}
                       onChange={(e) => setEditedRate(e.target.value)}
                       style={{
@@ -1036,7 +1037,8 @@
                   <MonoLabel size={10} color={A.inkSoft}>Total equity management hours</MonoLabel>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
                       onChange={(e) => setEditedHours(e.target.value)}
                       style={{
