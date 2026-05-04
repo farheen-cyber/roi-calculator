@@ -190,6 +190,7 @@ export const FUNDRAISING_WORKFLOWS = {
 // Users can select any type regardless of incorporation country.
 export const VALUATION_TYPES = [
   { name: '409A Valuation', sub: 'US Black-Scholes', cost: 1500, elCost: 1200 },
+  { name: 'Black Scholes Valuation', sub: 'India method', cost: 100000, elCost: 75000 },
   { name: 'Registered Valuer Assessment', sub: 'India IBBI-registered', cost: 50000, elCost: 42000 },
   { name: 'Merchant Banker Assessment', sub: 'India SEBI-registered', cost: 90000, elCost: 70000 }
 ];

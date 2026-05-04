@@ -77,7 +77,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
 | Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
 | Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
-| Valuation Report Type | `valuationType` | 409A Valuation, Registered Valuer Assessment, Merchant Banker Assessment | — | Only if valuations needed; determines cost per event. All types always available (not country-gated). |
+| Valuation Report Type | `valuationType` | 409A Valuation, Black Scholes Valuation, Registered Valuer Assessment, Merchant Banker Assessment | — | Only if valuations needed; determines cost per event. All types always available (not country-gated). |
 
 **Notes:** 
 - The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
@@ -320,7 +320,8 @@ All valuation types are always available in the calculator dropdown (not country
 
 | Report Type | Market Cost | EquityList Cost | Currency |
 |:---|---:|---:|:---|
-| **409A Valuation** (Black-Scholes) | $1,500 | $1,200 | USD |
+| **409A Valuation** (US Black-Scholes) | $1,500 | $1,200 | USD |
+| **Black Scholes Valuation** (India method) | ₹100,000 | ₹75,000 | INR |
 | **Registered Valuer Assessment** (IBBI-registered) | ₹50,000 | ₹42,000 | INR |
 | **Merchant Banker Assessment** (SEBI-registered) | ₹90,000 | ₹70,000 | INR |
 
