@@ -830,7 +830,7 @@
       );
     }
 
-    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount }) {
+    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData }) {
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(true);
       const [leavingStale, setLeavingStale] = useState(false);
@@ -861,7 +861,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <MonoLabel size={11} color={A.ink}>Live Estimate</MonoLabel>
                 <span style={{ width: 1, height: 14, background: A.line }} />
-                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, adminMethod })} />
+                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate(formData)} />
               </div>
             </div>
             <div style={{ fontSize: 12.5, color: A.mute, marginTop: 6 }}>
@@ -869,7 +869,7 @@
             </div>
           </div>
 
-          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, adminMethod }); }} />}
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(formData); }} />}
 
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
@@ -1047,7 +1047,7 @@
             alignItems: 'flex-start',
           }}>
             <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} />}
+            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} />}
           </div>
 
           <footer style={{
