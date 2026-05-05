@@ -1346,10 +1346,19 @@
         if (currentFormData) {
           setCurrentFormValues(currentFormData);
           setFormData(currentFormData);
-        }
-        if (mode === 'live') {
-          setMode('stale');
-          setDirtyInputs({ ...dirtyInputs, changed: true });
+
+          if (mode === 'live') {
+            setMode('stale');
+            // Track which specific fields have changed
+            const newDirty = {};
+            const fields = ['sh', 'oh', 'gr', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
+            fields.forEach(field => {
+              if (currentFormData[field] !== results?.[field] && (results || currentFormData[field] !== formData[field])) {
+                newDirty[field] = true;
+              }
+            });
+            setDirtyInputs(newDirty);
+          }
         }
       };
 
