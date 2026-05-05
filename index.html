@@ -960,7 +960,7 @@
       );
     }
 
-    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData }) {
+    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues }) {
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(false);
       const [leavingStale, setLeavingStale] = useState(false);
@@ -1244,7 +1244,7 @@
                       overrides.grHr = parseInt(editedHours, 10);
                     }
                     setLeavingStale(true);
-                    onRecalculate && onRecalculate(formData, overrides);
+                    onRecalculate && onRecalculate(currentFormValues, overrides);
                     setEditedRate(null);
                     setEditedHours(null);
                   }}
@@ -1393,7 +1393,7 @@
             alignItems: 'flex-start',
           }}>
             <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} />}
+            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} />}
           </div>
 
           <footer style={{
