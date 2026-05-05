@@ -818,13 +818,14 @@
           geoOp,
           stage,
           meth: adminMethod,
+          legalEntity,
           planningToFundraise: fundraise,
           fundraiseRound,
           newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0,
           valuationFrequency: valuation ? valFreq : null,
           valuationType: valuation ? valType : null
         });
-      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, fundraise, fundraiseRound, newShareholdersFromFundraise, valuation, valFreq, valType]);
+      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, legalEntity, fundraise, fundraiseRound, newShareholdersFromFundraise, valuation, valFreq, valType]);
       const grantsNum = parseInt(grants, 10) || 0;
       const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
       const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
