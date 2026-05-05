@@ -1063,7 +1063,7 @@
         return roundMap[round?.toLowerCase()] || 'SEED';
       };
 
-      const v = results || { annCost: 557996, elAnn: 120117, diff: 437879, roi: 3.6, manualHTotal: 159, internalHTotal: 16, grCost: 62250, cpCost: 298800, ctCost: 169320, secCost: 27563, valuationCost: 0, elValuationCost: 0, grHr: 1.5, compHr: 72, rate: 4150, secRate: 875, mult: 1, baseWorkflows: 12, shareholderScaling: 1.05 };
+      const v = results || {};
       const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
 
       useEffect(() => {
@@ -1369,7 +1369,7 @@
 
     function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues }) {
       const [expanded, setExpanded] = useState(false);
-      const v = results || { annCost: 557996, elAnn: 120117, diff: 437879, roi: 3.6, manualHTotal: 159, internalHTotal: 16, grCost: 62250, cpCost: 298800, ctCost: 169320, secCost: 27563, valuationCost: 0, elValuationCost: 0, grHr: 1.5, compHr: 72, rate: 4150, secRate: 875, mult: 1, baseWorkflows: 12, shareholderScaling: 1.05 };
+      const v = results || {};
       const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
       const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
       const savingsPct = v.annCost > 0 ? Math.round((Math.abs(v.diff) / v.annCost) * 100) : 0;
