@@ -1138,7 +1138,7 @@
           label: 'Valuation Reports',
           formula: (() => {
             const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
-            const stagePricing = VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
+            const stagePricing = EL_VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
             const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
             const costPerEvent = stagePricing ? stagePricing[opCurrency] : 0;
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
