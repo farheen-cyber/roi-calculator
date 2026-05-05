@@ -970,10 +970,7 @@
       ];
 
       const opts = allValuationTypes.map(v => {
-        const stagePricing = EL_VALUATION_PRICING[v.value]?.[stage];
-        const amount = stagePricing ? stagePricing[opCurrency] : 0;
-        const displayLabel = `${v.label}: ${opSymbol}${amount.toLocaleString()} per event`;
-        return { value: v.value, label: displayLabel };
+        return { value: v.value, label: v.label };
       });
 
       const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : 0;
