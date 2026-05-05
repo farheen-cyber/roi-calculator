@@ -4,7 +4,7 @@
     {
       "name": "static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "-d", "/Users/farheenshaikh/Documents/roi-calculator"],
+      "runtimeArgs": ["-m", "http.server", "8000", "--directory", "/Users/farheenshaikh/Documents/roi-calculator"],
       "port": 8000,
       "autoPort": true
     }
