@@ -1348,25 +1348,26 @@
 
           if (mode === 'live') {
             setMode('stale');
-            // Track which specific fields have changed from last calculated values
-            const newDirty = {};
-            const fields = ['sh', 'oh', 'gr', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
-            fields.forEach(field => {
-              // Convert numeric fields for comparison (form values are strings, formData values are integers)
-              let currentVal = currentFormData[field];
-              let previousVal = formData[field];
-
-              if (['sh', 'oh', 'gr', 'newShareholdersFromFundraise'].includes(field)) {
-                currentVal = parseInt(currentVal, 10) || 0;
-                previousVal = parseInt(previousVal, 10) || 0;
-              }
-
-              if (currentVal !== previousVal) {
-                newDirty[field] = true;
-              }
-            });
-            setDirtyInputs(newDirty);
           }
+
+          // Track which specific fields have changed from last calculated values
+          const newDirty = {};
+          const fields = ['sh', 'oh', 'gr', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
+          fields.forEach(field => {
+            // Convert numeric fields for comparison (form values are strings, formData values are integers)
+            let currentVal = currentFormData[field];
+            let previousVal = formData[field];
+
+            if (['sh', 'oh', 'gr', 'newShareholdersFromFundraise'].includes(field)) {
+              currentVal = parseInt(currentVal, 10) || 0;
+              previousVal = parseInt(previousVal, 10) || 0;
+            }
+
+            if (currentVal !== previousVal) {
+              newDirty[field] = true;
+            }
+          });
+          setDirtyInputs(newDirty);
         }
       };
 
