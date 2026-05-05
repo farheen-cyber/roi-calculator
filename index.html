@@ -773,7 +773,7 @@
       const handleGrantsChange = (val) => {
         setGrants(val);
         if (mode === 'stale') {
-          onCalculate && onCalculate();
+          onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: val, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null });
         }
       };
 
