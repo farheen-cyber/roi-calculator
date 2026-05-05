@@ -1149,10 +1149,8 @@
             const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
             const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
-            const marketCost = v.valuationCost || 0;
             const elCost = v.elValuationCost || 0;
-            const savings = marketCost - elCost;
-            return `${currencySymbol}${marketCost.toLocaleString(locale)} (${currencySymbol}${elCost.toLocaleString(locale)} with EquityList, saves ${currencySymbol}${savings.toLocaleString(locale)})`;
+            return `${currencySymbol}${elCost.toLocaleString(locale)}`;
           })(),
           pct: `${valuationPct}%`,
           tip: null
