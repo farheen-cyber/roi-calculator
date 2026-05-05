@@ -1436,18 +1436,22 @@
 
       // Initialize with computed default values on mount
       useEffect(() => {
-        const defaultInputs = {
-          sh: 20,
-          oh: 0,
-          gr: 10,
-          geoInc: 'india',
-          geoOp: 'india',
-          stage: 'seriesab',
-          meth: 'in-house',
-          legalEntityName: ''
-        };
-        const computedResults = computeROI(defaultInputs);
-        setResults(computedResults);
+        try {
+          const defaultInputs = {
+            sh: 20,
+            oh: 0,
+            gr: 10,
+            geoInc: 'india',
+            geoOp: 'india',
+            stage: 'seriesab',
+            meth: 'in-house',
+            legalEntityName: ''
+          };
+          const computedResults = computeROI(defaultInputs);
+          setResults(computedResults);
+        } catch (error) {
+          console.error('Error computing default ROI:', error);
+        }
       }, []);
 
       const validateField = (field, value) => {
