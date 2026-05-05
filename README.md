@@ -108,3 +108,4 @@ All amounts stay in `geo_op` local currency throughout — no FX conversion need
 ## Versioning
 
 Current PRD version: **3.3** (April 2026). See [`roi-calculator-prd.md`](roi-calculator-prd.md) §9 for the full changelog.
+# Test deployment
