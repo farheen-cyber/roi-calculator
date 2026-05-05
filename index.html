@@ -563,6 +563,7 @@
               })}
             </div>
           )}
+          {error && <div style={{ marginTop: 6, fontSize: 12, color: A.redLight }}>{error}</div>}
         </div>
       );
     }
@@ -855,7 +856,7 @@
                 <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
-                <ValuationExpanded oneColumn={oneColumn} stage={stage} geoOp={geoOp} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
+                <ValuationExpanded oneColumn={oneColumn} stage={stage} geoOp={geoOp} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} errors={errors} />
               </SwitchCard>
             </div>
           </FormSection>
@@ -864,7 +865,7 @@
             <Dropdown label="Administrative Method" value={adminMethod} required error={errors?.meth} options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
-          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
+          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
           </PrimaryBtn>
@@ -957,7 +958,7 @@
       );
     }
 
-    function ValuationExpanded({ oneColumn, stage, geoOp, freq, setFreq, type, setType }) {
+    function ValuationExpanded({ oneColumn, stage, geoOp, freq, setFreq, type, setType, errors }) {
       const opCurrency = GEO_TO_CURRENCY[geoOp] || 'INR';
       const opSymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
 
@@ -977,11 +978,11 @@
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
-            <Dropdown label="How often?" required value={freq} onChange={setFreq} options={[
+            <Dropdown label="How often?" required value={freq} onChange={setFreq} error={errors?.valuationFrequency} options={[
               { value: 'annually', label: 'Annually (1× per year)' },
               { value: 'quarterly', label: 'Quarterly (4× per year)' },
             ]} placeholder="Select frequency" />
-            <Dropdown label="Report type" required value={type} onChange={setType} options={opts} placeholder="Select report type" />
+            <Dropdown label="Report type" required value={type} onChange={setType} error={errors?.valuationType} options={opts} placeholder="Select report type" />
           </div>
           {freq && type && (
             <div style={{
@@ -1405,6 +1406,12 @@
         if (sharesErr) newErrors.shareholders = sharesErr;
         if (holdersErr) newErrors.optionHolders = holdersErr;
         if (grantsErr) newErrors.grants = grantsErr;
+
+        // Validate valuation fields if valuation is enabled
+        if (inputs?.valuation) {
+          if (!inputs?.valuationFrequency || inputs.valuationFrequency.trim() === '') newErrors.valuationFrequency = 'Field required';
+          if (!inputs?.valuationType || inputs.valuationType.trim() === '') newErrors.valuationType = 'Field required';
+        }
 
         setErrors(newErrors);
 
