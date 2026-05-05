@@ -1409,8 +1409,8 @@
 
         // Validate valuation fields if valuation is enabled
         if (inputs?.valuation) {
-          if (!inputs?.valuationFrequency || inputs.valuationFrequency.trim() === '') newErrors.valuationFrequency = 'Field required';
-          if (!inputs?.valuationType || inputs.valuationType.trim() === '') newErrors.valuationType = 'Field required';
+          if (!inputs?.valuationFrequency) newErrors.valuationFrequency = 'Field required';
+          if (!inputs?.valuationType) newErrors.valuationType = 'Field required';
         }
 
         setErrors(newErrors);
