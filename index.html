@@ -1316,6 +1316,7 @@
       };
 
       const handleCalculate = (inputs, overrides = {}) => {
+        console.log('Calculate clicked with inputs:', inputs);
         const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
         const holdersErr = validateField('optionHolders', String(inputs?.oh || ''));
         const grantsErr = validateField('grants', String(inputs?.gr || ''));
@@ -1334,6 +1335,7 @@
             oh: parseInt(inputs.oh, 10),
             gr: parseInt(inputs.gr, 10),
           };
+          console.log('Setting formData to:', validatedInputs);
           const calcs = computeROI(validatedInputs, overrides);
           setResults(calcs);
           setFormData(validatedInputs);
@@ -1343,6 +1345,7 @@
       };
 
       const handleInputChange = (currentFormData) => {
+        console.log('handleInputChange called with:', currentFormData, 'formData is:', formData);
         if (currentFormData && formData) {
           setCurrentFormValues(currentFormData);
 
@@ -1367,8 +1370,10 @@
               newDirty[field] = true;
             }
           });
-          console.log('currentFormData:', currentFormData, 'formData:', formData, 'newDirty:', newDirty);
+          console.log('Setting dirty inputs to:', newDirty);
           setDirtyInputs(newDirty);
+        } else {
+          console.log('Condition failed - currentFormData:', !!currentFormData, 'formData:', !!formData);
         }
       };
 
