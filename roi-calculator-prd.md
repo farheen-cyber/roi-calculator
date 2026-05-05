@@ -1,7 +1,7 @@
 # EquityList ROI Calculator — Complete Specification
 
 **Version**: 3.3  
-**Last Updated**: April 29, 2026  
+**Last Updated**: May 5, 2026  
 **Purpose**: Complete technical and functional documentation of the EquityList ROI Calculator, including all features, formulas, assumptions, data sources, and test scenarios.
 
 ## What This Calculator Does
@@ -320,26 +320,26 @@ Valuation complexity increases with company maturity due to multiple instruments
 
 | Valuation Type | Preseed | Seed | Series A/B | Series B/C | Series C+ |
 |:---|---:|---:|---:|---:|---:|
-| **409A** (USD) | $1,800 | $2,250 | $2,700 | $3,150 | $3,600 |
-| **409A** (INR) | ₹135,000 | ₹168,750 | ₹202,500 | ₹236,250 | ₹270,000 |
-| **409A** (GBP) | £1,350 | £1,688 | £2,025 | £2,363 | £2,700 |
-| **409A** (SGD) | S$2,400 | S$3,000 | S$3,600 | S$4,200 | S$4,800 |
-| **Black Scholes** (USD) | $3,000 | $3,750 | $4,500 | $5,250 | $6,000 |
-| **Black Scholes** (INR) | ₹100,000 | ₹125,000 | ₹150,000 | ₹175,000 | ₹200,000 |
-| **Black Scholes** (GBP) | £2,250 | £2,813 | £3,375 | £3,938 | £4,500 |
-| **Black Scholes** (SGD) | S$4,000 | S$5,000 | S$6,000 | S$7,000 | S$8,000 |
-| **Registered Valuer** (USD) | $1,200 | $1,500 | $1,800 | $2,100 | $2,400 |
-| **Registered Valuer** (INR) | ₹40,000 | ₹50,000 | ₹60,000 | ₹70,000 | ₹80,000 |
-| **Registered Valuer** (GBP) | £900 | £1,125 | £1,350 | £1,575 | £1,800 |
-| **Registered Valuer** (SGD) | S$1,600 | S$2,000 | S$2,400 | S$2,800 | S$3,200 |
-| **Merchant Banker** (USD) | $3,000 | $3,750 | $4,500 | $5,250 | $6,000 |
-| **Merchant Banker** (INR) | ₹100,000 | ₹125,000 | ₹150,000 | ₹175,000 | ₹200,000 |
-| **Merchant Banker** (GBP) | £2,250 | £2,813 | £3,375 | £3,938 | £4,500 |
-| **Merchant Banker** (SGD) | S$4,000 | S$5,000 | S$6,000 | S$7,000 | S$8,000 |
-| **HMRC** (USD) | $1,600 | $2,000 | $2,400 | $2,800 | $3,200 |
-| **HMRC** (INR) | ₹120,000 | ₹150,000 | ₹180,000 | ₹210,000 | ₹240,000 |
-| **HMRC** (GBP) | £1,200 | £1,500 | £1,800 | £2,100 | £2,400 |
-| **HMRC** (SGD) | S$2,133 | S$2,667 | S$3,200 | S$3,733 | S$4,267 |
+| **409A** (USD) | $1,260 | $1,575 | $1,890 | $2,205 | $2,520 |
+| **409A** (INR) | ₹94,500 | ₹118,125 | ₹141,750 | ₹165,375 | ₹189,000 |
+| **409A** (GBP) | £945 | £1,181 | £1,418 | £1,653 | £1,890 |
+| **409A** (SGD) | S$1,680 | S$2,100 | S$2,520 | S$2,940 | S$3,360 |
+| **Black Scholes** (USD) | $2,100 | $2,625 | $3,150 | $3,675 | $4,200 |
+| **Black Scholes** (INR) | ₹70,000 | ₹87,500 | ₹105,000 | ₹122,500 | ₹140,000 |
+| **Black Scholes** (GBP) | £1,575 | £1,969 | £2,363 | £2,756 | £3,150 |
+| **Black Scholes** (SGD) | S$2,800 | S$3,500 | S$4,200 | S$4,900 | S$5,600 |
+| **Registered Valuer** (USD) | $840 | $1,050 | $1,260 | $1,470 | $1,680 |
+| **Registered Valuer** (INR) | ₹28,000 | ₹35,000 | ₹42,000 | ₹49,000 | ₹56,000 |
+| **Registered Valuer** (GBP) | £630 | £788 | £945 | £1,103 | £1,260 |
+| **Registered Valuer** (SGD) | S$1,120 | S$1,400 | S$1,680 | S$1,960 | S$2,240 |
+| **Merchant Banker** (USD) | $2,100 | $2,625 | $3,150 | $3,675 | $4,200 |
+| **Merchant Banker** (INR) | ₹70,000 | ₹87,500 | ₹105,000 | ₹122,500 | ₹140,000 |
+| **Merchant Banker** (GBP) | £1,575 | £1,969 | £2,363 | £2,756 | £3,150 |
+| **Merchant Banker** (SGD) | S$2,800 | S$3,500 | S$4,200 | S$4,900 | S$5,600 |
+| **HMRC** (USD) | $1,120 | $1,400 | $1,680 | $1,960 | $2,240 |
+| **HMRC** (INR) | ₹84,000 | ₹105,000 | ₹126,000 | ₹147,000 | ₹168,000 |
+| **HMRC** (GBP) | £840 | £1,050 | £1,260 | £1,470 | £1,680 |
+| **HMRC** (SGD) | S$1,491 | S$1,867 | S$2,240 | S$2,613 | S$2,987 |
 
 **EquityList Pricing (20% discount):**
 EquityList offers a consistent 20% discount across all valuation types, stages, and currencies. All EquityList prices are automatically calculated by applying the 20% discount to market rates above.
@@ -520,8 +520,9 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 - **Changed**: Valuation pricing now **stage-based** with 1.0x–2.0x complexity multiplier (Preseed → Series C+)
 - **Changed**: Valuation currency selection now uses `geoOp` (operation country) instead of `geoInc` (incorporation country)
 - **Changed**: All 5 valuation types now priced in all 4 currencies (USD, INR, GBP, SGD) — no forex conversion needed at display time
+- **Changed**: Valuation starting points reduced by 30% across all types, stages, and currencies (effective 5 May 2026)
 - **Added**: Singapore and UK valuation types with full pricing across all stages
-- **Updated**: Valuation market costs (stage-specific): 409A ($1,800–$3,600), Black Scholes (₹100k–₹200k), Registered Valuer (₹40k–₹80k), Merchant Banker (₹100k–₹200k), HMRC (£1,200–£2,400)
+- **Updated**: Valuation market costs (stage-specific, 30% reduction): 409A ($1,260–$2,520), Black Scholes (₹70k–₹140k), Registered Valuer (₹28k–₹56k), Merchant Banker (₹70k–₹140k), HMRC (£840–£1,680)
 - **Updated**: EquityList discount applies uniformly (20%) across all valuation types, stages, and currencies
 - **Fixed**: Outsourced method now correctly includes 40% internal effort cost (review, approvals, coordination) + external retainer (was only charging retainer)
 - **Fixed**: `computeROI()` now calculates blended rate for BOTH in-house and outsourced methods (previously set rate=0 for outsourced, making 0.4 multiplier meaningless)
