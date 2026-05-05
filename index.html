@@ -452,20 +452,17 @@
       const labelColor = error ? A.redLight : A.mute;
       const handleChange = (e) => {
         let val = e.target.value;
+        let hasError = false;
         if (type === 'number') {
           val = val.replace(/[^\d]/g, '');
-          if (val === '') {
-            onNumericError && onNumericError(false);
-            onChange && onChange(val);
-            return;
+          if (val !== '') {
+            const num = parseInt(val, 10);
+            if (isNaN(num) || num < 0) {
+              hasError = true;
+            }
           }
-          const num = parseInt(val, 10);
-          if (isNaN(num) || num < 0) {
-            onNumericError && onNumericError(true);
-            return;
-          }
-          onNumericError && onNumericError(false);
         }
+        onNumericError && onNumericError(hasError);
         onChange && onChange(val);
       };
       return (
