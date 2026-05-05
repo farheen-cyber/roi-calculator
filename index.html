@@ -1029,7 +1029,7 @@
       );
     }
 
-    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues }) {
+    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, sticky = true }) {
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(false);
       const [leavingStale, setLeavingStale] = useState(false);
@@ -1162,7 +1162,7 @@
       return (
         <aside style={{
           display: 'flex', flexDirection: 'column', gap: 14,
-          position: 'sticky', top: 24,
+          position: sticky ? 'sticky' : 'static', top: sticky ? 24 : undefined,
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -1367,6 +1367,65 @@
       );
     }
 
+    function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues }) {
+      const [expanded, setExpanded] = useState(false);
+      const v = results || {
+        diff: 0,
+        annCost: 0,
+        elAnn: 0,
+      };
+      const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
+      const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
+      const savingsPct = v.annCost > 0 ? Math.round((Math.abs(v.diff) / v.annCost) * 100) : 0;
+
+      return (
+        <div style={{
+          position: 'sticky', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: '#fff',
+          borderTop: `1px solid ${A.line}`,
+          boxShadow: '0 -8px 24px rgba(30,27,46,0.06)',
+          transition: 'all .25s ease',
+        }}>
+          {/* Collapsed strip */}
+          <div style={{
+            padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          }}>
+            <div
+              role="button" tabIndex={0} onClick={() => setExpanded(!expanded)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(!expanded); } }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flex: 1, minWidth: 0, cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <MonoLabel size={9} color={A.mute}>Potential savings</MonoLabel>
+                </div>
+                <div style={{
+                  fontFamily: A.sans, fontSize: 22, fontWeight: 700, letterSpacing: -0.6,
+                  color: v.diff < 0 ? A.red : A.green, fontVariantNumeric: 'tabular-nums', marginTop: 2, lineHeight: 1.1,
+                }}>
+                  {opCurrencySymbol}{(Math.abs(v.diff) || 0).toLocaleString(opLocale)}
+                  <span style={{ fontSize: 11, color: A.mute, fontWeight: 500, marginLeft: 6 }}>/yr</span>
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke={A.mute} strokeWidth="1.8" strokeLinecap="round" style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform .15s', flexShrink: 0 }}>
+                <path d="M3 9l4-4 4 4"/>
+              </svg>
+            </div>
+            <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, gr: formData?.gr, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise })} />
+          </div>
+
+          {/* Expanded section */}
+          {expanded && (
+            <div style={{ padding: '0 20px 20px', borderTop: `1px solid ${A.lineSoft}` }}>
+              <div style={{ paddingTop: 16 }}>
+                <ALiveEstimate width={width - 40} mode={mode} results={results} onRecalculate={onRecalculate} dirtyCount={dirtyCount} formData={formData} currentFormValues={currentFormValues} sticky={false} />
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     function ScreenA({ width, height }) {
       const [formData, setFormData] = useState(null);
       const [results, setResults] = useState(null);
@@ -1490,8 +1549,11 @@
             alignItems: 'flex-start',
           }}>
             <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} />}
+            {isDesktop && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={true} />}
+            {isTablet && <ALiveEstimate width={width - 80} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={false} />}
           </div>
+
+          {isMobile && <ABottomDrawer width={width} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} />}
 
           <footer style={{
             borderTop: `1px solid ${A.line}`, padding: isMobile ? '20px' : '28px 40px',
