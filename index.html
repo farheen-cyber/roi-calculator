@@ -910,7 +910,7 @@
       ];
 
       const opts = allValuationTypes.map(v => {
-        const convertedAmount = Math.round(v.pricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[v.pricing.currency]));
+        const convertedAmount = Math.round(v.pricing.amount * (FOREX_RATES[v.pricing.currency] / FOREX_RATES[targetCurrency]));
         const originalSymbol = CURRENCY_SYMBOLS[v.pricing.currency];
         const displayLabel = `${v.label}: ${targetSymbol}${convertedAmount.toLocaleString()} (${originalSymbol}${v.pricing.amount.toLocaleString()})`;
         return { value: v.value, label: displayLabel };
@@ -1081,9 +1081,11 @@
           label: 'Valuation Reports',
           formula: (() => {
             const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
-            const costPerEvent = VALUATION_PRICING[formData?.geoInc]?.[formData?.valuationType] || 0;
-            const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
-            const locale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
+            const marketPricing = VALUATION_PRICING[formData?.valuationType];
+            const targetCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
+            const costPerEvent = Math.round(marketPricing.amount * (FOREX_RATES[marketPricing.currency] / FOREX_RATES[targetCurrency]));
+            const currencySymbol = CURRENCY_SYMBOLS[targetCurrency] || '₹';
+            const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[targetCurrency] || 'en-IN';
             return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString(locale)} per event`;
           })(),
           value: (() => {
