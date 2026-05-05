@@ -1091,7 +1091,10 @@
           value: (() => {
             const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
             const locale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
-            return `${currencySymbol}${(v.valuationCost || 0).toLocaleString(locale)}`;
+            const marketCost = v.valuationCost || 0;
+            const elCost = v.elValuationCost || 0;
+            const savings = marketCost - elCost;
+            return `${currencySymbol}${marketCost.toLocaleString(locale)} (${currencySymbol}${elCost.toLocaleString(locale)} with EquityList, saves ${currencySymbol}${savings.toLocaleString(locale)})`;
           })(),
           pct: `${valuationPct}%`,
           tip: null
