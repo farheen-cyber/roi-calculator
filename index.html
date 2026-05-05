@@ -1446,6 +1446,28 @@
       const isTablet = width >= 720 && width < 1100;
       const isDesktop = width >= 1100;
 
+      // Update sample values as user fills in the form
+      useEffect(() => {
+        if (mode === 'sample' && currentFormValues && Object.keys(currentFormValues).length > 0) {
+          try {
+            const sampleInputs = {
+              sh: parseInt(currentFormValues.sh, 10) || 20,
+              oh: parseInt(currentFormValues.oh, 10) || 0,
+              gr: parseInt(currentFormValues.gr, 10) || 10,
+              geoInc: currentFormValues.geoInc || 'india',
+              geoOp: currentFormValues.geoOp || 'india',
+              stage: currentFormValues.stage || 'seriesab',
+              meth: currentFormValues.meth || 'in-house',
+              legalEntityName: ''
+            };
+            const sampleResults = computeROI(sampleInputs);
+            setResults(sampleResults);
+          } catch (error) {
+            console.error('Error computing sample ROI:', error);
+          }
+        }
+      }, [currentFormValues, mode]);
+
       const validateField = (field, value) => {
         const num = parseInt(value, 10);
         if (!value || value.trim() === '') return 'Field required';
