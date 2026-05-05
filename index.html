@@ -1434,6 +1434,22 @@
       const isTablet = width >= 720 && width < 1100;
       const isDesktop = width >= 1100;
 
+      // Initialize with computed default values on mount
+      useEffect(() => {
+        const defaultInputs = {
+          sh: 20,
+          oh: 0,
+          gr: 10,
+          geoInc: 'india',
+          geoOp: 'india',
+          stage: 'seriesab',
+          meth: 'in-house',
+          legalEntityName: ''
+        };
+        const computedResults = computeROI(defaultInputs);
+        setResults(computedResults);
+      }, []);
+
       const validateField = (field, value) => {
         const num = parseInt(value, 10);
         if (!value || value.trim() === '') return 'Field required';
