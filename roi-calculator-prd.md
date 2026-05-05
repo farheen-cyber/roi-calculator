@@ -77,7 +77,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
 | Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
 | Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
-| Valuation Report Type | `valuationType` | Country-gated options (see §4.6) | — | Only if valuations needed; available options depend on `geo_inc`. India: 409A, Black Scholes, Registered Valuer, Merchant Banker. US/Singapore: 409A. UK: 409A, HMRC. |
+| Valuation Report Type | `valuationType` | 409A, Black Scholes, Registered Valuer, Merchant Banker, HMRC | — | Only if valuations needed; all types visible globally with prices converted to incorporation country currency (see §4.6) |
 
 **Notes:** 
 - The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
@@ -305,48 +305,36 @@ Where:
 > - Total: $38,000/year (vs. pure in-house: 100 hrs × 1.0 × $500 = $50,000/year)
 
 ### 4.6 Valuation Services Cost (Optional)
-**Formula**: `valuation_cost = cost_per_event × frequency_multiplier` (Only if user enables valuation reports)
+**Formula**: `valuation_cost = (cost_per_event × forex_rate) × frequency_multiplier` (Only if user enables valuation reports)
 
 **How It's Triggered:**
 1. User toggles "Do you need valuation reports?" checkbox (default: OFF)
 2. If enabled, user selects:
    - **Frequency**: Annually (1×/yr) or Quarterly (4×/yr)
-   - **Report Type**: Country-gated options based on `geo_inc` (country of incorporation)
-3. System calculates valuation cost and adds it to total annual cost
-4. All costs displayed in country-of-incorporation currency (determined by `geo_inc`, not `geo_op`)
+   - **Report Type**: All 5 valuation types visible regardless of `geo_inc` (country of incorporation)
+3. System calculates valuation cost in company's incorporation country currency using live forex rates
+4. All costs are converted and displayed in country-of-incorporation currency
 
-**Valuation Types** (cost per event, displayed in country-of-incorporation currency):
+**Valuation Types** (available globally, with market pricing in native currency):
 
-**India Companies:**
+| Report Type | Native Currency | Market Cost | EquityList Cost |
+|:---|:---|---:|---:|
+| **409A Valuation** | USD | $1,500 | $1,200 |
+| **Black Scholes Valuation** | INR | ₹100,000 | ₹75,000 |
+| **Registered Valuer Assessment** (IBBI-registered) | INR | ₹50,000 | ₹42,000 |
+| **Merchant Banker Assessment** (SEBI-registered) | INR | ₹90,000 | ₹70,000 |
+| **HMRC Valuation** (HM Revenue & Customs) | GBP | £1,500 | £1,200 |
 
-| Report Type | Market Cost | EquityList Cost |
-|:---|---:|---:|
-| **409A Valuation** | ₹100,000 | ₹75,000 |
-| **Black Scholes Valuation** | ₹100,000 | ₹75,000 |
-| **Registered Valuer Assessment** (IBBI-registered) | ₹50,000 | ₹42,000 |
-| **Merchant Banker Assessment** (SEBI-registered) | ₹90,000 | ₹70,000 |
+**Currency Display & Conversion:**
+- All valuation types are visible to all companies in the dropdown
+- Prices are displayed in the company's country-of-incorporation currency (`geo_inc`) using live forex rates
+- Display format shows both converted and original amounts: e.g., "$650 (₹50k converted)"
+- Example: US company sees Registered Valuer as "$525 (₹50k converted)"
+- Example: India company sees HMRC as "₹115,500 (£1,500 converted)"
 
-**US Companies:**
-
-| Report Type | Market Cost | EquityList Cost |
-|:---|---:|---:|
-| **409A Valuation** | $1,500 | $1,200 |
-
-**Singapore Companies:**
-
-| Report Type | Market Cost | EquityList Cost |
-|:---|---:|---:|
-| **409A Valuation** | $1,500 | $1,200 |
-
-**UK Companies:**
-
-| Report Type | Market Cost | EquityList Cost |
-|:---|---:|---:|
-| **409A Valuation** | $1,500 | $1,200 |
-| **HMRC Valuation** (HM Revenue & Customs) | $1,500 | $1,200 |
-
-**Currency Display Rule:**
-All valuation costs are displayed in the currency of the company's country of incorporation (`geo_inc`), ensuring users see the actual amount they would pay in their jurisdiction. This is independent of their country of operation (`geo_op`).
+**Live Forex Rates Used:**
+- Current rates: 1 USD = ~95 INR, 1 GBP = ~130 INR, 1 SGD = ~75 INR
+- Rates are refreshed on each page load via API
 
 EquityList Cost represents the discounted rate available through EquityList's platform (already integrated into ROI calculation).
 
