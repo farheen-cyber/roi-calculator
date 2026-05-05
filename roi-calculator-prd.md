@@ -46,8 +46,8 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 - **Blended Hourly Rate**: For in-house method, the cost of equity operations is based on the sum of (FTE × role hourly rate) for the company stage. This accounts for multi-person effort (founder, HR, Finance, Legal).
 - **Method Multiplier**: The fraction of work retained internally (1.0 for in-house, 0.4 for outsourced with CA/Legal help).
 - **Geographic Duality**: Two geography inputs serve different purposes:
-  - `geo_inc` (incorporation): Determines compliance requirements
-  - `geo_op` (operations): Determines hourly rates, retainer costs, and EquityList pricing
+  - `geo_inc` (incorporation): Determines compliance requirements, valuation types available, and currency display for all costs (ensures users see what they'd actually pay)
+  - `geo_op` (operations): Determines hourly rates, retainer costs, and per-stakeholder EquityList pricing
 - **Stage-Based Staffing**: Equity admin workload scales predictably with funding stage. A preseed founder does everything; a Series C company has dedicated teams.
 
 ---
@@ -59,8 +59,8 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | UI Input | Variable | Range / Type | Default | Notes |
 |:---|:---|:---|:---|:---|
 | Legal Entity Name | `co` | String | — | Optional, for reference only |
-| Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements & valuation types |
-| Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, EL pricing |
+| Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements, valuation types, and currency display |
+| Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, and per-stakeholder EL pricing |
 | Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
 | Shareholders Count | `sh` | Positive integer: 1–10,000 | 30 | Affects cap table and secretarial scaling |
 | Option Holders Count | `oh` | Positive integer: 0–10,000 | 15 | Counted toward total stakeholders for pricing |
@@ -77,7 +77,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
 | Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
 | Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
-| Valuation Report Type | `valuationType` | 409A Valuation, Black Scholes Valuation, Registered Valuer Assessment, Merchant Banker Assessment | — | Only if valuations needed; determines cost per event. All types always available (not country-gated). |
+| Valuation Report Type | `valuationType` | Country-gated options (see §4.6) | — | Only if valuations needed; available options depend on `geo_inc`. India: 409A, Black Scholes, Registered Valuer, Merchant Banker. US/Singapore: 409A. UK: 409A, HMRC. |
 
 **Notes:** 
 - The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
@@ -313,19 +313,40 @@ Where:
    - **Frequency**: Annually (1×/yr) or Quarterly (4×/yr)
    - **Report Type**: Country-gated options based on `geo_inc` (country of incorporation)
 3. System calculates valuation cost and adds it to total annual cost
+4. All costs displayed in country-of-incorporation currency (determined by `geo_inc`, not `geo_op`)
 
-**Valuation Types** (cost per event in local currency):
+**Valuation Types** (cost per event, displayed in country-of-incorporation currency):
 
-All valuation types are always available in the calculator dropdown (not country-gated).
+**India Companies:**
 
-| Report Type | Market Cost | EquityList Cost | Currency |
-|:---|---:|---:|:---|
-| **409A Valuation** (US Black-Scholes) | $1,500 | $1,200 | USD |
-| **Black Scholes Valuation** (India method) | ₹100,000 | ₹75,000 | INR |
-| **Registered Valuer Assessment** (IBBI-registered) | ₹50,000 | ₹42,000 | INR |
-| **Merchant Banker Assessment** (SEBI-registered) | ₹90,000 | ₹70,000 | INR |
+| Report Type | Market Cost | EquityList Cost |
+|:---|---:|---:|
+| **409A Valuation** | ₹100,000 | ₹75,000 |
+| **Black Scholes Valuation** | ₹100,000 | ₹75,000 |
+| **Registered Valuer Assessment** (IBBI-registered) | ₹50,000 | ₹42,000 |
+| **Merchant Banker Assessment** (SEBI-registered) | ₹90,000 | ₹70,000 |
 
-**Note**: Singapore and UK valuation types are not currently supported. To add them, contact EquityList with verified market rate data.
+**US Companies:**
+
+| Report Type | Market Cost | EquityList Cost |
+|:---|---:|---:|
+| **409A Valuation** | $1,500 | $1,200 |
+
+**Singapore Companies:**
+
+| Report Type | Market Cost | EquityList Cost |
+|:---|---:|---:|
+| **409A Valuation** | $1,500 | $1,200 |
+
+**UK Companies:**
+
+| Report Type | Market Cost | EquityList Cost |
+|:---|---:|---:|
+| **409A Valuation** | $1,500 | $1,200 |
+| **HMRC Valuation** (HM Revenue & Customs) | $1,500 | $1,200 |
+
+**Currency Display Rule:**
+All valuation costs are displayed in the currency of the company's country of incorporation (`geo_inc`), ensuring users see the actual amount they would pay in their jurisdiction. This is independent of their country of operation (`geo_op`).
 
 EquityList Cost represents the discounted rate available through EquityList's platform (already integrated into ROI calculation).
 
