@@ -1007,7 +1007,6 @@
 
       const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
       const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
-      console.log('formData?.geoOp:', formData?.geoOp, 'opCurrencySymbol:', opCurrencySymbol);
 
       const items = [
         {
@@ -1317,6 +1316,7 @@
       };
 
       const handleCalculate = (inputs, overrides = {}) => {
+        setCurrentFormValues(inputs);
         const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
         const holdersErr = validateField('optionHolders', String(inputs?.oh || ''));
         const grantsErr = validateField('grants', String(inputs?.gr || ''));
