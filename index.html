@@ -1424,7 +1424,19 @@
 
     function ScreenA({ width, height }) {
       const [formData, setFormData] = useState(null);
-      const [results, setResults] = useState(null);
+      const [results, setResults] = useState(() => {
+        const defaultInputs = {
+          sh: 20,
+          oh: 0,
+          gr: 10,
+          geoInc: 'india',
+          geoOp: 'india',
+          stage: 'seriesab',
+          meth: 'in-house',
+          legalEntityName: ''
+        };
+        return computeROI(defaultInputs);
+      });
       const [mode, setMode] = useState('sample');
       const [errors, setErrors] = useState({});
       const [dirtyInputs, setDirtyInputs] = useState({});
