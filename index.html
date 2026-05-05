@@ -1393,7 +1393,7 @@
             alignItems: 'flex-start',
           }}>
             <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={currentFormValues} />}
+            {!isMobile && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} />}
           </div>
 
           <footer style={{
