@@ -1,3 +1,4 @@
+<!-- Cache buster: 2026-05-05T13:10:00Z -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -966,6 +967,7 @@
       const [leavingStale, setLeavingStale] = useState(false);
       const [editedRate, setEditedRate] = useState(null);
       const [editedHours, setEditedHours] = useState(null);
+      const recalcFormValues = currentFormValues || formData;
 
       const formatStage = (stage) => {
         const stageMap = {
@@ -1103,7 +1105,7 @@
             </div>
           </div>
 
-          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(formData); }} />}
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(recalcFormValues); }} />}
 
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
@@ -1244,7 +1246,7 @@
                       overrides.grHr = parseInt(editedHours, 10);
                     }
                     setLeavingStale(true);
-                    onRecalculate && onRecalculate(formData, overrides);
+                    onRecalculate && onRecalculate(recalcFormValues, overrides);
                     setEditedRate(null);
                     setEditedHours(null);
                   }}
