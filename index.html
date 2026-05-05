@@ -207,43 +207,31 @@
       secretarial: 4
     };
 
+    const FOREX_RATES = {
+      USD: 1,
+      INR: 0.0105,
+      GBP: 0.0077,
+      SGD: 0.0134
+    };
+
     const VALUATION_PRICING = {
-      us: {
-        '409a': 1500
-      },
-      india: {
-        '409a': 100000,
-        'blackscholes': 100000,
-        'rv': 50000,
-        'mb': 90000
-      },
-      singapore: {
-        '409a': 1500
-      },
-      uk: {
-        '409a': 1500,
-        'hmrc': 1500
-      }
+      '409a': { amount: 1500, currency: 'USD' },
+      'blackscholes': { amount: 100000, currency: 'INR' },
+      'rv': { amount: 50000, currency: 'INR' },
+      'mb': { amount: 90000, currency: 'INR' },
+      'hmrc': { amount: 1500, currency: 'GBP' }
     };
 
     const EL_VALUATION_PRICING = {
-      us: {
-        '409a': 1200
-      },
-      india: {
-        '409a': 75000,
-        'blackscholes': 75000,
-        'rv': 42000,
-        'mb': 70000
-      },
-      singapore: {
-        '409a': 1200
-      },
-      uk: {
-        '409a': 1200,
-        'hmrc': 1200
-      }
+      '409a': { amount: 1200, currency: 'USD' },
+      'blackscholes': { amount: 75000, currency: 'INR' },
+      'rv': { amount: 42000, currency: 'INR' },
+      'mb': { amount: 70000, currency: 'INR' },
+      'hmrc': { amount: 1200, currency: 'GBP' }
     };
+
+    const CURRENCY_SYMBOLS = { USD: '$', INR: '₹', GBP: '£', SGD: 'S$' };
+    const GEO_TO_CURRENCY = { us: 'USD', india: 'INR', uk: 'GBP', singapore: 'SGD' };
 
     function computeROI(inputs, overrides = {}) {
       const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
@@ -307,10 +295,17 @@
       let elValuationCost = 0;
       if (valuationFrequency && valuationType) {
         const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : 0;
-        const pricePerEvent = VALUATION_PRICING[geoInc]?.[valuationType] || 0;
-        const elPricePerEvent = EL_VALUATION_PRICING[geoInc]?.[valuationType] || 0;
-        valuationCost = events * pricePerEvent;
-        elValuationCost = events * elPricePerEvent;
+        const targetCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
+
+        const marketPricing = VALUATION_PRICING[valuationType];
+        const elPricing = EL_VALUATION_PRICING[valuationType];
+
+        if (marketPricing && elPricing) {
+          const marketAmount = marketPricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[marketPricing.currency]);
+          const elAmount = elPricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[elPricing.currency]);
+          valuationCost = Math.round(events * marketAmount);
+          elValuationCost = Math.round(events * elAmount);
+        }
       }
 
       const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
@@ -903,17 +898,24 @@
     }
 
     function ValuationExpanded({ oneColumn, freq, setFreq, type, setType, geoInc }) {
-      const opts = geoInc === 'india' ? [
-        { value: '409a', label: '409A Valuation' },
-        { value: 'blackscholes', label: 'Black Scholes Valuation' },
-        { value: 'rv', label: 'Registered Valuer Assessment' },
-        { value: 'mb', label: 'Merchant Banker Assessment' },
-      ] : geoInc === 'uk' ? [
-        { value: '409a', label: '409A Valuation' },
-        { value: 'hmrc', label: 'HMRC Valuation' },
-      ] : [
-        { value: '409a', label: '409A Valuation' },
+      const targetCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
+      const targetSymbol = CURRENCY_SYMBOLS[targetCurrency] || '₹';
+
+      const allValuationTypes = [
+        { value: '409a', label: '409A Valuation', pricing: VALUATION_PRICING['409a'] },
+        { value: 'blackscholes', label: 'Black Scholes Valuation', pricing: VALUATION_PRICING['blackscholes'] },
+        { value: 'rv', label: 'Registered Valuer Assessment', pricing: VALUATION_PRICING['rv'] },
+        { value: 'mb', label: 'Merchant Banker Assessment', pricing: VALUATION_PRICING['mb'] },
+        { value: 'hmrc', label: 'HMRC Valuation', pricing: VALUATION_PRICING['hmrc'] },
       ];
+
+      const opts = allValuationTypes.map(v => {
+        const convertedAmount = Math.round(v.pricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[v.pricing.currency]));
+        const originalSymbol = CURRENCY_SYMBOLS[v.pricing.currency];
+        const displayLabel = `${v.label}: ${targetSymbol}${convertedAmount.toLocaleString()} (${originalSymbol}${v.pricing.amount.toLocaleString()})`;
+        return { value: v.value, label: displayLabel };
+      });
+
       const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : 0;
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
