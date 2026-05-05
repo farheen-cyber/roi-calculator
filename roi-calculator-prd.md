@@ -77,7 +77,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Expected New Shareholders | `newShareholdersFromFundraise` | Positive integer ≥ 0 | 0 | Only if planning to fundraise; adds to shareholder scaling |
 | Need Valuation Reports | `needsValuation` | Boolean | No (OFF) | If YES, unlocks valuation subsection |
 | Valuation Frequency | `valuationFrequency` | Annually \| Quarterly | — | Only if valuations needed; affects cost multiplier |
-| Valuation Report Type | `valuationType` | 409A, Black Scholes, Registered Valuer, Merchant Banker, HMRC | — | Only if valuations needed; all types visible globally with prices converted to incorporation country currency (see §4.6) |
+| Valuation Report Type | `valuationType` | 409A, Black Scholes, Registered Valuer, Merchant Banker, HMRC | — | Only if valuations needed; all types visible globally with stage-specific prices in operation country currency (see §4.6) |
 
 **Notes:** 
 - The "Managed By" field has been removed. Staffing and roles are now determined by company stage via the staffing matrix (see §2.3).
@@ -305,36 +305,50 @@ Where:
 > - Total: $38,000/year (vs. pure in-house: 100 hrs × 1.0 × $500 = $50,000/year)
 
 ### 4.6 Valuation Services Cost (Optional)
-**Formula**: `valuation_cost = (cost_per_event × forex_rate) × frequency_multiplier` (Only if user enables valuation reports)
+**Formula**: `valuation_cost = cost_per_event × frequency_multiplier` (Only if user enables valuation reports)
 
 **How It's Triggered:**
 1. User toggles "Do you need valuation reports?" checkbox (default: OFF)
 2. If enabled, user selects:
    - **Frequency**: Annually (1×/yr) or Quarterly (4×/yr)
-   - **Report Type**: All 5 valuation types visible regardless of `geo_inc` (country of incorporation)
-3. System calculates valuation cost in company's incorporation country currency using live forex rates
-4. All costs are converted and displayed in country-of-incorporation currency
+   - **Report Type**: All 5 valuation types visible regardless of company stage or incorporation country
+3. System looks up cost based on `[valuationType][stage][geoOp_currency]`
+4. All costs are displayed in company's **country-of-operation currency** (`geo_op`), not incorporation country
 
-**Valuation Types** (available globally, with market pricing in native currency):
+**Stage-Based Pricing (1.0x - 2.0x complexity multiplier):**
+Valuation complexity increases with company maturity due to multiple instruments, rounds, and regulatory requirements. Costs scale from Preseed (baseline) to Series C+ (2.0x).
 
-| Report Type | Native Currency | Market Cost | EquityList Cost |
-|:---|:---|---:|---:|
-| **409A Valuation** | USD | $1,500 | $1,200 |
-| **Black Scholes Valuation** | INR | ₹100,000 | ₹75,000 |
-| **Registered Valuer Assessment** (IBBI-registered) | INR | ₹50,000 | ₹42,000 |
-| **Merchant Banker Assessment** (SEBI-registered) | INR | ₹90,000 | ₹70,000 |
-| **HMRC Valuation** (HM Revenue & Customs) | GBP | £1,500 | £1,200 |
+| Valuation Type | Preseed | Seed | Series A/B | Series B/C | Series C+ |
+|:---|---:|---:|---:|---:|---:|
+| **409A** (USD) | $1,800 | $2,250 | $2,700 | $3,150 | $3,600 |
+| **409A** (INR) | ₹135,000 | ₹168,750 | ₹202,500 | ₹236,250 | ₹270,000 |
+| **409A** (GBP) | £1,350 | £1,688 | £2,025 | £2,363 | £2,700 |
+| **409A** (SGD) | S$2,400 | S$3,000 | S$3,600 | S$4,200 | S$4,800 |
+| **Black Scholes** (USD) | $3,000 | $3,750 | $4,500 | $5,250 | $6,000 |
+| **Black Scholes** (INR) | ₹100,000 | ₹125,000 | ₹150,000 | ₹175,000 | ₹200,000 |
+| **Black Scholes** (GBP) | £2,250 | £2,813 | £3,375 | £3,938 | £4,500 |
+| **Black Scholes** (SGD) | S$4,000 | S$5,000 | S$6,000 | S$7,000 | S$8,000 |
+| **Registered Valuer** (USD) | $1,200 | $1,500 | $1,800 | $2,100 | $2,400 |
+| **Registered Valuer** (INR) | ₹40,000 | ₹50,000 | ₹60,000 | ₹70,000 | ₹80,000 |
+| **Registered Valuer** (GBP) | £900 | £1,125 | £1,350 | £1,575 | £1,800 |
+| **Registered Valuer** (SGD) | S$1,600 | S$2,000 | S$2,400 | S$2,800 | S$3,200 |
+| **Merchant Banker** (USD) | $3,000 | $3,750 | $4,500 | $5,250 | $6,000 |
+| **Merchant Banker** (INR) | ₹100,000 | ₹125,000 | ₹150,000 | ₹175,000 | ₹200,000 |
+| **Merchant Banker** (GBP) | £2,250 | £2,813 | £3,375 | £3,938 | £4,500 |
+| **Merchant Banker** (SGD) | S$4,000 | S$5,000 | S$6,000 | S$7,000 | S$8,000 |
+| **HMRC** (USD) | $1,600 | $2,000 | $2,400 | $2,800 | $3,200 |
+| **HMRC** (INR) | ₹120,000 | ₹150,000 | ₹180,000 | ₹210,000 | ₹240,000 |
+| **HMRC** (GBP) | £1,200 | £1,500 | £1,800 | £2,100 | £2,400 |
+| **HMRC** (SGD) | S$2,133 | S$2,667 | S$3,200 | S$3,733 | S$4,267 |
 
-**Currency Display & Conversion:**
-- All valuation types are visible to all companies in the dropdown
-- Prices are displayed in the company's country-of-incorporation currency (`geo_inc`) using live forex rates
-- Display format shows both converted and original amounts: e.g., "$650 (₹50k converted)"
-- Example: US company sees Registered Valuer as "$525 (₹50k converted)"
-- Example: India company sees HMRC as "₹115,500 (£1,500 converted)"
+**EquityList Pricing (20% discount):**
+EquityList offers a consistent 20% discount across all valuation types, stages, and currencies. All EquityList prices are automatically calculated by applying the 20% discount to market rates above.
 
-**Live Forex Rates Used:**
-- Current rates: 1 USD = ~95 INR, 1 GBP = ~130 INR, 1 SGD = ~75 INR
-- Rates are refreshed on each page load via API
+**Currency Display:**
+- All valuation types are visible in the dropdown to all companies
+- Prices are displayed in the company's **country-of-operation currency** (`geo_op`), not country of incorporation
+- No live forex conversion — prices are pre-calculated for all 4 currencies and all 5 stages
+- Dropdown shows: "409A Valuation: ₹162,000 per event" (for Series A/B, India operation)
 
 EquityList Cost represents the discounted rate available through EquityList's platform (already integrated into ROI calculation).
 
@@ -502,10 +516,13 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 ### Version 3.3 (Current)
 - **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
 - **Removed**: Unused FX conversion table (PRICING and rates are already in each geography's local currency)
-- **Removed**: Singapore and UK valuation types (market rates not yet verified)
 - **Removed**: "Hybrid" method option from PRD (not implemented)
-- **Changed**: Valuation types now always visible (not country-gated) — dropdown shows 409A, Registered Valuer, and Merchant Banker options at all times
-- **Updated**: Valuation market costs: 409A ($1,500 vs. $6,000), Registered Valuer (₹50,000 vs. ₹200,000), Merchant Banker (₹90,000 vs. ₹300,000)
+- **Changed**: Valuation pricing now **stage-based** with 1.0x–2.0x complexity multiplier (Preseed → Series C+)
+- **Changed**: Valuation currency selection now uses `geoOp` (operation country) instead of `geoInc` (incorporation country)
+- **Changed**: All 5 valuation types now priced in all 4 currencies (USD, INR, GBP, SGD) — no forex conversion needed at display time
+- **Added**: Singapore and UK valuation types with full pricing across all stages
+- **Updated**: Valuation market costs (stage-specific): 409A ($1,800–$3,600), Black Scholes (₹100k–₹200k), Registered Valuer (₹40k–₹80k), Merchant Banker (₹100k–₹200k), HMRC (£1,200–£2,400)
+- **Updated**: EquityList discount applies uniformly (20%) across all valuation types, stages, and currencies
 - **Fixed**: Outsourced method now correctly includes 40% internal effort cost (review, approvals, coordination) + external retainer (was only charging retainer)
 - **Fixed**: `computeROI()` now calculates blended rate for BOTH in-house and outsourced methods (previously set rate=0 for outsourced, making 0.4 multiplier meaningless)
 - **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 483,840 input combinations (increase from 421,120 due to all valuation types now available)

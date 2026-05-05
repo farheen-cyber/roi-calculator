@@ -215,19 +215,79 @@
     };
 
     const VALUATION_PRICING = {
-      '409a': { amount: 1500, currency: 'USD' },
-      'blackscholes': { amount: 100000, currency: 'INR' },
-      'rv': { amount: 50000, currency: 'INR' },
-      'mb': { amount: 90000, currency: 'INR' },
-      'hmrc': { amount: 1500, currency: 'GBP' }
+      '409a': {
+        'preseed': { USD: 1800, INR: 135000, GBP: 1350, SGD: 2400 },
+        'seed': { USD: 2250, INR: 168750, GBP: 1688, SGD: 3000 },
+        'seriesab': { USD: 2700, INR: 202500, GBP: 2025, SGD: 3600 },
+        'seriesbc': { USD: 3150, INR: 236250, GBP: 2363, SGD: 4200 },
+        'seriescd': { USD: 3600, INR: 270000, GBP: 2700, SGD: 4800 }
+      },
+      'blackscholes': {
+        'preseed': { USD: 3000, INR: 100000, GBP: 2250, SGD: 4000 },
+        'seed': { USD: 3750, INR: 125000, GBP: 2813, SGD: 5000 },
+        'seriesab': { USD: 4500, INR: 150000, GBP: 3375, SGD: 6000 },
+        'seriesbc': { USD: 5250, INR: 175000, GBP: 3938, SGD: 7000 },
+        'seriescd': { USD: 6000, INR: 200000, GBP: 4500, SGD: 8000 }
+      },
+      'rv': {
+        'preseed': { USD: 1200, INR: 40000, GBP: 900, SGD: 1600 },
+        'seed': { USD: 1500, INR: 50000, GBP: 1125, SGD: 2000 },
+        'seriesab': { USD: 1800, INR: 60000, GBP: 1350, SGD: 2400 },
+        'seriesbc': { USD: 2100, INR: 70000, GBP: 1575, SGD: 2800 },
+        'seriescd': { USD: 2400, INR: 80000, GBP: 1800, SGD: 3200 }
+      },
+      'mb': {
+        'preseed': { USD: 3000, INR: 100000, GBP: 2250, SGD: 4000 },
+        'seed': { USD: 3750, INR: 125000, GBP: 2813, SGD: 5000 },
+        'seriesab': { USD: 4500, INR: 150000, GBP: 3375, SGD: 6000 },
+        'seriesbc': { USD: 5250, INR: 175000, GBP: 3938, SGD: 7000 },
+        'seriescd': { USD: 6000, INR: 200000, GBP: 4500, SGD: 8000 }
+      },
+      'hmrc': {
+        'preseed': { USD: 1600, INR: 120000, GBP: 1200, SGD: 2133 },
+        'seed': { USD: 2000, INR: 150000, GBP: 1500, SGD: 2667 },
+        'seriesab': { USD: 2400, INR: 180000, GBP: 1800, SGD: 3200 },
+        'seriesbc': { USD: 2800, INR: 210000, GBP: 2100, SGD: 3733 },
+        'seriescd': { USD: 3200, INR: 240000, GBP: 2400, SGD: 4267 }
+      }
     };
 
     const EL_VALUATION_PRICING = {
-      '409a': { amount: 1200, currency: 'USD' },
-      'blackscholes': { amount: 75000, currency: 'INR' },
-      'rv': { amount: 42000, currency: 'INR' },
-      'mb': { amount: 70000, currency: 'INR' },
-      'hmrc': { amount: 1200, currency: 'GBP' }
+      '409a': {
+        'preseed': { USD: 1440, INR: 108000, GBP: 1080, SGD: 1920 },
+        'seed': { USD: 1800, INR: 135000, GBP: 1350, SGD: 2400 },
+        'seriesab': { USD: 2160, INR: 162000, GBP: 1620, SGD: 2880 },
+        'seriesbc': { USD: 2520, INR: 189000, GBP: 1890, SGD: 3360 },
+        'seriescd': { USD: 2880, INR: 216000, GBP: 2160, SGD: 3840 }
+      },
+      'blackscholes': {
+        'preseed': { USD: 2400, INR: 80000, GBP: 1800, SGD: 3200 },
+        'seed': { USD: 3000, INR: 100000, GBP: 2250, SGD: 4000 },
+        'seriesab': { USD: 3600, INR: 120000, GBP: 2700, SGD: 4800 },
+        'seriesbc': { USD: 4200, INR: 140000, GBP: 3150, SGD: 5600 },
+        'seriescd': { USD: 4800, INR: 160000, GBP: 3600, SGD: 6400 }
+      },
+      'rv': {
+        'preseed': { USD: 960, INR: 32000, GBP: 720, SGD: 1280 },
+        'seed': { USD: 1200, INR: 40000, GBP: 900, SGD: 1600 },
+        'seriesab': { USD: 1440, INR: 48000, GBP: 1080, SGD: 1920 },
+        'seriesbc': { USD: 1680, INR: 56000, GBP: 1260, SGD: 2240 },
+        'seriescd': { USD: 1920, INR: 64000, GBP: 1440, SGD: 2560 }
+      },
+      'mb': {
+        'preseed': { USD: 2400, INR: 80000, GBP: 1800, SGD: 3200 },
+        'seed': { USD: 3000, INR: 100000, GBP: 2250, SGD: 4000 },
+        'seriesab': { USD: 3600, INR: 120000, GBP: 2700, SGD: 4800 },
+        'seriesbc': { USD: 4200, INR: 140000, GBP: 3150, SGD: 5600 },
+        'seriescd': { USD: 4800, INR: 160000, GBP: 3600, SGD: 6400 }
+      },
+      'hmrc': {
+        'preseed': { USD: 1280, INR: 96000, GBP: 960, SGD: 1707 },
+        'seed': { USD: 1600, INR: 120000, GBP: 1200, SGD: 2133 },
+        'seriesab': { USD: 1920, INR: 144000, GBP: 1440, SGD: 2560 },
+        'seriesbc': { USD: 2240, INR: 168000, GBP: 1680, SGD: 2987 },
+        'seriescd': { USD: 2560, INR: 192000, GBP: 1920, SGD: 3413 }
+      }
     };
 
     const CURRENCY_SYMBOLS = { USD: '$', INR: '₹', GBP: '£', SGD: 'S$' };
@@ -295,14 +355,14 @@
       let elValuationCost = 0;
       if (valuationFrequency && valuationType) {
         const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : 0;
-        const targetCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
+        const opCurrency = GEO_TO_CURRENCY[geoOp] || 'INR';
 
-        const marketPricing = VALUATION_PRICING[valuationType];
-        const elPricing = EL_VALUATION_PRICING[valuationType];
+        const marketPricing = VALUATION_PRICING[valuationType]?.[stageKey];
+        const elPricing = EL_VALUATION_PRICING[valuationType]?.[stageKey];
 
         if (marketPricing && elPricing) {
-          const marketAmount = marketPricing.amount * (FOREX_RATES[marketPricing.currency] / FOREX_RATES[targetCurrency]);
-          const elAmount = elPricing.amount * (FOREX_RATES[elPricing.currency] / FOREX_RATES[targetCurrency]);
+          const marketAmount = marketPricing[opCurrency] || 0;
+          const elAmount = elPricing[opCurrency] || 0;
           valuationCost = Math.round(events * marketAmount);
           elValuationCost = Math.round(events * elAmount);
         }
@@ -795,7 +855,7 @@
                 <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
-                <ValuationExpanded oneColumn={oneColumn} geoInc={geoInc} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
+                <ValuationExpanded oneColumn={oneColumn} stage={stage} geoOp={geoOp} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
               </SwitchCard>
             </div>
           </FormSection>
@@ -897,22 +957,22 @@
       );
     }
 
-    function ValuationExpanded({ oneColumn, freq, setFreq, type, setType, geoInc }) {
-      const targetCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
-      const targetSymbol = CURRENCY_SYMBOLS[targetCurrency] || '₹';
+    function ValuationExpanded({ oneColumn, stage, geoOp, freq, setFreq, type, setType }) {
+      const opCurrency = GEO_TO_CURRENCY[geoOp] || 'INR';
+      const opSymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
 
       const allValuationTypes = [
-        { value: '409a', label: '409A Valuation', pricing: VALUATION_PRICING['409a'] },
-        { value: 'blackscholes', label: 'Black Scholes Valuation', pricing: VALUATION_PRICING['blackscholes'] },
-        { value: 'rv', label: 'Registered Valuer Assessment', pricing: VALUATION_PRICING['rv'] },
-        { value: 'mb', label: 'Merchant Banker Assessment', pricing: VALUATION_PRICING['mb'] },
-        { value: 'hmrc', label: 'HMRC Valuation', pricing: VALUATION_PRICING['hmrc'] },
+        { value: '409a', label: '409A Valuation' },
+        { value: 'blackscholes', label: 'Black Scholes Valuation' },
+        { value: 'rv', label: 'Registered Valuer Assessment' },
+        { value: 'mb', label: 'Merchant Banker Assessment' },
+        { value: 'hmrc', label: 'HMRC Valuation' },
       ];
 
       const opts = allValuationTypes.map(v => {
-        const convertedAmount = Math.round(v.pricing.amount * (FOREX_RATES[v.pricing.currency] / FOREX_RATES[targetCurrency]));
-        const originalSymbol = CURRENCY_SYMBOLS[v.pricing.currency];
-        const displayLabel = `${v.label}: ${targetSymbol}${convertedAmount.toLocaleString()} (${originalSymbol}${v.pricing.amount.toLocaleString()})`;
+        const stagePricing = EL_VALUATION_PRICING[v.value]?.[stage];
+        const amount = stagePricing ? stagePricing[opCurrency] : 0;
+        const displayLabel = `${v.label}: ${opSymbol}${amount.toLocaleString()} per event`;
         return { value: v.value, label: displayLabel };
       });
 
@@ -1081,16 +1141,17 @@
           label: 'Valuation Reports',
           formula: (() => {
             const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
-            const marketPricing = VALUATION_PRICING[formData?.valuationType];
-            const targetCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
-            const costPerEvent = Math.round(marketPricing.amount * (FOREX_RATES[marketPricing.currency] / FOREX_RATES[targetCurrency]));
-            const currencySymbol = CURRENCY_SYMBOLS[targetCurrency] || '₹';
-            const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[targetCurrency] || 'en-IN';
+            const stagePricing = VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
+            const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
+            const costPerEvent = stagePricing ? stagePricing[opCurrency] : 0;
+            const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
+            const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
             return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString(locale)} per event`;
           })(),
           value: (() => {
-            const currencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
-            const locale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
+            const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
+            const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
+            const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
             const marketCost = v.valuationCost || 0;
             const elCost = v.elValuationCost || 0;
             const savings = marketCost - elCost;
