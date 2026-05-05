@@ -1040,20 +1040,6 @@
       const [editedHours, setEditedHours] = useState(null);
       const recalcFormValues = currentFormValues || formData;
 
-      // Compute default values on component mount instead of hardcoding
-      useEffect(() => {
-        if (!results && !formData) {
-          const defaultInputs = {
-            sh: 30, oh: 15, gr: 10, geoInc: 'india', geoOp: 'india', stage: 'seriesab',
-            meth: 'in-house', planningToFundraise: false, fundraiseRound: 'seed',
-            newShareholdersFromFundraise: 0, valuationFrequency: null, valuationType: null
-          };
-          const defaultCalcs = computeROI(defaultInputs, {});
-          setResults(defaultCalcs);
-          setMode('sample');
-        }
-      }, []);
-
       const formatStage = (stage) => {
         const stageMap = {
           'preseed': 'PRE-SEED',
