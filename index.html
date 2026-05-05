@@ -221,7 +221,8 @@
         '409a': 1500
       },
       uk: {
-        '409a': 1500
+        '409a': 1500,
+        'hmrc': 1500
       }
     };
 
@@ -239,7 +240,8 @@
         '409a': 1200
       },
       uk: {
-        '409a': 1200
+        '409a': 1200,
+        'hmrc': 1200
       }
     };
 
@@ -798,7 +800,7 @@
                 <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
-                <ValuationExpanded oneColumn={oneColumn} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
+                <ValuationExpanded oneColumn={oneColumn} geoInc={geoInc} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} />
               </SwitchCard>
             </div>
           </FormSection>
@@ -900,12 +902,17 @@
       );
     }
 
-    function ValuationExpanded({ oneColumn, freq, setFreq, type, setType }) {
-      const opts = [
+    function ValuationExpanded({ oneColumn, freq, setFreq, type, setType, geoInc }) {
+      const opts = geoInc === 'india' ? [
         { value: '409a', label: '409A Valuation' },
         { value: 'blackscholes', label: 'Black Scholes Valuation' },
         { value: 'rv', label: 'Registered Valuer Assessment' },
         { value: 'mb', label: 'Merchant Banker Assessment' },
+      ] : geoInc === 'uk' ? [
+        { value: '409a', label: '409A Valuation' },
+        { value: 'hmrc', label: 'HMRC Valuation' },
+      ] : [
+        { value: '409a', label: '409A Valuation' },
       ];
       const events = freq === 'annually' ? 1 : freq === 'quarterly' ? 4 : 0;
       return (
@@ -1007,55 +1014,55 @@
       const secretarialPct = v.annCost > 0 ? Math.round((v.secCost / v.annCost) * 100) : 0;
       const valuationPct = v.annCost > 0 ? Math.round((v.valuationCost / v.annCost) * 100) : 0;
 
-      const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
-      const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
+      const incCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoInc] || '₹';
+      const incLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoInc] || 'en-IN';
 
       const items = [
         {
           key: 'grant',
           label: 'Grant Admin',
-          formula: `${v.grHr || 1.5} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.grCost || 0).toLocaleString(opLocale)}`,
+          formula: `${v.grHr || 1.5} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.grCost || 0).toLocaleString(incLocale)}`,
           pct: `${grantPct}%`,
           tip: null
         },
         {
           key: 'compliance',
           label: 'Compliance',
-          formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
+          formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.cpCost || 0).toLocaleString(incLocale)}`,
           pct: `${compliancePct}%`,
           tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.'
         },
         {
           key: 'captable',
           label: 'Cap Table',
-          formula: `3h/mo base + ${Math.max(0, ((formData?.sh || 30) - 20) / 50).toFixed(2)} × 2 = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2) * 12)} hrs/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.ctCost || 0).toLocaleString(opLocale)}`,
+          formula: `3h/mo base + ${Math.max(0, ((formData?.sh || 30) - 20) / 50).toFixed(2)} × 2 = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2) * 12)} hrs/yr × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.ctCost || 0).toLocaleString(incLocale)}`,
           pct: `${capTablePct}%`,
           tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
         },
         {
           key: 'secretarial',
           label: 'Secretarial & Board Operations',
-          formula: `${v.baseWorkflows || 12} workflows/yr × 2.5 hrs/workflow × ${(v.shareholderScaling || 1).toFixed(2)} (shareholder scaling) = ${Math.round((v.baseWorkflows || 12) * 2.5 * (v.shareholderScaling || 1))} hrs/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.secCost || 0).toLocaleString(opLocale)}`,
+          formula: `${v.baseWorkflows || 12} workflows/yr × 2.5 hrs/workflow × ${(v.shareholderScaling || 1).toFixed(2)} (shareholder scaling) = ${Math.round((v.baseWorkflows || 12) * 2.5 * (v.shareholderScaling || 1))} hrs/yr × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.secCost || 0).toLocaleString(incLocale)}`,
           pct: `${secretarialPct}%`,
           tip: 'Board meetings, shareholder resolutions, and statutory filings.'
         },
         ...(v.ctFundraisingCost > 0 ? [{
           key: 'fundraising-captable',
           label: 'Fundraising — Cap Table',
-          formula: `${v.ctFundraisingHours || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.ctFundraisingCost || 0).toLocaleString(opLocale)}`,
+          formula: `${v.ctFundraisingHours || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.ctFundraisingCost || 0).toLocaleString(incLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.ctFundraisingCost / v.annCost) * 100) : 0}%`,
           tip: 'Cap table updates, new shareholder onboarding, and fundraising coordination.'
         }] : []),
         ...(v.secFundraisingCost > 0 ? [{
           key: 'fundraising-secretarial',
           label: 'Fundraising — Secretarial & Board',
-          formula: `${v.secFundraisingRaw || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.secFundraisingCost || 0).toLocaleString(opLocale)}`,
+          formula: `${v.secFundraisingRaw || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ${incCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
+          value: `${incCurrencySymbol}${(v.secFundraisingCost || 0).toLocaleString(incLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.secFundraisingCost / v.annCost) * 100) : 0}%`,
           tip: 'Board meetings, shareholder communications, and governance around the fundraising event.'
         }] : []),
@@ -1063,7 +1070,7 @@
           key: 'retainer',
           label: 'Outsourced Administration Retainer',
           formula: `Annual retainer for ${v.meth === 'outsourced' ? formData?.stage?.toUpperCase() || 'SERIES A/B' : 'N/A'} stage (external provider)`,
-          value: `${opCurrencySymbol}${(v.methodExtCost || 0).toLocaleString(opLocale)}`,
+          value: `${incCurrencySymbol}${(v.methodExtCost || 0).toLocaleString(incLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.methodExtCost / v.annCost) * 100) : 0}%`,
           tip: 'Fixed annual fee to external law firm or CA for ongoing equity administration.'
         }] : []),
@@ -1117,17 +1124,17 @@
               <div style={{
                 fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
                 color: v.diff < 0 ? A.red : A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
-              }}>{opCurrencySymbol}{(v.diff || 0).toLocaleString(opLocale)}</div>
+              }}>{incCurrencySymbol}{(v.diff || 0).toLocaleString(incLocale)}</div>
               <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
 
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
                   <MonoLabel size={9.5}>Current spend</MonoLabel>
-                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.inkSoft, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>{opCurrencySymbol}{(v.annCost || 0).toLocaleString(opLocale)}</div>
+                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.inkSoft, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>{incCurrencySymbol}{(v.annCost || 0).toLocaleString(incLocale)}</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
                   <MonoLabel size={9.5}>With EquityList</MonoLabel>
-                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.purple2, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>{opCurrencySymbol}{(v.elAnn || 0).toLocaleString(opLocale)}</div>
+                  <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.purple2, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.2 }}>{incCurrencySymbol}{(v.elAnn || 0).toLocaleString(incLocale)}</div>
                 </div>
               </div>
             </div>
@@ -1177,7 +1184,7 @@
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>{opCurrencySymbol}</span>
+                      <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>{incCurrencySymbol}</span>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -1280,7 +1287,7 @@
           }}>
             <MonoLabel size={9.5} color={A.purple2} style={{ marginBottom: 8 }}>The takeaway</MonoLabel>
             <p style={{ fontSize: 13, color: A.inkSoft, lineHeight: 1.55, margin: 0, marginBottom: 14 }}>
-              You're currently overspending on equity operations. You could save <strong style={{ color: A.ink, fontWeight: 700 }}>{opCurrencySymbol}{(v.diff || 0).toLocaleString(opLocale)}/year</strong> while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.
+              You're currently overspending on equity operations. You could save <strong style={{ color: A.ink, fontWeight: 700 }}>{incCurrencySymbol}{(v.diff || 0).toLocaleString(incLocale)}/year</strong> while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.
             </p>
             <PrimaryBtn fullWidth size="md">
               Book a demo
