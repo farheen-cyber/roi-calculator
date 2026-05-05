@@ -854,7 +854,7 @@
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <SwitchCard on={fundraise} onChange={(v) => { setFundraise(v); onInputChange && onInputChange(); }} title="Planning to fundraise in the next 12 months?" subtitle="Helps us model upcoming governance & onboarding workflows.">
-                <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} />
+                <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} errors={errors} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
                 <ValuationExpanded oneColumn={oneColumn} stage={stage} geoOp={geoOp} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} errors={errors} />
@@ -925,7 +925,7 @@
       );
     }
 
-    function FundraiseExpanded({ oneColumn, round, setRound, shareholders, setShareholders }) {
+    function FundraiseExpanded({ oneColumn, round, setRound, shareholders, setShareholders, errors }) {
       const [timing, setTiming] = useState('3–6 mo');
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -950,7 +950,7 @@
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '180px 1fr', gap: 16, alignItems: 'flex-end' }}>
-            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" error={shareholders && /[^\d]/.test(shareholders) ? 'Only numbers allowed' : ''} onNumericError={() => {}} />
+            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" required error={shareholders && /[^\d]/.test(shareholders) ? 'Only numbers allowed' : errors?.newShareholdersFromFundraise} onNumericError={() => {}} />
             <div style={{ fontSize: 12, color: A.mute, lineHeight: 1.5 }}>
               Investors, SAFE conversions, and new ESOP grants all count toward stakeholder load.
             </div>
@@ -1408,6 +1408,12 @@
         if (sharesErr) newErrors.shareholders = sharesErr;
         if (holdersErr) newErrors.optionHolders = holdersErr;
         if (grantsErr) newErrors.grants = grantsErr;
+
+        // Validate fundraise fields if fundraising is enabled
+        if (inputs?.planningToFundraise) {
+          const newShareholdersStr = String(inputs?.newShareholdersFromFundraise || '').trim();
+          if (!newShareholdersStr) newErrors.newShareholdersFromFundraise = 'Field required';
+        }
 
         // Validate valuation fields if valuation is enabled
         if (inputs?.valuation) {
