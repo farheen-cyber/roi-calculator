@@ -1007,6 +1007,7 @@
 
       const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
       const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
+      console.log('formData?.geoOp:', formData?.geoOp, 'opCurrencySymbol:', opCurrencySymbol);
 
       const items = [
         {
