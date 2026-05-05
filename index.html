@@ -301,8 +301,8 @@
         const elPricing = EL_VALUATION_PRICING[valuationType];
 
         if (marketPricing && elPricing) {
-          const marketAmount = marketPricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[marketPricing.currency]);
-          const elAmount = elPricing.amount * (FOREX_RATES[targetCurrency] / FOREX_RATES[elPricing.currency]);
+          const marketAmount = marketPricing.amount * (FOREX_RATES[marketPricing.currency] / FOREX_RATES[targetCurrency]);
+          const elAmount = elPricing.amount * (FOREX_RATES[elPricing.currency] / FOREX_RATES[targetCurrency]);
           valuationCost = Math.round(events * marketAmount);
           elValuationCost = Math.round(events * elAmount);
         }
