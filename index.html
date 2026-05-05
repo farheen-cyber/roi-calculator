@@ -1,4 +1,4 @@
-<!-- Cache buster: 2026-05-05T13:10:00Z -->
+<!-- Cache buster: 2026-05-05T14:00:00Z -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -840,7 +840,7 @@
               <Dropdown label={<>Country of Incorporation <InfoTip text="Determines which valuation reports, tax filings, and statutory compliance apply." /></>} value={geoInc} required error={errors?.geoInc} options={[{ value: 'india', label: 'India' }, { value: 'us', label: 'United States' }, { value: 'singapore', label: 'Singapore' }, { value: 'uk', label: 'United Kingdom' }]} onChange={(v) => { setGeoInc(v); onInputChange && onInputChange(); }} />
               <Dropdown label={<>Country of Operation <InfoTip text="Where your team is based — drives salary benchmarks for in-house equity admin." /></>} value={geoOp} required error={errors?.geoOp} options={[{ value: 'india', label: 'India' }, { value: 'us', label: 'United States' }, { value: 'singapore', label: 'Singapore' }, { value: 'uk', label: 'United Kingdom' }]} onChange={(v) => { setGeoOp(v); onInputChange && onInputChange(); }} />
               <Dropdown label={<>Current Stage <InfoTip text="Used to estimate your blended hourly rate and the typical staffing mix at this stage." /></>} value={stage} required error={errors?.stage} options={[{ value: 'preseed', label: 'Pre-seed' }, { value: 'seed', label: 'Seed' }, { value: 'seriesab', label: 'Series A/B' }, { value: 'seriesbc', label: 'Series B/C' }, { value: 'seriesc', label: 'Series C+' }]} onChange={(v) => { setStage(v); onInputChange && onInputChange(); }} />
-              <FormField label="Legal Entity Name" placeholder="Optional" value={legalEntity} onChange={(v) => { setLegalEntity(v); onInputChange && onInputChange(); }} />
+              <FormField label="Legal Entity Name" placeholder="e.g. Acme Corp Ltd." required value={legalEntity} onChange={(v) => { setLegalEntity(v); onInputChange && onInputChange(); }} error={errors?.legalEntityName} />
             </div>
           </FormSection>
 
@@ -865,7 +865,7 @@
             <Dropdown label="Administrative Method" value={adminMethod} required error={errors?.meth} options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
-          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
+          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, legalEntityName, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
           </PrimaryBtn>
@@ -1392,11 +1392,12 @@
         setCurrentFormValues(inputs);
         const newErrors = {};
 
-        // Validate dropdown fields
+        // Validate dropdown and text fields
         if (!inputs?.geoInc || inputs.geoInc.trim() === '') newErrors.geoInc = 'Field required';
         if (!inputs?.geoOp || inputs.geoOp.trim() === '') newErrors.geoOp = 'Field required';
         if (!inputs?.stage || inputs.stage.trim() === '') newErrors.stage = 'Field required';
         if (!inputs?.meth || inputs.meth.trim() === '') newErrors.meth = 'Field required';
+        if (!inputs?.legalEntityName || inputs.legalEntityName.trim() === '') newErrors.legalEntityName = 'Field required';
 
         // Validate numeric fields
         const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
