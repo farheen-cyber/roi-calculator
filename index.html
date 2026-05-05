@@ -1103,7 +1103,7 @@
             </div>
           </div>
 
-          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(currentFormValues); }} />}
+          {mode === 'stale' && <StaleAlert dirtyCount={dirtyCount} onRecalculate={() => { setLeavingStale(true); onRecalculate && onRecalculate(formData); }} />}
 
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{
             background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8,
