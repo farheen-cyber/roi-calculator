@@ -372,8 +372,10 @@
       const manualHTotal = grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw;
       const adjustedHTotal = (grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw) * mult;
       const elOversightHours = manualHTotal * 0.1;
-      const internalHTotal = adjustedHTotal - elOversightHours;
-      const timeSavedPct = manualHTotal > 0 ? Math.round(((manualHTotal - internalHTotal) / manualHTotal) * 100) : 0;
+      const hoursToday = adjustedHTotal;
+      const hoursSaved = Math.max(0, hoursToday - elOversightHours);
+      const internalHTotal = elOversightHours;
+      const timeSavedPct = hoursToday > 0 ? Math.round((hoursSaved / hoursToday) * 100) : 0;
 
       const elOverhead = manualHTotal * 0.1 * rate;
       const stakeholders = Math.min(sh + oh, 10000);
@@ -395,6 +397,7 @@
         secRate,
         manualHTotal: Math.round(manualHTotal * 10) / 10,
         internalHTotal: Math.round(internalHTotal * 10) / 10,
+        hoursSaved: Math.round(hoursSaved),
         timeSavedPct,
         grCost: Math.round(grCost),
         cpCost: Math.round(cpCost),
@@ -1341,7 +1344,7 @@
             <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <MonoLabel size={10}>Hours saved annually</MonoLabel>
               <div style={{ fontFamily: A.sans, fontSize: 16, fontWeight: 700, color: A.green, fontVariantNumeric: 'tabular-nums' }}>
-                {Math.round(v.manualHTotal - v.internalHTotal)} <span style={{ fontFamily: A.mono, fontSize: 10, color: A.green, fontWeight: 700 }}>hrs/yr</span>
+                {v.hoursSaved} <span style={{ fontFamily: A.mono, fontSize: 10, color: A.green, fontWeight: 700 }}>hrs/yr</span>
               </div>
             </div>
           </div>
