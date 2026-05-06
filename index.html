@@ -673,7 +673,7 @@
       );
     }
 
-    function PrimaryBtn({ children, fullWidth, onClick, size = 'md', style, disabled }) {
+    function PrimaryBtn({ children, fullWidth, onClick, size = 'md', style, disabled, onMouseEnter, onMouseLeave }) {
       const padding = size === 'lg' ? '16px 28px' : size === 'sm' ? '8px 14px' : '12px 22px';
       const fontSize = size === 'lg' ? 15 : size === 'sm' ? 12 : 14;
       return (
@@ -688,8 +688,8 @@
           opacity: disabled ? 0.5 : 1,
           ...style,
         }}
-          onMouseEnter={(e) => !disabled && (e.currentTarget.style.background = A.purple2)}
-          onMouseLeave={(e) => !disabled && (e.currentTarget.style.background = A.purple)}
+          onMouseEnter={onMouseEnter || ((e) => !disabled && (e.currentTarget.style.background = A.purple2))}
+          onMouseLeave={onMouseLeave || ((e) => !disabled && (e.currentTarget.style.background = A.purple))}
         >{children}</button>
       );
     }
