@@ -1491,7 +1491,7 @@
         // Validate fundraise fields if fundraising is enabled
         if (inputs?.planningToFundraise) {
           if (!inputs?.fundraiseRound) newErrors.fundraiseRound = 'Field required';
-          const newShareholdersStr = String(inputs?.newShareholdersFromFundraise || '').trim();
+          const newShareholdersStr = String(inputs?.newShareholdersFromFundraise ?? '').trim();
           if (!newShareholdersStr) newErrors.newShareholdersFromFundraise = 'Field required';
         }
 

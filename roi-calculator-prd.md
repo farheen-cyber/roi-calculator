@@ -58,7 +58,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 
 | UI Input | Variable | Range / Type | Default | Notes |
 |:---|:---|:---|:---|:---|
-| Legal Entity Name | `co` | String | — | Optional, for reference only |
+| Legal Entity Name | `co` | String | — | Required |
 | Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements, valuation types, and currency display |
 | Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, and per-stakeholder EL pricing |
 | Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
