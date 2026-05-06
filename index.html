@@ -1077,7 +1077,7 @@
       };
 
       const v = results || {};
-      const savingsPct = v.annCost > 0 ? Math.round((v.diff / v.annCost) * 100) : 0;
+      const savingsPct = v.annCost > 0 ? Math.round((Math.abs(v.diff) / v.annCost) * 100) : 0;
 
       useEffect(() => {
         if (leavingStale && mode !== 'stale') {
