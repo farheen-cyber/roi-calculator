@@ -446,28 +446,31 @@ savings = ops_total - el_cost
 ```javascript
 manual_hours = (gr × grHr) 
   + compliance_hours[geo_inc] 
-  + ((3 + max(0,(sh-20)/50)×2) × 12)                              // cap table base
-  + (workflows[geo_inc][stage] × 2.5 × shareholder_scaling)       // secretarial base
+  + cap_table_base_hours
+  + (base_secretarial_workflows[geo_inc][stage] × 2.5 × shareholder_scaling)
   + (fundraising_capTable_hours × roundMultiplier)                // if planning to fundraise
-  + (fundraising_secretarial_hours × roundMultiplier)             // if planning to fundraise
+  + (fundraising_secretarial_hours × roundMultiplier × shareholder_scaling)  // if planning to fundraise
 
 // Full unaffected-by-method hours — what 100% manual execution would cost in time
 // Includes both recurring operations and one-time fundraising effort
-// shareholder_scaling = 1 + max(0, (sh - 20) / 100) × 0.5
-// roundMultiplier = {safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5}
+// 
+// Where:
+//   cap_table_base_hours = (3 + max(0,(sh-20)/50)×2) × 12
+//   shareholder_scaling = 1 + max(0, (sh - 20) / 100) × 0.5
+//   roundMultiplier = {safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5}
 ```
 
 ### 8.3 Internal Effort (Method-Adjusted)
 ```javascript
-adjusted_hours = (gr × grHr × mult) 
-  + (compliance_hours[geo_inc] × mult) 
-  + (cap_table_hours × mult) 
-  + (secretarial_hours × mult)
-  + (fundraising_capTable_hours × roundMultiplier × mult)    // if planning to fundraise
-  + (fundraising_secretarial_hours × roundMultiplier × mult)  // if planning to fundraise
+adjusted_hours = manual_hours × mult
 
-// Actual internal hours after applying method multiplier (1.0 for in-house, 0.4 for outsourced)
-// Reflects the effort retained internally after outsourcing
+// Actual internal hours after applying method multiplier
+// mult = 1.0 for in-house (100% internal effort)
+// mult = 0.4 for outsourced (40% retained for oversight, approval, coordination)
+// 
+// This reflects the effort retained internally by the company. The remainder (60% for outsourced)
+// is handled by external partners (CA/law firm) but still counts toward the company's total 
+// equity administration effort and cost.
 ```
 
 ### 8.4 Time Saved %
