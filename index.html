@@ -296,7 +296,10 @@
     function computeROI(inputs, overrides = {}) {
       const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
 
-      const stageKey = stage;
+      let stageKey = stage;
+      if (planningToFundraise && fundraiseRound !== 'safe' && fundraiseRound !== 'bridge') {
+        stageKey = fundraiseRound;
+      }
       let rate = overrides.rate;
 
       if (!rate) {
@@ -949,11 +952,10 @@
               <MonoLabel>Round type</MonoLabel>
               <div style={{ marginTop: 8 }}>
                 <ChipSelect value={round} onChange={setRound} options={[
-                  { value: 'safe', label: 'SAFE' },
+                  { value: 'preseed', label: 'Pre-seed' },
                   { value: 'seed', label: 'Seed' },
                   { value: 'seriesab', label: 'Series A/B' },
-                  { value: 'seriesbc', label: 'Series B/C' },
-                  { value: 'bridge', label: 'Bridge' }
+                  { value: 'seriesbc', label: 'Series B/C' }
                 ]} />
               </div>
             </div>
@@ -1063,12 +1065,10 @@
 
       const formatRound = (round) => {
         const roundMap = {
-          'safe': 'SAFE',
           'seed': 'SEED',
           'seriesab': 'SERIES A/B',
           'seriesbc': 'SERIES B/C',
-          'seriesc': 'SERIES C+',
-          'bridge': 'BRIDGE'
+          'seriesc': 'SERIES C+'
         };
         return roundMap[round?.toLowerCase()] || 'SEED';
       };
