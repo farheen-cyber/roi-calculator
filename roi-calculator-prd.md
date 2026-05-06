@@ -62,9 +62,9 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Country of Incorporation | `geo_inc` | India, US, Singapore, UK | India | Determines compliance requirements, valuation types, and currency display |
 | Country of Operation | `geo_op` | India, US, Singapore, UK | India | Determines hourly rates, retainer costs, and per-stakeholder EL pricing |
 | Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
-| Shareholders Count | `sh` | Positive integer: 1–10,000 | 30 | Affects cap table and secretarial scaling |
-| Option Holders Count | `oh` | Positive integer: 0–10,000 | 15 | Counted toward total stakeholders for pricing |
-| Annual Equity Grants | `gr` | Positive integer: 1–365+ | 10 | Number of grant issuance events per year |
+| Shareholders Count | `sh` | Integer: 0–100,000 | 30 | Affects cap table and secretarial scaling. Min 0 allows form entry before finalizing count. |
+| Option Holders Count | `oh` | Integer: 0–100,000 | 15 | Counted toward total stakeholders for pricing |
+| Annual Equity Grants | `gr` | Integer: 1–10,000 | 10 | Number of grant issuance events per year |
 | Administration Method | `meth` | In-house \| Outsourced | In-house | Determines cost model (blended rate vs. retainer) |
 
 ### Optional Inputs (Step 2)
