@@ -1495,12 +1495,10 @@
           if (!newShareholdersStr) newErrors.newShareholdersFromFundraise = 'Field required';
         }
 
-        // Validate valuation fields if valuation frequency is set
-        if (inputs?.valuationFrequency) {
-          if (!inputs?.valuationType) newErrors.valuationType = 'Field required';
-        }
-        if (inputs?.valuationType) {
+        // Validate valuation fields if valuation toggle is on
+        if (inputs?.valuation) {
           if (!inputs?.valuationFrequency) newErrors.valuationFrequency = 'Field required';
+          if (!inputs?.valuationType) newErrors.valuationType = 'Field required';
         }
 
         setErrors(newErrors);
