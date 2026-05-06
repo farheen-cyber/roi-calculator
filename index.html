@@ -1077,7 +1077,7 @@
       };
 
       const v = results || {};
-      const savingsPct = v.annCost > 0 ? Math.round((Math.abs(v.diff) / v.annCost) * 100) : 0;
+      const savingsPct = v.timeSavedPct || 0;
 
       useEffect(() => {
         if (leavingStale && mode !== 'stale') {
@@ -1391,7 +1391,7 @@
       const v = results || {};
       const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
       const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
-      const savingsPct = v.annCost > 0 ? Math.round((Math.abs(v.diff) / v.annCost) * 100) : 0;
+      const savingsPct = v.timeSavedPct || 0;
 
       return (
         <div style={{
