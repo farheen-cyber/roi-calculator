@@ -368,9 +368,9 @@ Valuation cost is added to the total annual operational cost (`annCost`), direct
 
 ---
 
-## 6. Blended Hourly Rate Calculation
+## 5. Blended Hourly Rate Calculation
 
-### 6.1 In-House Method
+### 5.1 In-House Method
 The blended hourly rate is calculated as the sum of FTE-weighted hourly rates for the stage:
 
 ```javascript
@@ -390,14 +390,14 @@ blended_rate = (0.8 × $288) + (1.0 × $156) + (1.0 × $131) + (0.5 × $119)
 
 This represents the effective hourly cost for equity administration across the full team.
 
-### 6.2 Outsourced Method
+### 5.2 Outsourced Method
 No blended rate calculation. Use stage-based retainer directly (see §4.5).
 
 ---
 
-## 7. Summary Formulas
+## 6. Summary Formulas
 
-### 7.1 Total Annual Ops Cost (Manual)
+### 6.1 Total Annual Ops Cost (Manual)
 ```javascript
 ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_cost + external_cost + valuation_cost
 ```
@@ -410,7 +410,7 @@ ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_co
 - `external_cost`: CA/Legal retainer (if outsourced) or tool cost
 - `valuation_cost`: Third-party valuation reports (if enabled, 0 otherwise)
 
-### 7.2 EquityList Annual Cost
+### 6.2 EquityList Annual Cost
 ```javascript
 el_platform = stakeholders × PRICING[geo_op]
 // PRICING is per-stakeholder per year, already in local currency:
@@ -479,20 +479,21 @@ time_saved_pct = round((manual_hours - adjusted_hours) / manual_hours × 100)
 // Represents the % of total equity ops effort that the current method eliminates vs. pure in-house
 ```
 
-### 7.5 Direct ROI Multiple
+### 8.5 Direct ROI Multiple
 ```javascript
 roi = round(abs(savings) / el_cost, 1)
 // How many times the savings exceeds EquityList's cost; shown as "Xx"
 ```
 
-### 7.6 Your Annual Spend
+### 8.6 Your Annual Spend
 ```javascript
-annual_spend = grant_admin_cost + compliance_cost + cap_table_cost + external_cost
+annual_spend = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_cost + external_cost + valuation_cost
 // Total annual operational cost for current method (in-house or outsourced)
 // Also called ops_total; primary comparison point against EquityList
+// Includes all six cost components: grants, compliance, cap table, secretarial, external services, and valuations
 ```
 
-### 7.7 Hours Saved Annually (with EquityList)
+### 8.7 Hours Saved Annually (with EquityList)
 ```javascript
 hours_saved = adjusted_hours - (manual_hours × 0.1)
 // Actual hours eliminated by switching to EquityList from current method
@@ -502,7 +503,7 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 
 ---
 
-## 8. Data Sources & References
+## 9. Data Sources & References
 
 **Hourly Rate Tables**: See §3 (Hourly Rate Assumptions) for complete industry-standard rates by stage, geography, and role. Rates reflect market compensation for equity administration professionals at each funding stage, calculated as: Annual Salary ÷ 2,080 working hours.
 
@@ -514,7 +515,7 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 
 ---
 
-## 9. Key Changes from Previous Versions
+## 10. Key Changes from Previous Versions
 
 ### Version 3.3 (Current)
 - **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
@@ -549,12 +550,11 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 - **Added**: Valuation Reports subsection in Step 2 (Equity Structure)
 - **Added**: Toggle to enable/disable third-party valuation services
 - **Added**: Frequency selector (Annually vs. Quarterly)
-- **Added**: Country-gated valuation type dropdown (US, India, UK, Singapore)
+- **Added**: Global valuation type dropdown (all 5 types visible to all companies, priced in geo_op currency)
 - **Added**: Impact preview showing number of annual valuation events
 - **Added**: Valuation cost calculation with frequency multiplier (1× or 4×)
 - **Added**: Validation requiring both frequency and type if valuation is enabled
 - **Improved**: Cost breakdown now includes valuation services line item
-- **Fixed**: Dropdown properly rebuilds and syncs SelectField instances when geography changes
 
 ### Version 3.0
 - **Removed**: Persona-based approach ("Managed By" field)
@@ -671,26 +671,15 @@ The calculator uses a single entry method: manual data entry via an interactive 
    - Add fundraising workflows to cap table and secretarial workloads
    - Scale shareholder count by new shareholders from fundraise
 6. If valuation enabled:
-   - Look up VALUATION_TYPES_BY_GEO[geo_inc]
-   - Find selected valuation type and get market cost
+   - Look up valuation type cost from VALUATION_PRICING[valuationType][stage][geoOp_currency]
    - Multiply by frequency (1 for annual, 4 for quarterly)
-   - Add to total annual cost
+   - Add valuation_cost to total annual ops cost
 7. Compare to EquityList cost and show ROI
 
 ### Valuation Feature Implementation Details
 
-**SelectField Component Synchronization:**
-The calculator uses a custom SelectField component for accessible dropdown UI. When user changes geography (geo_inc), the valuation report type options must rebuild:
-
-1. **Trigger**: `handleGeoIncChange()` calls `rebuildValuationTypeOptions()`
-2. **Process**:
-   - Clear native `<select>` HTML and custom dropdown list
-   - Rebuild both from VALUATION_TYPES_BY_GEO[geo_inc]
-   - Store SelectField instance reference: `selectElement._selectField = instance`
-   - Update SelectField's cached options: `selectElement._selectField.options = wrapper.querySelectorAll('[role="option"]')`
-   - Re-attach event listeners to new option elements
-   - Call `updateDisplay()` to refresh UI
-3. **Result**: Dropdown correctly shows country-specific valuation types
+**Valuation Type Selection:**
+All 5 valuation types (409A, Black Scholes, Registered Valuer, Merchant Banker, HMRC) are globally visible to all companies regardless of incorporation country (geo_inc) or operation country (geo_op). Prices are always displayed in the operation country (geo_op) currency.
 
 **Validation Flow:**
 - `validateInputs()` checks if valuation checkbox is enabled
@@ -699,7 +688,8 @@ The calculator uses a custom SelectField component for accessible dropdown UI. W
 - Calculate button is disabled until validation passes
 
 **Data Synchronization:**
-- When frequency or type changes: `updateValuationNote()` updates impact preview
+- When frequency or type changes: impact preview updates to show annual event count
+- Valuation cost is recalculated on each change
 - When valuation is toggled off: All fields reset to empty, impact preview hides
 - When geography changes: Type dropdown rebuilds with new options
 
