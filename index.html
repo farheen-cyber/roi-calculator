@@ -1205,7 +1205,7 @@
               <div style={{
                 fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
                 color: v.diff < 0 ? A.red : A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
-              }}>{opCurrencySymbol}{(v.diff || 0).toLocaleString(opLocale)}</div>
+              }}>{opCurrencySymbol}{(v.diff < 0 ? Math.abs(v.diff) : v.diff || 0).toLocaleString(opLocale)}</div>
               <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
 
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
