@@ -259,14 +259,12 @@ Where:
 - **USA**: No legal minimum for private companies; investor-driven (typically quarterly boards)
 - **UK & Singapore**: Annual AGM required; quarterly boards expected for investor companies
 
-**Example Calculation** (Series A/B, India, 100 shareholders, in-house, not planning to fundraise):
-- Base workflows: 12/year (no fundraising workflows added)
+**Example Calculation** (Series A/B, India, 100 shareholders, in-house):
+- Base workflows: 12/year
 - Shareholder scaling: 1 + (100 - 20) / 100 × 0.5 = 1.4x
 - Hours: 12 × 2.5 × 1.4 = 42 hours/year
 - Legal/Secretarial rate (India, Series A/B): ₹875/hr
 - Cost: 42 × 1.0 × ₹875 = ₹36,750/year
-
-**If planning to fundraise** (e.g., Series A round), add 3 workflows: 15 × 2.5 × 1.4 = 52.5 hours/year, cost ₹45,938/year
 
 ### 4.5 External Service Cost (Outsourced Only)
 **Formula**: `STAGE_RETAINER[geo_op][stage]` (Only if Method = Outsourced)
