@@ -795,7 +795,7 @@
       );
     }
 
-    function AForm({ width, onCalculate, onInputChange, showErrors = false, errors, mode }) {
+    function AForm({ width, onCalculate, onInputChange, showErrors = false, errors, mode, editedRate, editedHours }) {
       const [stage, setStage] = useState('seriesab');
       const [shareholders, setShareholders] = useState('30');
       const [optionHolders, setOptionHolders] = useState('15');
@@ -872,7 +872,16 @@
             <Dropdown label="Administrative Method" value={adminMethod} required error={errors?.meth} options={[{ value: 'in-house', label: 'In-house (Spreadsheets)' }, { value: 'outsourced', label: 'Outsourced (CA/Law Firm)' }]} onChange={(v) => { setAdminMethod(v); onInputChange && onInputChange(); }} />
           </FormSection>
 
-          <PrimaryBtn fullWidth size="lg" onClick={() => onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, legalEntityName: legalEntity, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null })}>
+          <PrimaryBtn fullWidth size="lg" onClick={() => {
+            const overrides = {};
+            if (editedRate !== null && editedRate !== '') {
+              overrides.rate = parseInt(editedRate, 10);
+            }
+            if (editedHours !== null && editedHours !== '') {
+              overrides.manualHTotal = parseInt(editedHours, 10);
+            }
+            onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, legalEntityName: legalEntity, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null }, overrides);
+          }}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
           </PrimaryBtn>
@@ -1035,12 +1044,10 @@
       );
     }
 
-    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, sticky = true }) {
+    function ALiveEstimate({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, sticky = true, editedRate, setEditedRate, editedHours, setEditedHours }) {
       const compact = width < 460;
       const [breakdownOpen, setBreakdownOpen] = useState(false);
       const [leavingStale, setLeavingStale] = useState(false);
-      const [editedRate, setEditedRate] = useState(null);
-      const [editedHours, setEditedHours] = useState(null);
       const recalcFormValues = currentFormValues || formData;
 
       const formatStage = (stage) => {
@@ -1417,7 +1424,7 @@
           {expanded && (
             <div style={{ padding: '0 20px 20px', borderTop: `1px solid ${A.lineSoft}` }}>
               <div style={{ paddingTop: 16 }}>
-                <ALiveEstimate width={width - 40} mode={mode} results={results} onRecalculate={onRecalculate} dirtyCount={dirtyCount} formData={formData} currentFormValues={currentFormValues} sticky={false} />
+                <ALiveEstimate width={width - 40} mode={mode} results={results} onRecalculate={onRecalculate} dirtyCount={dirtyCount} formData={formData} currentFormValues={currentFormValues} sticky={false} editedRate={editedRate} setEditedRate={setEditedRate} editedHours={editedHours} setEditedHours={setEditedHours} />
               </div>
             </div>
           )}
@@ -1444,6 +1451,8 @@
       const [errors, setErrors] = useState({});
       const [dirtyInputs, setDirtyInputs] = useState({});
       const [currentFormValues, setCurrentFormValues] = useState({});
+      const [editedRate, setEditedRate] = useState(null);
+      const [editedHours, setEditedHours] = useState(null);
 
       const isMobile = width < 720;
       const isTablet = width >= 720 && width < 1100;
@@ -1584,9 +1593,9 @@
             gap: isDesktop ? 56 : 32,
             alignItems: 'flex-start',
           }}>
-            <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} />
-            {isDesktop && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={true} />}
-            {isTablet && <ALiveEstimate width={width - 80} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={false} />}
+            <AForm width={width} onCalculate={handleCalculate} onInputChange={handleInputChange} errors={errors} mode={mode} editedRate={editedRate} editedHours={editedHours} />
+            {isDesktop && <ALiveEstimate width={Math.min(380, width - 80)} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={true} editedRate={editedRate} setEditedRate={setEditedRate} editedHours={editedHours} setEditedHours={setEditedHours} />}
+            {isTablet && <ALiveEstimate width={width - 80} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={false} editedRate={editedRate} setEditedRate={setEditedRate} editedHours={editedHours} setEditedHours={setEditedHours} />}
           </div>
 
           {isMobile && <ABottomDrawer width={width} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} />}
