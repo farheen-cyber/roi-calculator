@@ -1365,7 +1365,13 @@
           }}>
             <MonoLabel size={9.5} color={A.purple2} style={{ marginBottom: 8 }}>The takeaway</MonoLabel>
             <p style={{ fontSize: 13, color: A.inkSoft, lineHeight: 1.55, margin: 0, marginBottom: 14 }}>
-              You're currently overspending on equity operations. You could save <strong style={{ color: A.ink, fontWeight: 700 }}>{opCurrencySymbol}{(v.diff || 0).toLocaleString(opLocale)}/year</strong> while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.
+              {v.diff > 100 ? (
+                <>You're currently overspending on equity operations. You could save <strong style={{ color: A.ink, fontWeight: 700 }}>{opCurrencySymbol}{Math.abs(v.diff || 0).toLocaleString(opLocale)}/year</strong> while eliminating most manual work. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.</>
+              ) : v.diff < -100 ? (
+                <>Your current setup is cost-efficient — for now. As you scale, risks increase. EquityList removes manual work, mitigates compliance gaps, and prevents costly errors that grow with complexity.</>
+              ) : (
+                <>Cost isn't the deciding factor. The real difference is reliability as complexity increases. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.</>
+              )}
             </p>
             <PrimaryBtn fullWidth size="md">
               Book a demo
