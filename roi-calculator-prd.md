@@ -475,8 +475,10 @@ adjusted_hours = manual_hours × mult
 
 ### 8.4 Time Saved %
 ```javascript
-time_saved_pct = round((manual_hours - adjusted_hours) / manual_hours × 100)
-// Represents the % of total equity ops effort that the current method eliminates vs. pure in-house
+time_saved_pct = round((hours_saved / hours_today) × 100)
+// Where: hours_today = adjusted hours with current method
+//        hours_saved = hours_today - el_oversight_hours
+// Represents the % of equity ops effort that EquityList eliminates vs. your current method
 ```
 
 ### 8.5 Direct ROI Multiple
