@@ -1153,7 +1153,7 @@
           label: 'Valuation Reports',
           formula: (() => {
             const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
-            const stagePricing = EL_VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
+            const stagePricing = VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
             const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
             const costPerEvent = stagePricing ? stagePricing[opCurrency] : 0;
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
@@ -1164,8 +1164,8 @@
             const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
             const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
-            const elCost = v.elValuationCost || 0;
-            return `${currencySymbol}${elCost.toLocaleString(locale)}`;
+            const cost = v.valuationCost || 0;
+            return `${currencySymbol}${cost.toLocaleString(locale)}`;
           })(),
           pct: `${valuationPct}%`,
           tip: null
@@ -1377,7 +1377,7 @@
       );
     }
 
-    function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues }) {
+    function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, editedRate, setEditedRate, editedHours, setEditedHours }) {
       const [expanded, setExpanded] = useState(false);
       const v = results || {};
       const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
@@ -1576,7 +1576,7 @@
             {isTablet && <ALiveEstimate width={width - 80} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} sticky={false} editedRate={editedRate} setEditedRate={setEditedRate} editedHours={editedHours} setEditedHours={setEditedHours} />}
           </div>
 
-          {isMobile && <ABottomDrawer width={width} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} />}
+          {isMobile && <ABottomDrawer width={width} mode={mode} results={results} onRecalculate={handleCalculate} dirtyCount={Object.keys(dirtyInputs).length} formData={formData} currentFormValues={currentFormValues} editedRate={editedRate} setEditedRate={setEditedRate} editedHours={editedHours} setEditedHours={setEditedHours} />}
 
           <footer style={{
             borderTop: `1px solid ${A.line}`, padding: isMobile ? '20px' : '28px 40px',
