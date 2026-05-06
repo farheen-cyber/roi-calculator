@@ -259,12 +259,14 @@ Where:
 - **USA**: No legal minimum for private companies; investor-driven (typically quarterly boards)
 - **UK & Singapore**: Annual AGM required; quarterly boards expected for investor companies
 
-**Example Calculation** (Series A/B, India, 100 shareholders, in-house):
-- Base workflows: 12/year
+**Example Calculation** (Series A/B, India, 100 shareholders, in-house, not planning to fundraise):
+- Base workflows: 12/year (no fundraising workflows added)
 - Shareholder scaling: 1 + (100 - 20) / 100 × 0.5 = 1.4x
 - Hours: 12 × 2.5 × 1.4 = 42 hours/year
 - Legal/Secretarial rate (India, Series A/B): ₹875/hr
 - Cost: 42 × 1.0 × ₹875 = ₹36,750/year
+
+**If planning to fundraise** (e.g., Series A round), add 3 workflows: 15 × 2.5 × 1.4 = 52.5 hours/year, cost ₹45,938/year
 
 ### 4.5 External Service Cost (Outsourced Only)
 **Formula**: `STAGE_RETAINER[geo_op][stage]` (Only if Method = Outsourced)
@@ -530,8 +532,7 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 - **Updated**: EquityList discount applies uniformly (20%) across all valuation types, stages, and currencies
 - **Fixed**: Outsourced method now correctly includes 40% internal effort cost (review, approvals, coordination) + external retainer (was only charging retainer)
 - **Fixed**: `computeROI()` now calculates blended rate for BOTH in-house and outsourced methods (previously set rate=0 for outsourced, making 0.4 multiplier meaningless)
-- **Added**: Comprehensive automated test suite (`test-calculator.js`) covering 483,840 input combinations (increase from 421,120 due to all valuation types now available)
-- **Added**: Failure-path test suite (`test-failures.js`) — 36 negative-path assertions
+- **Refactored**: Calculator consolidated into single-file HTML build (index.html) for simpler deployment
 - **Added**: Input validation in `computeROI()` — throws explicit errors on missing geography/stage tables
 - **Added**: Round-complexity multiplier for fundraising costs (SAFE 0.5×, Bridge 0.75×, Seed 1.0×, Series A/B 1.5×, Series B/C 2.0×, Series C+ 2.5×)
 - **Added**: Workflow definitions explaining what counts as one "governance workflow" (board meetings, shareholder approvals, statutory filings, equity amendments, compliance reports)
