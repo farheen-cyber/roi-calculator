@@ -224,7 +224,7 @@ Where `monthly_hours = 3 + max(0, (sh - 20) / 50) × 2`
 
 Where:
 - `base_workflows` = governance workflows required by law in that country
-- `fundraising_workflows` = 3 additional workflows if planning to fundraise (cap table + secretarial prep); 0 otherwise
+- `fundraising_workflows` = 7 additional workflows if planning to fundraise: 3 for cap table + 4 for secretarial prep; 0 otherwise
 - `cs_rate` = Company Secretary/Legal role hourly rate for geo_op and stage
 
 **Base Governance Workflows by Geography and Stage** (required by law):
