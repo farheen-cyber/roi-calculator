@@ -283,8 +283,16 @@
       }
     };
 
-    const CURRENCY_SYMBOLS = { USD: '$', INR: '₹', GBP: '£', SGD: 'S$' };
-    const GEO_TO_CURRENCY = { us: 'USD', india: 'INR', uk: 'GBP', singapore: 'SGD' };
+    const GEO_CURRENCY_MAP = {
+      us: { code: 'USD', symbol: '$', locale: 'en-US' },
+      india: { code: 'INR', symbol: '₹', locale: 'en-IN' },
+      uk: { code: 'GBP', symbol: '£', locale: 'en-GB' },
+      singapore: { code: 'SGD', symbol: 'S$', locale: 'en-SG' }
+    };
+
+    // Legacy compatibility
+    const CURRENCY_SYMBOLS = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [v.code, v.symbol]));
+    const GEO_TO_CURRENCY = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [k, v.code]));
 
     function computeROI(inputs, overrides = {}) {
       const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
@@ -320,7 +328,7 @@
       const ctHrs = ctRaw * mult;
       const ctCost = ctHrs * rate;
 
-      const ROUND_COMPLEXITY = { safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
+      const ROUND_COMPLEXITY = { preseed: 0.5, safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
       const roundMultiplier = planningToFundraise ? (ROUND_COMPLEXITY[fundraiseRound] || 1.0) : 0;
       const ctFundraisingHours = planningToFundraise ? (FUNDRAISING_WORKFLOWS.capTable * 2.5 * roundMultiplier) : 0;
       const ctFundraisingHrs = ctFundraisingHours * mult;
@@ -696,12 +704,25 @@
 
     function InfoTip({ text, color }) {
       const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const handleDocumentClick = (e) => {
+          if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        if (open) document.addEventListener('click', handleDocumentClick);
+        return () => document.removeEventListener('click', handleDocumentClick);
+      }, [open]);
       return (
-        <span style={{ position: 'relative', display: 'inline-flex', verticalAlign: 'middle', marginLeft: 4 }}>
+        <span ref={ref} style={{ position: 'relative', display: 'inline-flex', verticalAlign: 'middle', marginLeft: 4 }}>
           <span
             tabIndex={0}
-            onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
-            onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
+            role="button"
+            aria-label={`Information: ${text}`}
+            aria-expanded={open}
             style={{
               width: 13, height: 13, borderRadius: '50%',
               border: `1px solid ${color || A.muteSoft}`, color: color || A.mute,
@@ -963,7 +984,7 @@
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '180px 1fr', gap: 16, alignItems: 'flex-end' }}>
-            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" required error={shareholders && /[^\d]/.test(shareholders) ? 'Only numbers allowed' : errors?.newShareholdersFromFundraise} onNumericError={() => {}} />
+            <FormField label="New shareholders" placeholder="e.g. 8" value={shareholders} onChange={setShareholders} type="number" required error={errors?.newShareholdersFromFundraise} onNumericError={() => {}} />
             <div style={{ fontSize: 12, color: A.mute, lineHeight: 1.5 }}>
               Investors, SAFE conversions, and new ESOP grants all count toward stakeholder load.
             </div>
@@ -1084,8 +1105,9 @@
       const secretarialPct = v.annCost > 0 ? Math.round((v.secCost / v.annCost) * 100) : 0;
       const valuationPct = v.annCost > 0 ? Math.round((v.valuationCost / v.annCost) * 100) : 0;
 
-      const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
-      const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
+      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoOp] || GEO_CURRENCY_MAP.india;
+      const opCurrencySymbol = opCurrencyInfo.symbol;
+      const opLocale = opCurrencyInfo.locale;
 
       const items = [
         {
@@ -1262,7 +1284,7 @@
                       <input
                         type="text"
                         inputMode="numeric"
-                        value={editedRate !== null ? editedRate : Math.round(v.rate)}
+                        value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.rate)}
                         onChange={(e) => {
                           if (e.target.value && /[^\d]/.test(e.target.value)) {
                             setEditedRate(e.target.value);
@@ -1293,7 +1315,7 @@
                       <input
                         type="text"
                         inputMode="numeric"
-                        value={editedHours !== null ? editedHours : Math.round(v.manualHTotal)}
+                        value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
                         onChange={(e) => {
                           const val = e.target.value.replace(/[^\d]/g, '');
                           setEditedHours(val);
@@ -1311,27 +1333,44 @@
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    const overrides = {};
-                    let hasChanges = false;
-                    if (editedRate !== null && editedRate !== '' && editedRate !== String(Math.round(v.rate))) {
-                      overrides.rate = parseInt(editedRate, 10);
-                      hasChanges = true;
-                    }
-                    if (editedHours !== null && editedHours !== '' && editedHours !== String(Math.round(v.manualHTotal))) {
-                      overrides.manualHTotal = parseInt(editedHours, 10);
-                      hasChanges = true;
-                    }
-                    if (hasChanges) {
+                <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                  <button
+                    onClick={() => {
+                      setEditedRate('');
+                      setEditedHours('');
                       setLeavingStale(true);
-                      onRecalculate && onRecalculate(recalcFormValues, overrides);
-                    }
-                  }}
-                  style={{ width: '100%', padding: '10px 16px', background: A.purple, color: '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Apply
-                </button>
+                      onRecalculate && onRecalculate(recalcFormValues, {});
+                    }}
+                    style={{ flex: 1, padding: '10px 16px', background: A.lineSoft, color: A.ink, border: `1px solid ${A.line}`, borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = A.line; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = A.lineSoft; }}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    onClick={() => {
+                      const overrides = {};
+                      let hasChanges = false;
+                      if (editedRate !== null && editedRate !== '' && editedRate !== String(Math.round(v.rate))) {
+                        overrides.rate = parseInt(editedRate, 10);
+                        hasChanges = true;
+                      }
+                      if (editedHours !== null && editedHours !== '' && editedHours !== String(Math.round(v.manualHTotal))) {
+                        overrides.manualHTotal = parseInt(editedHours, 10);
+                        hasChanges = true;
+                      }
+                      if (hasChanges) {
+                        setLeavingStale(true);
+                        onRecalculate && onRecalculate(recalcFormValues, overrides);
+                      }
+                    }}
+                    style={{ flex: 1, padding: '10px 16px', background: A.purple, color: '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'background .15s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = A.purple2; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = A.purple; }}
+                  >
+                    Apply
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1366,7 +1405,7 @@
                 <>Cost isn't the deciding factor. The real difference is reliability as complexity increases. EquityList ensures your cap table stays accurate, audit-ready, and compliant as you scale.</>
               )}
             </p>
-            <PrimaryBtn fullWidth size="md">
+            <PrimaryBtn fullWidth size="md" onClick={() => window.location.href = 'https://www.equitylist.co/contact'}>
               Book a demo
               <span style={{ opacity: 0.7 }}>→</span>
             </PrimaryBtn>
@@ -1382,8 +1421,9 @@
     function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, editedRate, setEditedRate, editedHours, setEditedHours }) {
       const [expanded, setExpanded] = useState(false);
       const v = results || {};
-      const opCurrencySymbol = { india: '₹', us: '$', singapore: 'S$', uk: '£' }[formData?.geoOp] || '₹';
-      const opLocale = { india: 'en-IN', us: 'en-US', singapore: 'en-SG', uk: 'en-GB' }[formData?.geoOp] || 'en-IN';
+      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoOp] || GEO_CURRENCY_MAP.india;
+      const opCurrencySymbol = opCurrencyInfo.symbol;
+      const opLocale = opCurrencyInfo.locale;
       const savingsPct = v.timeSavedPct || 0;
 
       return (
@@ -1466,7 +1506,7 @@
         if (isNaN(num)) return 'Must be a number';
         if (field === 'shareholders' && (num < 0 || num > 100000)) return 'Must be 0–100,000';
         if (field === 'optionHolders' && (num < 0 || num > 100000)) return 'Must be 0–100,000';
-        if (field === 'grants' && (num < 1 || num > 10000)) return 'Must be 1–10,000';
+        if (field === 'grants' && (num < 0 || num > 10000)) return 'Must be 0–10,000';
         return null;
       };
 
