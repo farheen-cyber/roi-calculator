@@ -1,7 +1,7 @@
 # EquityList ROI Calculator — Complete Specification
 
-**Version**: 3.3  
-**Last Updated**: May 5, 2026  
+**Version**: 3.4  
+**Last Updated**: May 20, 2026  
 **Purpose**: Complete technical and functional documentation of the EquityList ROI Calculator, including all features, formulas, assumptions, data sources, and test scenarios.
 
 ## What This Calculator Does
@@ -64,7 +64,7 @@ Display a clear ROI case: how much a company spends annually managing equity, ca
 | Current Funding Stage | `stage` | Preseed, Seed, Series A/B, Series B/C, Series C+ | Series A/B | Determines staffing matrix and hourly rates |
 | Shareholders Count | `sh` | Integer: 0–100,000 | 30 | Affects cap table and secretarial scaling. Min 0 allows form entry before finalizing count. |
 | Option Holders Count | `oh` | Integer: 0–100,000 | 15 | Counted toward total stakeholders for pricing |
-| Annual Equity Grants | `gr` | Integer: 1–10,000 | 10 | Number of grant issuance events per year |
+| Annual Equity Grants | `gr` | Integer: 0–10,000 | 10 | Number of grant issuance events per year |
 | Administration Method | `meth` | In-house \| Outsourced | In-house | Determines cost model (blended rate vs. retainer) |
 
 ### Optional Inputs (Step 2)
@@ -128,14 +128,14 @@ const STAFFING_MATRIX = {
 
 ### 2.4 Geographic Model
 The calculator accepts two geography inputs:
-- **`geo_inc`** (Country of Incorporation): Used for compliance requirements
+- **`geo_inc`** (Country of Incorporation): Used for compliance requirements AND rate calculations
   - Determines statutory register requirements (India SH-6, US Rule 701, etc.)
   - Determines baseline compliance hours (COMPLIANCE[geo_inc])
+  - **Now used for all rate lookups** (labor costs, retainer costs, EquityList pricing)
   
-- **`geo_op`** (Country of Operation): Used for hourly rates, external retainer costs, and EL pricing
-  - Selects industry-standard hourly rates per role and stage (STAGE_HOURLY_RATES[geo_op])
-  - Determines stage-based external retainer cost (if method = Outsourced): STAGE_RETAINER[geo_op][stage]
-  - Determines per-stakeholder EquityList pricing (PRICING[geo_op]) — already in local currency
+- **`geo_op`** (Country of Operation): Used for currency display and reference
+  - Determines which currency to display in the UI (for backward compatibility and user clarity)
+  - All costs are calculated using `geo_inc` rates
   - All cost outputs are denominated in `geo_op`'s local currency; no FX conversion is performed
 
 ---
@@ -194,7 +194,7 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
     - Error checking: 10m
 
 ### 4.2 Compliance & Reporting Cost
-**Formula**: `base_comp_hours[geo_inc] × mult × blended_rate`
+**Formula**: `base_comp_hours[geo_inc] × mult × blended_rate[geo_inc]`
 - **Baseline Hours (Manual)** — varies by country of incorporation:
     - **India**: 72 hrs/yr
     - **US**: 68 hrs/yr
@@ -205,7 +205,7 @@ Stage-based hourly rates by role and geography. Rates reflect market-standard co
     - **Europe/Asia**: IFRS 2 Share-based Payment.
 
 ### 4.3 Cap Table Maintenance Cost
-**Formula**: `monthly_hours × 12 months × mult × blended_rate`
+**Formula**: `monthly_hours × 12 months × mult × blended_rate[geo_inc]`
 
 Where `monthly_hours = 3 + max(0, (sh - 20) / 50) × 2`
 
@@ -220,7 +220,7 @@ Where `monthly_hours = 3 + max(0, (sh - 20) / 50) × 2`
 **Rationale**: Cap table complexity grows with stakeholder count. Beyond 20 shareholders, coordination overhead increases non-linearly due to shareholder notifications, approval tracking, and amendment management.
 
 ### 4.4 Secretarial & Board Operations Cost
-**Formula**: `(base_workflows + fundraising_workflows) × 2.5 × (1 + max(0, (sh - 20) / 100) × 0.5) × mult × cs_rate[geo_op][stage]`
+**Formula**: `(base_workflows + fundraising_workflows) × 2.5 × (1 + max(0, (sh - 20) / 100) × 0.5) × mult × cs_rate[geo_inc][stage]`
 
 Where:
 - `base_workflows` = governance workflows required by law in that country
@@ -267,7 +267,7 @@ Where:
 - Cost: 42 × 1.0 × ₹875 = ₹36,750/year
 
 ### 4.5 External Service Cost (Outsourced Only)
-**Formula**: `STAGE_RETAINER[geo_op][stage]` (Only if Method = Outsourced)
+**Formula**: `STAGE_RETAINER[geo_inc][stage]` (Only if Method = Outsourced)
 
 **Stage-Based Retainer by Geography**:
 - **India**: 
@@ -312,8 +312,8 @@ Where:
 2. If enabled, user selects:
    - **Frequency**: Annually (1×/yr) or Quarterly (4×/yr)
    - **Report Type**: All 5 valuation types visible regardless of company stage or incorporation country
-3. System looks up cost based on `[valuationType][stage][geoOp_currency]`
-4. All costs are displayed in company's **country-of-operation currency** (`geo_op`), not incorporation country
+3. System looks up cost based on `[valuationType][stage][geoInc_currency]` (now uses incorporation country)
+4. All costs are displayed in company's **country-of-incorporation currency** (`geo_inc`), which determines rate calculations
 
 **Stage-Based Pricing (1.0x - 2.0x complexity multiplier):**
 Valuation complexity increases with company maturity due to multiple instruments, rounds, and regulatory requirements. Costs scale from Preseed (baseline) to Series C+ (2.0x).
@@ -371,13 +371,13 @@ Valuation cost is added to the total annual operational cost (`annCost`), direct
 ## 5. Blended Hourly Rate Calculation
 
 ### 5.1 In-House Method
-The blended hourly rate is calculated as the sum of FTE-weighted hourly rates for the stage:
+The blended hourly rate is calculated as the sum of FTE-weighted hourly rates for the stage, using country of incorporation rates:
 
 ```javascript
 blended_rate = 0
 for each role in ['founder', 'hr', 'finance', 'cs']:
   fte = STAFFING_MATRIX[stage][role]
-  rate = STAGE_HOURLY_RATES[geo_op][stage][role]
+  rate = STAGE_HOURLY_RATES[geo_inc][stage][role]  // Now uses geo_inc, not geo_op
   blended_rate += (fte × rate)
 ```
 
@@ -412,14 +412,15 @@ ops_total = grant_admin_cost + compliance_cost + cap_table_cost + secretarial_co
 
 ### 6.2 EquityList Annual Cost
 ```javascript
-el_platform = stakeholders × PRICING[geo_op]
+el_platform = stakeholders × PRICING[geo_inc]
 // PRICING is per-stakeholder per year, already in local currency:
 //   india: ₹1,200  |  us: $40  |  uk: £30  |  singapore: S$25
 // No FX conversion — every table is denominated in its geography's local currency.
+// Now uses country of incorporation for consistency with rate calculations.
 
-el_overhead = manual_hours × 0.1 × blended_rate[geo_op][stage]
+el_overhead = manual_hours × 0.1 × blended_rate[geo_inc][stage]
 // Internal oversight still required even with EquityList (10% of full manual baseline)
-// Blended rate determined by stage and country of operation
+// Blended rate determined by stage and country of incorporation
 
 el_valuation_cost = el_cost_per_event × frequency_multiplier (if valuations enabled, else 0)
 // Discounted valuation cost through EquityList platform
@@ -428,7 +429,7 @@ el_valuation_cost = el_cost_per_event × frequency_multiplier (if valuations ena
 el_annual = el_platform + el_overhead + el_valuation_cost
 ```
 
-> *Pricing calculated using country of operation. Applies blended hourly rates from geo_op for internal oversight cost.*
+> *Pricing calculated using country of incorporation. Applies blended hourly rates from geo_inc for internal oversight cost.*
 > *Valuation costs reflect EquityList's discounted rates for bundled services.*
 > *\* Pricing may vary based on reporting complexity and requirements.*
 
@@ -519,7 +520,20 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 
 ## 10. Key Changes from Previous Versions
 
-### Version 3.3 (Current)
+### Version 3.4 (Current)
+- **Refactored**: All rate calculations (blended hourly rate, retainer costs, EquityList pricing, valuation costs) now use `geo_inc` (country of incorporation) instead of `geo_op` (country of operation)
+  - **Rationale**: Rates should be based on where the company is legally incorporated, not where it operates. Incorporation country determines tax jurisdiction and compliance requirements.
+  - **Impact**: All cost calculations now consistently reference the incorporation country for labor rates, external services, and platform pricing
+- **Added**: Preseed to ROUND_COMPLEXITY map with 0.5× multiplier
+  - **Previously**: Preseed appeared in fundraise dropdown but defaulted to 1.0× multiplier when selected
+  - **Now**: Preseed correctly uses 0.5× multiplier for fundraising workflows
+- **Updated**: Grants field validation to allow 0 annual grants (was previously requiring minimum of 1)
+  - **Rationale**: Mature companies with no annual equity grants are a valid use case
+  - **New range**: 0–10,000 grants per year
+- **Fixed**: All currency displays and cost outputs now consistently use incorporation country currency (geo_inc)
+- **All 80+ tests passing** after refactoring
+
+### Version 3.3
 - **Removed**: CSV upload feature and "Enter Manually vs Upload Cap Table" method selection — calculator now starts directly with manual entry form
 - **Removed**: Unused FX conversion table (PRICING and rates are already in each geography's local currency)
 - **Removed**: "Hybrid" method option from PRD (not implemented)
@@ -662,7 +676,7 @@ The calculator uses a single entry method: manual data entry via an interactive 
 1. User selects: stage, geo_inc, geo_op, shareholders, option holders, grants, method
 2. System looks up STAFFING_MATRIX[stage] for FTE allocations
 3. For **in-house** method:
-   - Calculate blended_rate = sum(FTE × STAGE_HOURLY_RATES[geo_op][stage][role])
+   - Calculate blended_rate = sum(FTE × STAGE_HOURLY_RATES[geo_inc][stage][role])
    - Calculate costs = hours × blended_rate × 1.0
 4. For **outsourced** method:
    - Use STAGE_RETAINER[geo_op][stage] directly
@@ -672,7 +686,7 @@ The calculator uses a single entry method: manual data entry via an interactive 
    - Add fundraising workflows to cap table and secretarial workloads
    - Scale shareholder count by new shareholders from fundraise
 6. If valuation enabled:
-   - Look up valuation type cost from VALUATION_PRICING[valuationType][stage][geoOp_currency]
+   - Look up valuation type cost from VALUATION_PRICING[valuationType][stage][geoInc_currency]
    - Multiply by frequency (1 for annual, 4 for quarterly)
    - Add valuation_cost to total annual ops cost
 7. Compare to EquityList cost and show ROI
