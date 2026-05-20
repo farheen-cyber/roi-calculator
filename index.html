@@ -375,15 +375,12 @@
       const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
       const manualHTotal = overrides.manualHTotal || (grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw);
       const adjustedHTotal = manualHTotal * mult;
-      const elOversightHours = manualHTotal * 0.1;
       const hoursToday = adjustedHTotal;
-      const hoursSaved = Math.max(0, hoursToday - elOversightHours);
-      const internalHTotal = elOversightHours;
+      const hoursSaved = hoursToday;
       const timeSavedPct = hoursToday > 0 ? Math.round((hoursSaved / hoursToday) * 100) : 0;
 
-      const elOverhead = manualHTotal * 0.1 * rate;
       const stakeholders = Math.min(sh + oh, 10000);
-      const elAnn = stakeholders * PRICING[geoInc] + elOverhead + elValuationCost;
+      const elAnn = stakeholders * PRICING[geoInc] + elValuationCost;
 
       const diff = annCost - elAnn;
       const isSpend = diff >= 0;
@@ -400,7 +397,6 @@
         rate,
         secRate,
         manualHTotal: Math.round(manualHTotal * 10) / 10,
-        internalHTotal: Math.round(internalHTotal * 10) / 10,
         hoursSaved: Math.round(hoursSaved),
         timeSavedPct,
         grCost: Math.round(grCost),

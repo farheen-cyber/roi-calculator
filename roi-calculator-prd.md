@@ -418,18 +418,14 @@ el_platform = stakeholders × PRICING[geo_inc]
 // No FX conversion — every table is denominated in its geography's local currency.
 // Now uses country of incorporation for consistency with rate calculations.
 
-el_overhead = manual_hours × 0.1 × blended_rate[geo_inc][stage]
-// Internal oversight still required even with EquityList (10% of full manual baseline)
-// Blended rate determined by stage and country of incorporation
-
 el_valuation_cost = el_cost_per_event × frequency_multiplier (if valuations enabled, else 0)
 // Discounted valuation cost through EquityList platform
 // frequency_multiplier = 4 (quarterly) or 1 (annually)
 
-el_annual = el_platform + el_overhead + el_valuation_cost
+el_annual = el_platform + el_valuation_cost
 ```
 
-> *Pricing calculated using country of incorporation. Applies blended hourly rates from geo_inc for internal oversight cost.*
+> *Pricing calculated using country of incorporation.*
 > *Valuation costs reflect EquityList's discounted rates for bundled services.*
 > *\* Pricing may vary based on reporting complexity and requirements.*
 
@@ -498,10 +494,10 @@ annual_spend = grant_admin_cost + compliance_cost + cap_table_cost + secretarial
 
 ### 8.7 Hours Saved Annually (with EquityList)
 ```javascript
-hours_saved = adjusted_hours - (manual_hours × 0.1)
+hours_saved = adjusted_hours
 // Actual hours eliminated by switching to EquityList from current method
-// Accounts for the 10% minimum oversight required even with EquityList
-// Example: With outsourced (mult=0.4), switching to EL saves (manualHTotal×0.4) - (manualHTotal×0.1) = manualHTotal×0.3 hours
+// EquityList handles all equity administration tasks, eliminating the need for internal staff time
+// Example: With in-house (mult=1.0), switching to EL saves all manual hours. With outsourced (mult=0.4), saves the 40% internal effort hours
 ```
 
 ---
@@ -524,6 +520,11 @@ hours_saved = adjusted_hours - (manual_hours × 0.1)
 - **Refactored**: All rate calculations (blended hourly rate, retainer costs, EquityList pricing, valuation costs) now use `geo_inc` (country of incorporation) instead of `geo_op` (country of operation)
   - **Rationale**: Rates should be based on where the company is legally incorporated, not where it operates. Incorporation country determines tax jurisdiction and compliance requirements.
   - **Impact**: All cost calculations now consistently reference the incorporation country for labor rates, external services, and platform pricing
+- **Removed**: 10% EquityList internal oversight cost from annual cost calculation
+  - **Previously**: `el_annual = platform_fee + (manual_hours × 0.1 × blended_rate) + valuation_cost`
+  - **Now**: `el_annual = platform_fee + valuation_cost`
+  - **Rationale**: EquityList platform fully handles equity administration; no residual internal hours required
+  - **Impact**: EquityList cost now reflects platform pricing only, improving ROI comparison clarity
 - **Added**: Preseed to ROUND_COMPLEXITY map with 0.5× multiplier
   - **Previously**: Preseed appeared in fundraise dropdown but defaulted to 1.0× multiplier when selected
   - **Now**: Preseed correctly uses 0.5× multiplier for fundraising workflows
