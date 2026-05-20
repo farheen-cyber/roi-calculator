@@ -310,7 +310,7 @@
         for (const role of roles) {
           const fte = matrix[role] || 0;
           if (fte > 0) {
-            const roleRate = STAGE_HOURLY_RATES[geoOp][stageKey][role];
+            const roleRate = STAGE_HOURLY_RATES[geoInc][stageKey][role];
             rate += fte * roleRate;
           }
         }
@@ -339,7 +339,7 @@
       const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
       const secRaw = secBaseHours * shareholderScaling;
       const secHrs = secRaw * mult;
-      const secRate = STAGE_HOURLY_RATES[geoOp][stageKey].cs;
+      const secRate = STAGE_HOURLY_RATES[geoInc][stageKey].cs;
       const secCost = secHrs * secRate;
 
       const secFundraisingWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
@@ -352,14 +352,14 @@
 
       let methodExtCost = 0;
       if (meth === 'outsourced') {
-        methodExtCost = STAGE_RETAINER[geoOp][stageKey];
+        methodExtCost = STAGE_RETAINER[geoInc][stageKey];
       }
 
       let valuationCost = 0;
       let elValuationCost = 0;
       if (valuationFrequency && valuationType) {
         const events = valuationFrequency === 'annually' ? 1 : valuationFrequency === 'quarterly' ? 4 : 0;
-        const opCurrency = GEO_TO_CURRENCY[geoOp] || 'INR';
+        const opCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
 
         const marketPricing = VALUATION_PRICING[valuationType]?.[stageKey];
         const elPricing = EL_VALUATION_PRICING[valuationType]?.[stageKey];
@@ -383,7 +383,7 @@
 
       const elOverhead = manualHTotal * 0.1 * rate;
       const stakeholders = Math.min(sh + oh, 10000);
-      const elAnn = stakeholders * PRICING[geoOp] + elOverhead + elValuationCost;
+      const elAnn = stakeholders * PRICING[geoInc] + elOverhead + elValuationCost;
 
       const diff = annCost - elAnn;
       const isSpend = diff >= 0;
@@ -882,7 +882,7 @@
                 <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} errors={errors} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
-                <ValuationExpanded oneColumn={oneColumn} stage={stage} geoOp={geoOp} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} errors={errors} />
+                <ValuationExpanded oneColumn={oneColumn} stage={stage} geoInc={geoInc} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} errors={errors} />
               </SwitchCard>
             </div>
           </FormSection>
@@ -993,8 +993,8 @@
       );
     }
 
-    function ValuationExpanded({ oneColumn, stage, geoOp, freq, setFreq, type, setType, errors }) {
-      const opCurrency = GEO_TO_CURRENCY[geoOp] || 'INR';
+    function ValuationExpanded({ oneColumn, stage, geoInc, freq, setFreq, type, setType, errors }) {
+      const opCurrency = GEO_TO_CURRENCY[geoInc] || 'INR';
       const opSymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
 
       const allValuationTypes = [
@@ -1105,7 +1105,7 @@
       const secretarialPct = v.annCost > 0 ? Math.round((v.secCost / v.annCost) * 100) : 0;
       const valuationPct = v.annCost > 0 ? Math.round((v.valuationCost / v.annCost) * 100) : 0;
 
-      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoOp] || GEO_CURRENCY_MAP.india;
+      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoInc] || GEO_CURRENCY_MAP.india;
       const opCurrencySymbol = opCurrencyInfo.symbol;
       const opLocale = opCurrencyInfo.locale;
 
@@ -1172,14 +1172,14 @@
           formula: (() => {
             const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
             const stagePricing = VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
-            const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
+            const opCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
             const costPerEvent = stagePricing ? stagePricing[opCurrency] : 0;
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
             const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
             return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString(locale)} per event`;
           })(),
           value: (() => {
-            const opCurrency = GEO_TO_CURRENCY[formData?.geoOp] || 'INR';
+            const opCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
             const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
             const cost = v.valuationCost || 0;
@@ -1421,7 +1421,7 @@
     function ABottomDrawer({ width, mode, results, onRecalculate, dirtyCount, formData, currentFormValues, editedRate, setEditedRate, editedHours, setEditedHours }) {
       const [expanded, setExpanded] = useState(false);
       const v = results || {};
-      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoOp] || GEO_CURRENCY_MAP.india;
+      const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoInc] || GEO_CURRENCY_MAP.india;
       const opCurrencySymbol = opCurrencyInfo.symbol;
       const opLocale = opCurrencyInfo.locale;
       const savingsPct = v.timeSavedPct || 0;
