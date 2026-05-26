@@ -289,93 +289,57 @@
 
     // ============ DYNAMIC COMPLIANCE HOURS (TIERED BY REPORTS) ============
     function getDynamicComplianceHours(stage, shareholders, optionHolders, geoInc, newHireGrants = 0) {
-      // Define report hours by geography
-      const REPORT_HOURS = {
-        india: {
-          tier1: {
-            'cap-table-summary': 8,
-            'transaction-ledger': 12
-          },
-          tier2: {
-            'equity-plan-overview': 2,
-            'grant-summary': 4,
-            'ind-as-102-15': 24,
-            'sh6-esop-register': 16,
-            'vesting-reports': 2
-          },
-          tier3: {
-            'exercise-reports': 2,
-            'surrender-summaries': 2
-          }
-        },
-        us: {
-          tier1: {
-            'cap-table-summary': 8,
-            'transaction-ledger': 12
-          },
-          tier2: {
-            'equity-plan-overview': 2,
-            'grant-summary': 4,
-            'asc-718-820': 32,
-            'rule-701-analysis': 6,
-            'vesting-reports': 2
-          },
-          tier3: {
-            'exercise-reports': 2,
-            'surrender-summaries': 2
-          }
-        },
-        singapore: {
-          tier1: {
-            'cap-table-summary': 8,
-            'transaction-ledger': 12
-          },
-          tier2: {
-            'equity-plan-overview': 2,
-            'grant-summary': 4,
-            'ifrs2': 24,
-            'vesting-reports': 2
-          },
-          tier3: {
-            'exercise-reports': 2,
-            'surrender-summaries': 2
-          }
-        },
-        uk: {
-          tier1: {
-            'cap-table-summary': 8,
-            'transaction-ledger': 12
-          },
-          tier2: {
-            'equity-plan-overview': 2,
-            'grant-summary': 4,
-            'ifrs2': 24,
-            'vesting-reports': 2
-          },
-          tier3: {
-            'exercise-reports': 2,
-            'surrender-summaries': 2
-          }
-        }
+      // Stage scaling factors
+      const stageScale = {
+        preseed: 0.5,
+        seed: 0.75,
+        seriesab: 1.0,
+        seriesbc: 1.25,
+        seriesc: 1.5
       };
 
-      const geoReports = REPORT_HOURS[geoInc] || REPORT_HOURS.india;
+      const scale = stageScale[stage] || 1.0;
+      const totalGrants = newHireGrants + (parseInt(newHireGrants, 10) > 0 ? newHireGrants : 0); // placeholder for refresh grants later
+
+      // Helper function to calculate report hours with volume scaling
+      const reportHours = (baseHrs, scalingFactor = 1) => baseHrs * scale * scalingFactor;
+
+      // Volume scaling multipliers
+      const shareholderScale = shareholders > 0 ? (1 + Math.max(0, shareholders - 10) / 100) : 1;
+      const optionHolderScale = optionHolders > 0 ? (1 + Math.max(0, optionHolders - 5) / 50) : 1;
+      const grantScale = totalGrants > 0 ? (1 + Math.max(0, totalGrants - 3) / 30) : 1;
+
       let hours = 0;
 
       // TIER 1: Always required if you have shareholders
       if (shareholders > 0) {
-        Object.values(geoReports.tier1).forEach(h => hours += h);
+        hours += reportHours(2, shareholderScale);    // Cap table summary
+        hours += reportHours(3, shareholderScale);    // Transaction-level ownership ledger
       }
 
       // TIER 2: Required if you have option holders or plan to issue grants
       if (optionHolders > 0 || newHireGrants > 0) {
-        Object.values(geoReports.tier2).forEach(h => hours += h);
+        hours += reportHours(1, 1);                   // Equity plan & pool overview
+        hours += reportHours(1, grantScale);          // Grant summary reports
+        hours += reportHours(0.5, optionHolderScale); // Vesting reports
+
+        // Geography-specific accounting standard
+        if (geoInc === 'india') {
+          hours += reportHours(4, optionHolderScale); // Ind AS 102/15
+          hours += reportHours(4, optionHolderScale); // SH-6 (Statutory ESOP Register)
+        } else if (geoInc === 'us') {
+          hours += reportHours(4, optionHolderScale); // ASC 718/820
+          hours += reportHours(6, 1);                 // Rule 701 (annual, fixed)
+        } else if (geoInc === 'singapore' || geoInc === 'uk') {
+          hours += reportHours(4, optionHolderScale); // IFRS 2
+        }
       }
 
       // TIER 3: Required if you have equity AND at Series A or later
       const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
       if ((optionHolders > 0 || newHireGrants > 0) && (stageOrder[stage] || 0) >= 2) {
-        Object.values(geoReports.tier3).forEach(h => hours += h);
+        hours += reportHours(1, optionHolderScale);   // Exercise reports
+        hours += reportHours(0.5, optionHolderScale); // Surrender summaries
       }
 
       return Math.round(hours);
