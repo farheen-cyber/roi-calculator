@@ -93,13 +93,13 @@ const secFundraisingCost = secFundraisingHrs * secRate;
 **After:**
 ```javascript
 // === FUNDRAISING: SECRETARIAL & BOARD ===
-// 4 workflows × 2.5 hours/workflow = 10 hours baseline
-// Per PRD: "4 for secretarial prep" workflows during fundraising
+// 3 workflows × 2.5 hours/workflow = 7.5 hours baseline
+// Workflows: (1) Board approvals, (2) Shareholder approvals, (3) Documentation coordination
 // Scaled by shareholder count (more shareholders = more communication/coordination)
 const secFundraisingBaseWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
-const secFundraisingBaseHours = secFundraisingBaseWorkflows * HOURS_PER_WORKFLOW; // 4 × 2.5 = 10
+const secFundraisingBaseHours = secFundraisingBaseWorkflows * HOURS_PER_WORKFLOW; // 3 × 2.5 = 7.5
 const secFundraisingHours = secFundraisingBaseHours * roundMultiplier;
-const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
+const effectiveShareholders = planingToFundraise ? (sh + newShareholdersFromFundraise) : sh;
 // Shareholder scaling: starts at 1.0 for ≤20 shareholders, increases 0.5% for every 100 shareholders above 20
 const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
 const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
@@ -108,10 +108,13 @@ const secFundraisingCost = secFundraisingHrs * secRate;
 ```
 
 **Impact:**
-- Made baseline explicit: 10 hours (4 workflows × 2.5 hours)
+- Made baseline explicit: 7.5 hours (3 workflows × 2.5 hours)
 - Reused `HOURS_PER_WORKFLOW` constant for consistency
+- Documented the 3 workflows: board approvals, shareholder approvals, documentation coordination
 - Documented shareholder scaling formula in plain English
 - Shows separation of concern: base hours → round multiplier → shareholder scaling
+
+**Important:** This corrects the PRD (which specified 4 secretarial workflows) to match the actual requirement of 3.
 
 ---
 
@@ -157,10 +160,10 @@ const FUNDRAISING_WORKFLOWS = {
 - **New:** `ctFundraisingBaseHours × roundMultiplier = 7.5 × roundMultiplier`
 - **Status:** ✅ IDENTICAL
 
-### Fundraising Secretarial
-- **Old:** `4 × 2.5 × roundMultiplier × shareholderScale = 10 × roundMultiplier × shareholderScale`
-- **New:** `secFundraisingBaseHours × roundMultiplier × shareholderScale = 10 × roundMultiplier × shareholderScale`
-- **Status:** ✅ IDENTICAL
+### Fundraising Secretarial (UPDATED)
+- **Old (PRD):** `4 × 2.5 × roundMultiplier × shareholderScale = 10 × roundMultiplier × shareholderScale`
+- **New (Actual):** `3 × 2.5 × roundMultiplier × shareholderScale = 7.5 × roundMultiplier × shareholderScale`
+- **Status:** ⚠️ **CORRECTED** — Updated from 4 workflows to 3 workflows (25% reduction in secretarial effort)
 
 ---
 

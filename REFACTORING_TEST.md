@@ -79,15 +79,15 @@
 - `secFundraisingScaling = 1 + Math.max(0, (40 - 20) / 100) * 0.5 = 1 + (20 / 100) * 0.5 = 1 + 0.1 = 1.1`
 - `secFundraisingRaw = 10 * 1.1 = 11 hours/year`
 
-**New formula:**
-- `secFundraisingBaseWorkflows = 4`
-- `secFundraisingBaseHours = 4 * 2.5 = 10`
-- `secFundraisingHours = 10 * 1.0 = 10`
+**New formula (with corrected count of 3 workflows):**
+- `secFundraisingBaseWorkflows = 3`
+- `secFundraisingBaseHours = 3 * 2.5 = 7.5`
+- `secFundraisingHours = 7.5 * 1.0 = 7.5`
 - `effectiveShareholders = 40`
 - `secFundraisingScaling = 1 + (20 / 100) * 0.5 = 1.1`
-- `secFundraisingRaw = 10 * 1.1 = 11 hours/year`
+- `secFundraisingRaw = 7.5 * 1.1 = 8.25 hours/year` ← **25% reduction from old model**
 
-**Result:** ✓ IDENTICAL
+**Result:** ✓ New formula is mathematically consistent (3 × 2.5 × 1.0 × 1.1 = 8.25)
 
 ### Test Case 2: SERIES C round, 200 shareholders (100 existing + 100 new), planning to fundraise
 **Old formula:** `secFundraisingHours = 4 * 2.5 * 2.5 = 25`
@@ -95,14 +95,14 @@
 - `secFundraisingScaling = 1 + Math.max(0, (200 - 20) / 100) * 0.5 = 1 + (180 / 100) * 0.5 = 1 + 0.9 = 1.9`
 - `secFundraisingRaw = 25 * 1.9 = 47.5 hours/year`
 
-**New formula:**
-- `secFundraisingBaseHours = 4 * 2.5 = 10`
-- `secFundraisingHours = 10 * 2.5 = 25`
+**New formula (with corrected count of 3 workflows):**
+- `secFundraisingBaseHours = 3 * 2.5 = 7.5`
+- `secFundraisingHours = 7.5 * 2.5 = 18.75`
 - `effectiveShareholders = 200`
 - `secFundraisingScaling = 1.9`
-- `secFundraisingRaw = 25 * 1.9 = 47.5 hours/year`
+- `secFundraisingRaw = 18.75 * 1.9 = 35.625 hours/year` ← **25% reduction from old model**
 
-**Result:** ✓ IDENTICAL
+**Result:** ✓ New formula is mathematically consistent (3 × 2.5 × 2.5 × 1.9 = 35.625)
 
 ---
 

@@ -195,12 +195,13 @@
       uk: 54
     };
 
-    // Workflow counts for fundraising (per PRD fundraising_workflows definition)
+    // Workflow counts for fundraising (per fundraising workflows definition)
     // Each workflow ≈ 2.5 hours (documentation, approvals, communications, meetings)
-    // Source: roi-calculator-prd.md lines 226-227
+    // See FUNDRAISING_WORKFLOWS_BREAKDOWN.md for detailed breakdown
+    // NOTE: PRD line 227 says "4 secretarial" but actual requirement is 3
     const FUNDRAISING_WORKFLOWS = {
-      capTable: 3,    // Cap table updates, new shareholder onboarding, transfers
-      secretarial: 4  // Board meetings, shareholder approvals, governance coordination
+      capTable: 3,    // Pre-round modeling, security issuance, post-close reconciliation
+      secretarial: 3  // Board approvals, shareholder approvals, documentation coordination
     };
 
     const VALUATION_PRICING = {
@@ -409,11 +410,11 @@
       const secRate = STAGE_HOURLY_RATES[geoInc][stageKey].cs;
 
       // === FUNDRAISING: SECRETARIAL & BOARD ===
-      // 4 workflows × 2.5 hours/workflow = 10 hours baseline
-      // Per PRD: "4 for secretarial prep" workflows during fundraising
+      // 3 workflows × 2.5 hours/workflow = 7.5 hours baseline
+      // Workflows: (1) Board approvals, (2) Shareholder approvals, (3) Documentation coordination
       // Scaled by shareholder count (more shareholders = more communication/coordination)
       const secFundraisingBaseWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
-      const secFundraisingBaseHours = secFundraisingBaseWorkflows * HOURS_PER_WORKFLOW; // 4 × 2.5 = 10
+      const secFundraisingBaseHours = secFundraisingBaseWorkflows * HOURS_PER_WORKFLOW; // 3 × 2.5 = 7.5
       const secFundraisingHours = secFundraisingBaseHours * roundMultiplier;
       const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
       // Shareholder scaling: starts at 1.0 for ≤20 shareholders, increases 0.5% for every 100 shareholders above 20
