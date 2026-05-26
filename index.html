@@ -509,6 +509,22 @@
       );
     }
 
+    function ROIMetricStat({ label, value, unit, muted }) {
+      return (
+        <div style={{ flex: 1 }}>
+          <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>{label}</MonoLabel>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
+            <span style={{
+              fontFamily: A.sans, fontSize: 15, fontWeight: 600,
+              color: muted ? A.mute : A.ink,
+              fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3, lineHeight: 1,
+            }}>{value}</span>
+            {unit && <span style={{ fontFamily: A.mono, fontSize: 10, color: A.mute, fontWeight: 700 }}>{unit}</span>}
+          </div>
+        </div>
+      );
+    }
+
     function SectionHeader({ number, title, subtitle, style }) {
       return (
         <div style={{ ...style }}>
@@ -1510,19 +1526,10 @@
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: 20, paddingTop: 12, borderTop: `1px solid ${A.lineSoft}` }}>
-              <div>
-                <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>PAYBACK PERIOD</MonoLabel>
-                <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums' }}>
-                  {v.roi > 1 ? `${Math.round((v.elAnn / (Math.abs(v.diff) / 12)))} mo` : '—'}
-                </div>
-              </div>
-              <div>
-                <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>HOURS SAVED</MonoLabel>
-                <div style={{ fontFamily: A.sans, fontSize: 15, fontWeight: 600, color: A.green, fontVariantNumeric: 'tabular-nums' }}>
-                  {v.hoursSaved} <span style={{ fontFamily: A.mono, fontSize: 10, fontWeight: 700 }}>hrs/yr</span>
-                </div>
-              </div>
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'flex', gap: 20 }}>
+              <ROIMetricStat label="PAYBACK PERIOD" value={v.roi > 1 ? (v.elAnn / (Math.abs(v.diff) / 12)).toFixed(1) : '—'} unit={v.roi > 1 ? 'mo' : null} muted={v.roi <= 1} />
+              <span style={{ width: 1, background: A.lineSoft, alignSelf: 'stretch' }} />
+              <ROIMetricStat label="HOURS SAVED" value={v.hoursSaved} unit="hrs/yr" />
             </div>
           </div>
 
