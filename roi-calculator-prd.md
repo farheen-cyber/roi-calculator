@@ -1,7 +1,7 @@
 # EquityList ROI Calculator — Complete Technical Specification (Enhanced)
 
-**Version**: 3.5 (Enhanced with detailed implementation notes)  
-**Last Updated**: May 26, 2026  
+**Version**: 3.6 (Audit-verified and clarified)  
+**Last Updated**: May 27, 2026  
 **Purpose**: Complete technical and functional documentation with "why" and "how" clarifications for every calculation, assumption, and design decision.
 
 ---
@@ -400,12 +400,18 @@ Every month, your cap table changes:
 
 #### The Calculation
 ```
-base_hours_per_month = 3
-shareholder_scaling = max(0, (shareholders - 20) / 50)
-monthly_hours = 3 + (shareholder_scaling × 2)
-annual_hours = monthly_hours × 12
-cap_table_cost = annual_hours × method_multiplier × blended_rate
+IF shareholders = 0:
+  cap_table_cost = 0  // No cap table to maintain
+
+ELSE:
+  base_hours_per_month = 3
+  shareholder_scaling = max(0, (shareholders - 20) / 50)
+  monthly_hours = 3 + (shareholder_scaling × 2)
+  annual_hours = monthly_hours × 12
+  cap_table_cost = annual_hours × method_multiplier × blended_rate
 ```
+
+**Note**: Cap table cost only applies if you have shareholders. A company with 0 shareholders (pure option pool, no equity) incurs no cap table maintenance cost.
 
 #### Why Scaling at 20 Shareholders?
 - Under 20 shareholders: Relatively stable (founders, early investors)
@@ -678,16 +684,29 @@ Where `stakeholders = min(sh + oh + grNewHire, 10,000)`.
 ## SECTION 7: OUTPUTS (What User Sees)
 
 ### 7.1 Annual Savings or Overspend
+
+**Calculation**:
 ```
 diff = annCost - elAnn
+savings = abs(diff)
 ```
-- **Positive**: "You're overspending by $X/year. Save $X with EquityList."
-- **Negative**: "Your current setup is cost-efficient. EquityList isn't a cost-saver for you; it's a risk-mitigation play."
-- **Zero**: Breakeven
 
-### 7.2 Internal Effort (Hours)
+**Sign Convention** (IMPORTANT):
+- **diff > 0** (positive savings): `annCost > elAnn` → Your current method costs MORE than EquityList → **EquityList saves you money**
+  - Example: Current spend ₹600K, EquityList costs ₹100K → diff = ₹500K → you save ₹500K/year
+  - Message: "You're overspending by ₹500K/year. Save that with EquityList."
 
-**Manual baseline** (if 100% internal):
+- **diff < 0** (negative savings): `annCost < elAnn` → Your current method costs LESS than EquityList → **EquityList costs more**
+  - Example: Current spend ₹50K, EquityList costs ₹100K → diff = -₹50K → you lose ₹50K/year
+  - Message: "Your current setup is cost-efficient. EquityList costs more for you."
+
+- **diff = 0**: Breakeven (unlikely in practice)
+
+### 7.2 Internal Effort (Hours Spent Today)
+
+**What This Metric Represents**: Total annual hours YOUR TEAM SPENDS today managing equity with your current method (in-house or outsourced). This is NOT the hours EquityList saves—it's your baseline effort.
+
+**Manual hours baseline** (what it takes today, assuming 100% in-house):
 ```
 manualHTotal = (oh + grNewHire + grRefresh) × 1.5 
              + compliance_hours 
@@ -696,12 +715,18 @@ manualHTotal = (oh + grNewHire + grRefresh) × 1.5
              + fundraising_secretarial_hours
 ```
 
-**Adjusted for method**:
+**Adjusted for your admin method**:
 ```
-adjustedHTotal = manualHTotal × mult
+hoursSaved = manualHTotal × mult
 ```
-- In-house: mult=1.0 (all hours count)
-- Outsourced: mult=0.4 (only 40% internal overhead)
+Where:
+- **In-house** (mult=1.0): Your team does 100% of the work → hoursSaved = manualHTotal
+  - Example: 500 hours/year of internal effort
+  
+- **Outsourced** (mult=0.4): A CA/law firm does 60%, your team does 40% → hoursSaved = manualHTotal × 0.4
+  - Example: 500 hours/year of manual work, but 60% outsourced → You still spend 200 hours/year internally (40%)
+
+**Important**: `hoursSaved` is poorly named. It's actually "internal hours YOU spend today" not "hours EquityList saves." With EquityList, this entire workload goes to near-zero.
 
 ### 7.3 Time Saved %
 ```
@@ -712,17 +737,39 @@ With EquityList, all these hours → zero. If currently in-house and 1,000 hours
 If outsourced and 400 hours/year, switching saves 100% of that 400.
 
 ### 7.4 ROI Multiple
+
+**Calculation**:
 ```
-roi = abs(savings) / elAnn
+roi = round((abs(annCost - elAnn) / elAnn) × 10) / 10
 ```
-- **2.0**: Savings are 2× the cost of EquityList (break-even in 6 months)
-- **0.5**: Savings are half the cost (take 24 months to break even)
+
+The ROI is **rounded to the nearest 0.1** (one decimal place) for display precision.
+
+**Interpretation**:
+- **2.0**: Savings are 2.0× the cost of EquityList. Break-even period ≈ 6 months.
+  - Example: Save ₹200K/year, EquityList costs ₹100K → ROI = 2.0× → 6-month payback
+  
+- **0.5**: Savings are 0.5× the cost of EquityList. Break-even period ≈ 24 months (or loss scenario).
+  - Example: Save ₹50K/year, EquityList costs ₹100K → ROI = 0.5× → 24-month payback
+  
+- **0**: No savings (your current method costs same as or less than EquityList)
+
+**Edge case**: If elAnn = 0, roi defaults to 0 (no division by zero).
 
 ---
 
 ## SECTION 8: KEY CHANGES FROM PREVIOUS VERSIONS
 
-### Version 3.5 (Current: Enhanced Documentation)
+### Version 3.6 (Current: Audit & Clarification)
+- **Audited**: All 12 core calculations against code (line-by-line comparison in CALCULATION_AUDIT.md)
+- **Fixed**: Grant admin formula made explicit: `(oh + grNewHire + grRefresh) × 1.5`
+- **Added**: Cap table cost condition: "= 0 if shareholders = 0"
+- **Clarified**: ROI rounding to nearest 0.1 documented
+- **Clarified**: Hours saved represents current internal hours (not EquityList delta)
+- **Clarified**: Savings sign convention (diff > 0 = save money, diff < 0 = cost more)
+- **Documented**: Known issues and design decisions (5 resolved, 4 open)
+
+### Version 3.5 (Enhanced Documentation)
 - **Added**: Comprehensive "why" and "how" explanations for every calculation
 - **Clarified**: Grant admin includes option holders (previously ambiguous)
 - **Documented**: Dynamic compliance hours model (previously listed as static)
@@ -743,15 +790,23 @@ roi = abs(savings) / elAnn
 
 ---
 
-## KNOWN ISSUES & CLARIFICATIONS NEEDED
+## KNOWN ISSUES & DESIGN DECISIONS
 
-1. **Base Secretarial Workflows**: Code only implements fundraising workflows. Are base governance workflows (board meetings, shareholder approvals, statutory filings) calculated separately or omitted?
+### Resolved (v3.6)
+1. ✅ **Grant Admin Formula**: Clarified that `(oh + grNewHire + grRefresh) × 1.5` (Section 4.1, line 289)
+2. ✅ **Cap Table Cost Condition**: Documented that cost = 0 if shareholders = 0 (Section 4.3, line 402)
+3. ✅ **ROI Rounding**: Documented rounding to nearest 0.1 (Section 7.4, line 716)
+4. ✅ **Hours Saved Semantics**: Clarified it represents current internal hours, not EquityList's delta (Section 7.2, line 691)
+5. ✅ **Savings Sign Convention**: Documented that diff > 0 = savings, diff < 0 = cost increase (Section 7.1, line 682)
 
-2. **Valuation Currency**: Code line 435 uses `geoInc`, but PRD v3.3 intended `geoOp`. Needs fix in code or clarification in intent.
+### Open Issues
+1. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
 
-3. **Stakeholders Calculation**: Including `grNewHire` in platform pricing calculation inflates count. Needs design decision: should new hire grants count toward platform pricing, or only existing option holders?
+2. **Valuation Currency Bug**: Code line 435 uses `geoInc` for currency selection, but PRD v3.3 intended `geoOp` (display currency). This causes valuation costs to be calculated in incorporation currency instead of operating currency. **Needs code fix or clarification of intent.**
 
-4. **Grant Admin Formula**: PRD line 186 is incomplete. Should explicitly include `oh` (option holders) in the formula.
+3. **Payback Period**: Previously calculated and displayed but removed from ROI card output (v3.5). Formula was: `paybackMonths = elAnn / (diff / 12)`. Should this metric be documented as historical or re-introduced?
+
+4. **Stakeholders Calculation Design**: Including `grNewHire` in platform pricing (`min(sh + oh + grNewHire, 10000)`) inflates stakeholder count. Design decision: Should new hire grants count toward platform pricing, or only existing shareholders + option holders?
 
 ---
 
