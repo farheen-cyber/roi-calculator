@@ -1479,23 +1479,41 @@
             )}
           </div>
 
-          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8, padding: '4px 18px' }}>
-            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
-              <MonoLabel size={10.5} color={A.ink}>ROI</MonoLabel>
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8, padding: '18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingBottom: 12, borderBottom: `1px solid ${A.lineSoft}` }}>
+              <MonoLabel size={10.5} color={A.ink}>RETURN ON INVESTMENT</MonoLabel>
+              <MonoLabel size={10} color={A.mute}>FY 26</MonoLabel>
             </div>
-            <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 6, borderBottom: `1px solid ${A.lineSoft}`, paddingBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <MonoLabel size={10} color={A.mute}>For every ₹1 spent on EquityList</MonoLabel>
+
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
+                <span style={{ fontStyle: 'italic', fontSize: 20, color: A.ink }}>Every</span>
+                <span style={{ fontFamily: A.sans, fontSize: 28, fontWeight: 700, color: A.green }}>₹1</span>
+                <span style={{ fontSize: 20, color: A.ink }}>returns</span>
+                <span style={{ fontFamily: A.sans, fontSize: 28, fontWeight: 700, color: v.roi > 0 ? A.green : '#D32F2F', letterSpacing: -0.4 }}>₹{v.roi.toFixed(2)}</span>
+                <span style={{ fontSize: 20, color: A.ink }}>.</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <div style={{ fontFamily: A.sans, fontSize: 24, fontWeight: 700, color: v.roi > 0 ? A.ink : A.mute, letterSpacing: -0.4 }}>₹{Math.max(0, v.roi).toFixed(2)}</div>
-                <MonoLabel size={10} color={A.mute}>{v.roi > 0 ? 'saved annually in manual costs' : 'in potential value at current usage'}</MonoLabel>
-              </div>
+              <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
+                {v.roi > 1 ? (
+                  <>Recoups in {(() => {const months = Math.round((v.elAnn / (Math.abs(v.diff) / 12))); return months > 0 ? `${months} month${months !== 1 ? 's' : ''}` : 'less than 1 month';})()}. After that, every operation runs on autopilot.</>
+                ) : (
+                  <>Below break-even at your scale — EquityList costs more in plan fees than it saves in manual ops.</>
+                )}
+              </p>
             </div>
-            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <MonoLabel size={10}>Hours saved annually</MonoLabel>
-              <div style={{ fontFamily: A.sans, fontSize: 16, fontWeight: 700, color: A.green, fontVariantNumeric: 'tabular-nums' }}>
-                {v.hoursSaved} <span style={{ fontFamily: A.mono, fontSize: 10, color: A.green, fontWeight: 700 }}>hrs/yr</span>
+
+            <div style={{ display: 'flex', gap: 20, paddingTop: 12, borderTop: `1px solid ${A.lineSoft}` }}>
+              <div>
+                <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>PAYBACK PERIOD</MonoLabel>
+                <div style={{ fontFamily: A.sans, fontSize: 18, fontWeight: 700, color: A.ink, fontVariantNumeric: 'tabular-nums' }}>
+                  {v.roi > 1 ? `${Math.round((v.elAnn / (Math.abs(v.diff) / 12)))} mo` : '—'}
+                </div>
+              </div>
+              <div>
+                <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>HOURS SAVED</MonoLabel>
+                <div style={{ fontFamily: A.sans, fontSize: 18, fontWeight: 700, color: A.green, fontVariantNumeric: 'tabular-nums' }}>
+                  {v.hoursSaved} <span style={{ fontFamily: A.mono, fontSize: 10, fontWeight: 700 }}>hrs/yr</span>
+                </div>
               </div>
             </div>
           </div>
