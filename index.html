@@ -738,6 +738,9 @@
     function InfoTip({ text, color }) {
       const [open, setOpen] = useState(false);
       const ref = useRef(null);
+      const tooltipRef = useRef(null);
+      const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+
       useEffect(() => {
         const handleDocumentClick = (e) => {
           if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -745,6 +748,17 @@
         if (open) document.addEventListener('click', handleDocumentClick);
         return () => document.removeEventListener('click', handleDocumentClick);
       }, [open]);
+
+      useEffect(() => {
+        if (open && ref.current && tooltipRef.current) {
+          const iconRect = ref.current.getBoundingClientRect();
+          const tooltipRect = tooltipRef.current.getBoundingClientRect();
+          const left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
+          const top = iconRect.top - tooltipRect.height - 6;
+          setTooltipPos({ top, left: Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8)) });
+        }
+      }, [open]);
+
       return (
         <span ref={ref} style={{ position: 'relative', display: 'inline-flex', verticalAlign: 'middle', marginLeft: 4 }}>
           <span
@@ -765,16 +779,15 @@
             }}
           >i</span>
           {open && (
-            <span style={{
-              position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+            <span ref={tooltipRef} style={{
+              position: 'fixed', top: tooltipPos.top, left: tooltipPos.left,
               background: A.ink, color: '#fff',
               fontFamily: A.sans, fontSize: 11.5, fontWeight: 500, lineHeight: 1.45, letterSpacing: 0,
               textTransform: 'none',
-              padding: '8px 10px', borderRadius: 5, maxWidth: 220, whiteSpace: 'normal', wordWrap: 'break-word', zIndex: 100,
+              padding: '8px 10px', borderRadius: 5, maxWidth: 220, whiteSpace: 'normal', wordWrap: 'break-word', zIndex: 1000,
               boxShadow: '0 6px 18px rgba(20,18,30,0.22)', pointerEvents: 'none',
             }}>
               {text}
-              <span style={{ position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%) rotate(45deg)', width: 8, height: 8, background: A.ink }} />
             </span>
           )}
         </span>
