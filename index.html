@@ -392,7 +392,7 @@
       const CAP_TABLE_BASE_HOURS_PER_MONTH = 3;
       const CAP_TABLE_SCALING_INCREMENT = 2; // hours/month per each 50 shareholders above 20
       const ctShareholderScale = Math.max(0, (sh - 20) / 50);
-      const ctMonthlyHours = CAP_TABLE_BASE_HOURS_PER_MONTH + (ctShareholderScale * CAP_TABLE_SCALING_INCREMENT);
+      const ctMonthlyHours = sh > 0 ? CAP_TABLE_BASE_HOURS_PER_MONTH + (ctShareholderScale * CAP_TABLE_SCALING_INCREMENT) : 0;
       const ctRaw = ctMonthlyHours * 12; // annualize
       const ctHrs = ctRaw * mult;
       const ctCost = ctHrs * rate;
