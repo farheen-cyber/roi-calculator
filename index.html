@@ -1219,7 +1219,7 @@
           formula: `3h/mo base + ${Math.max(0, ((formData?.sh || 30) - 20) / 50).toFixed(2)} × 2 = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2) * 12)} hrs/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.ctCost || 0).toLocaleString(opLocale)}`,
           pct: `${capTablePct}%`,
-          tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
+          tip: 'Maintenance of your current and fully diluted cap table, securities tracking, and transfer processing.'
         },
         ...(v.ctFundraisingCost > 0 ? [{
           key: 'fundraising-captable',
@@ -1227,7 +1227,7 @@
           formula: `${v.ctFundraisingHours || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.ctFundraisingCost || 0).toLocaleString(opLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.ctFundraisingCost / v.annCost) * 100) : 0}%`,
-          tip: 'Cap table updates, new shareholder onboarding, and fundraising coordination.'
+          tip: 'Time spent on scenario modeling, creating and updating securities, and option pool adjustments.'
         }] : []),
         ...(v.secFundraisingCost > 0 ? [{
           key: 'fundraising-secretarial',
@@ -1235,7 +1235,7 @@
           formula: `${v.secFundraisingRaw || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.secFundraisingCost || 0).toLocaleString(opLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.secFundraisingCost / v.annCost) * 100) : 0}%`,
-          tip: 'Board meetings, shareholder communications, and governance around the fundraising event.'
+          tip: 'Time spent on board and shareholder resolutions, documentation, and signature tracking.'
         }] : []),
         ...(v.methodExtCost > 0 ? [{
           key: 'retainer',
