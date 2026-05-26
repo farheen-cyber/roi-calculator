@@ -1221,9 +1221,16 @@
               uk: 'IFRS 2'
             };
             const specific = geoReports[geo] || geoReports.india;
-            const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
-            const moreReports = (stageOrder[stage] || 2) >= 2 ? 4 : 2;
-            return `${specific}, Cap table summary, vesting reports, grant summary, and ${moreReports} more reports`;
+            const oh = parseInt(formData?.oh, 10) || 0;
+            const grNewHire = parseInt(formData?.grNewHire, 10) || 0;
+
+            let reports = `${specific}, Cap table summary`;
+            if (oh > 0 || grNewHire > 0) {
+              const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
+              const moreReports = (stageOrder[stage] || 2) >= 2 ? 4 : 2;
+              reports += `, vesting reports, grant summary, and ${moreReports} more reports`;
+            }
+            return reports;
           })(),
           value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
           pct: `${compliancePct}%`,
