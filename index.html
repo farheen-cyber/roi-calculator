@@ -195,13 +195,6 @@
       uk: 54
     };
 
-    const SECRETARIAL_WORKFLOWS_BY_GEO = {
-      india: { preseed: 1, seed: 8, seriesab: 12, seriesbc: 20, seriesc: 30 },
-      us: { preseed: 0, seed: 4, seriesab: 8, seriesbc: 12, seriesc: 16 },
-      singapore: { preseed: 1, seed: 4, seriesab: 6, seriesbc: 10, seriesc: 14 },
-      uk: { preseed: 1, seed: 4, seriesab: 6, seriesbc: 10, seriesc: 14 }
-    };
-
     const FUNDRAISING_WORKFLOWS = {
       capTable: 3,
       secretarial: 4
@@ -294,8 +287,54 @@
     const CURRENCY_SYMBOLS = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [v.code, v.symbol]));
     const GEO_TO_CURRENCY = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [k, v.code]));
 
+    // ============ DYNAMIC COMPLIANCE HOURS ============
+    function getDynamicComplianceHours(stage, shareholders, optionHolders, geoInc, newHireGrants = 0) {
+      const accountingByGeo = {
+        india: 40,
+        us: 38,
+        singapore: 24,
+        uk: 24
+      };
+
+      const complexityFactor = {
+        preseed: 0.03,
+        seed: 0.05,
+        seriesab: 0.08,
+        seriesbc: 0.10,
+        seriesc: 0.15
+      };
+
+      const accountingScale = {
+        preseed: 0.25,
+        seed: 0.40,
+        seriesab: 0.60,
+        seriesbc: 0.80,
+        seriesc: 1.0
+      };
+
+      let hours = 0;
+      const factor = complexityFactor[stage];
+
+      // Scale from shareholder count
+      hours += shareholders * factor;
+
+      // Scale from option holder count (current + new hires) + accounting
+      // Include if you have option holders OR are issuing new hire grants
+      if (optionHolders > 0 || newHireGrants > 0) {
+        // Both current and future option holders affect compliance
+        const totalOptionHolders = optionHolders + newHireGrants;
+        hours += totalOptionHolders * factor;
+
+        // Accounting scales by stage AND by option holder complexity (current only)
+        const accountingMultiplier = 1 + (optionHolders * 0.01);
+        hours += accountingByGeo[geoInc] * accountingScale[stage] * accountingMultiplier;
+      }
+
+      return Math.round(hours);
+    }
+
     function computeROI(inputs, overrides = {}) {
-      const { sh = 30, oh = 15, gr = 10, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
+      const { sh = 30, oh = 15, grNewHire = 5, grRefresh = 5, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
 
       let stageKey = stage;
       if (planningToFundraise && fundraiseRound !== 'safe' && fundraiseRound !== 'bridge') {
@@ -318,9 +357,12 @@
 
       const mult = meth === 'in-house' ? 1 : 0.4;
       const grHr = overrides.grHr || 1.5;
-      const compHr = overrides.compHr || COMPLIANCE[geoInc];
+      const compHr = overrides.compHr || getDynamicComplianceHours(stageKey, sh, oh, geoInc, grNewHire);
 
-      const grHrs = gr * grHr;
+      const grNewHireNum = parseInt(grNewHire, 10);
+      const grRefreshNum = parseInt(grRefresh, 10);
+      const totalGrantAdminWork = oh + grNewHireNum + grRefreshNum;
+      const grHrs = totalGrantAdminWork * grHr;
       const grCost = grHrs * mult * rate;
       const cpCost = compHr * mult * rate;
 
@@ -334,13 +376,7 @@
       const ctFundraisingHrs = ctFundraisingHours * mult;
       const ctFundraisingCost = ctFundraisingHrs * rate;
 
-      const baseWorkflows = SECRETARIAL_WORKFLOWS_BY_GEO[geoInc][stageKey] || 0;
-      const secBaseHours = baseWorkflows * 2.5;
-      const shareholderScaling = 1 + Math.max(0, (sh - 20) / 100) * 0.5;
-      const secRaw = secBaseHours * shareholderScaling;
-      const secHrs = secRaw * mult;
       const secRate = STAGE_HOURLY_RATES[geoInc][stageKey].cs;
-      const secCost = secHrs * secRate;
 
       const secFundraisingWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
       const secFundraisingHours = secFundraisingWorkflows * 2.5 * roundMultiplier;
@@ -372,14 +408,14 @@
         }
       }
 
-      const annCost = grCost + cpCost + ctCost + secCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
-      const manualHTotal = overrides.manualHTotal || (grHrs + compHr + ctRaw + secRaw + ctFundraisingHours + secFundraisingRaw);
+      const annCost = grCost + cpCost + ctCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
+      const manualHTotal = overrides.manualHTotal || (totalGrantAdminWork * grHr + compHr + ctRaw + ctFundraisingHours + secFundraisingRaw);
       const adjustedHTotal = manualHTotal * mult;
       const hoursToday = adjustedHTotal;
       const hoursSaved = hoursToday;
       const timeSavedPct = hoursToday > 0 ? Math.round((hoursSaved / hoursToday) * 100) : 0;
 
-      const stakeholders = Math.min(sh + oh, 10000);
+      const stakeholders = Math.min(sh + oh + parseInt(grNewHire, 10), 10000);
       const elAnn = stakeholders * PRICING[geoInc] + elValuationCost;
 
       const diff = annCost - elAnn;
@@ -402,7 +438,6 @@
         grCost: Math.round(grCost),
         cpCost: Math.round(cpCost),
         ctCost: Math.round(ctCost),
-        secCost: Math.round(secCost),
         ctFundraisingCost: Math.round(ctFundraisingCost),
         secFundraisingCost: Math.round(secFundraisingCost),
         methodExtCost: Math.round(methodExtCost),
@@ -411,8 +446,6 @@
         grHr,
         compHr,
         mult,
-        baseWorkflows,
-        shareholderScaling,
         planningToFundraise,
         fundraiseRound,
         roundMultiplier,
@@ -814,7 +847,8 @@
       const [stage, setStage] = useState('seriesab');
       const [shareholders, setShareholders] = useState('30');
       const [optionHolders, setOptionHolders] = useState('15');
-      const [grants, setGrants] = useState('10');
+      const [newHireGrants, setNewHireGrants] = useState('5');
+      const [refreshGrants, setRefreshGrants] = useState('5');
       const [geoInc, setGeoInc] = useState('india');
       const [geoOp, setGeoOp] = useState('india');
       const [legalEntity, setLegalEntity] = useState('');
@@ -834,7 +868,8 @@
         onInputChange && onInputChange({
           sh: shareholders,
           oh: optionHolders,
-          gr: grants,
+          grNewHire: newHireGrants,
+          grRefresh: refreshGrants,
           geoInc,
           geoOp,
           stage,
@@ -846,14 +881,15 @@
           valuationFrequency: valuation ? valFreq : null,
           valuationType: valuation ? valType : null
         });
-      }, [shareholders, optionHolders, grants, geoInc, geoOp, stage, adminMethod, legalEntity, fundraise, fundraiseRound, newShareholdersFromFundraise, valuation, valFreq, valType]);
-      const grantsNum = parseInt(grants, 10) || 0;
-      const weeksBetweenGrants = grantsNum > 0 ? Math.round(52 / grantsNum) : 0;
-      const grantsHelper = grantsNum > 0 ? `about 1 grant every ~${weeksBetweenGrants} weeks` : '';
+      }, [shareholders, optionHolders, newHireGrants, refreshGrants, geoInc, geoOp, stage, adminMethod, legalEntity, fundraise, fundraiseRound, newShareholdersFromFundraise, valuation, valFreq, valType]);
 
-      const handleGrantsChange = (val) => {
-        setGrants(val);
-      };
+      const newHireGrantsNum = parseInt(newHireGrants, 10) || 0;
+      const weeksBetweenNewHires = newHireGrantsNum > 0 ? Math.round(52 / newHireGrantsNum) : 0;
+      const newHireGrantsHelper = newHireGrantsNum > 0 ? `about 1 new hire with options every ~${weeksBetweenNewHires} weeks` : '';
+
+      const refreshGrantsNum = parseInt(refreshGrants, 10) || 0;
+      const weeksBetweenRefresh = refreshGrantsNum > 0 ? Math.round(52 / refreshGrantsNum) : 0;
+      const refreshGrantsHelper = refreshGrantsNum > 0 ? `about 1 refresh every ~${weeksBetweenRefresh} weeks` : '';
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
@@ -867,10 +903,11 @@
           </FormSection>
 
           <FormSection number={2} title="Equity Structure" subtitle="Stakeholder volume scales your cap table reconciliation and grant overhead.">
-            <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
               <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.shareholders ? 'Only numbers allowed' : errors?.shareholders} onNumericError={(hasError) => setNumericErrors({...numericErrors, shareholders: hasError})} />
               <FormField label={<>Option holders <InfoTip text="Employees and advisors with vested or unvested options outstanding." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.optionHolders ? 'Only numbers allowed' : errors?.optionHolders} onNumericError={(hasError) => setNumericErrors({...numericErrors, optionHolders: hasError})} />
-              <FormField label={<>Grants per year <InfoTip text="New ESOP grants you issue annually — drives grant-admin overhead." /></>} required value={grants} onChange={(v) => { handleGrantsChange(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.grants ? 'Only numbers allowed' : errors?.grants} helperText={grantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, grants: hasError})} />
+              <FormField label={<>New hire grants/year <InfoTip text="Employees newly hired with stock options annually — drives compliance overhead and stakeholder count." /></>} required value={newHireGrants} onChange={(v) => { setNewHireGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.newHireGrants ? 'Only numbers allowed' : errors?.newHireGrants} helperText={newHireGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, newHireGrants: hasError})} />
+              <FormField label={<>Refresh grants/year <InfoTip text="Equity refreshes and acceleration grants to existing option holders — drives grant overhead." /></>} required value={refreshGrants} onChange={(v) => { setRefreshGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.refreshGrants ? 'Only numbers allowed' : errors?.refreshGrants} helperText={refreshGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, refreshGrants: hasError})} />
             </div>
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -895,7 +932,7 @@
             if (editedHours !== null && editedHours !== '') {
               overrides.manualHTotal = parseInt(editedHours, 10);
             }
-            onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, gr: grants, geoInc, geoOp, stage, meth: adminMethod, legalEntityName: legalEntity, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null }, overrides);
+            onCalculate && onCalculate({ sh: shareholders, oh: optionHolders, grNewHire: newHireGrants, grRefresh: refreshGrants, geoInc, geoOp, stage, meth: adminMethod, legalEntityName: legalEntity, planningToFundraise: fundraise, fundraiseRound, newShareholdersFromFundraise: parseInt(newShareholdersFromFundraise, 10) || 0, valuation, valuationFrequency: valuation ? valFreq : null, valuationType: valuation ? valType : null }, overrides);
           }}>
             Calculate ROI
             <span style={{ opacity: 0.7 }}>→</span>
@@ -1098,7 +1135,6 @@
       const grantPct = v.annCost > 0 ? Math.round((v.grCost / v.annCost) * 100) : 0;
       const compliancePct = v.annCost > 0 ? Math.round((v.cpCost / v.annCost) * 100) : 0;
       const capTablePct = v.annCost > 0 ? Math.round((v.ctCost / v.annCost) * 100) : 0;
-      const secretarialPct = v.annCost > 0 ? Math.round((v.secCost / v.annCost) * 100) : 0;
       const valuationPct = v.annCost > 0 ? Math.round((v.valuationCost / v.annCost) * 100) : 0;
 
       const opCurrencyInfo = GEO_CURRENCY_MAP[formData?.geoInc] || GEO_CURRENCY_MAP.india;
@@ -1129,14 +1165,6 @@
           value: `${opCurrencySymbol}${(v.ctCost || 0).toLocaleString(opLocale)}`,
           pct: `${capTablePct}%`,
           tip: 'Reconciling holdings, processing transfers, and keeping the cap table audit-ready.'
-        },
-        {
-          key: 'secretarial',
-          label: 'Secretarial & Board Operations',
-          formula: `${v.baseWorkflows || 12} workflows/yr × 2.5 hrs/workflow × ${(v.shareholderScaling || 1).toFixed(2)} (shareholder scaling) = ${Math.round((v.baseWorkflows || 12) * 2.5 * (v.shareholderScaling || 1))} hrs/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.secCost || 0).toLocaleString(opLocale)}`,
-          pct: `${secretarialPct}%`,
-          tip: 'Board meetings, shareholder resolutions, and statutory filings.'
         },
         ...(v.ctFundraisingCost > 0 ? [{
           key: 'fundraising-captable',
