@@ -1483,12 +1483,15 @@
             <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
               <MonoLabel size={10.5} color={A.ink}>ROI</MonoLabel>
             </div>
-            <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
+            <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 6, borderBottom: `1px solid ${A.lineSoft}`, paddingBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <MonoLabel size={10}>Your ROI with EquityList</MonoLabel>
-                <InfoTip text="Ratio of annual savings to EquityList cost. Higher is better — how many times over the EquityList cost you save per year." />
+                <MonoLabel size={10} color={A.mute}>For every ₹1 spent on EquityList</MonoLabel>
+                <InfoTip text="For every rupee spent on EquityList, your organization saves this amount in manual equity administration costs annually." />
               </div>
-              <div style={{ fontFamily: A.sans, fontSize: 18, fontWeight: 700, color: A.ink, letterSpacing: -0.4 }}>{v.roi}×</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <div style={{ fontFamily: A.sans, fontSize: 24, fontWeight: 700, color: A.ink, letterSpacing: -0.4 }}>₹{v.roi.toFixed(2)}</div>
+                <MonoLabel size={10} color={A.mute}>saved annually in manual costs</MonoLabel>
+              </div>
             </div>
             <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <MonoLabel size={10}>Hours saved annually</MonoLabel>
