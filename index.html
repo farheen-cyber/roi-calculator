@@ -1211,7 +1211,7 @@
           formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
           pct: `${compliancePct}%`,
-          tip: 'Baseline statutory work — board minutes, ROC filings, ESOP approvals.'
+          tip: 'Statutory compliance reporting by geography — Ind AS 102/15 equity standards, shareholder registers (SH-6), cap table reports, board minutes, regulatory filings, and plan administration.'
         },
         {
           key: 'captable',
