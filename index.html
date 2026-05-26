@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EquityList ROI Calculator — Direction A</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Fraunces:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -506,22 +506,6 @@
           display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
           ...style,
         }}>{children}</div>
-      );
-    }
-
-    function ROIMetricStat({ label, value, unit, muted }) {
-      return (
-        <div style={{ flex: 1 }}>
-          <MonoLabel size={9} color={A.mute} style={{ marginBottom: 6, display: 'block' }}>{label}</MonoLabel>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
-            <span style={{
-              fontFamily: A.sans, fontSize: 15, fontWeight: 600,
-              color: muted ? A.mute : A.ink,
-              fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3, lineHeight: 1,
-            }}>{value}</span>
-            {unit && <span style={{ fontFamily: A.mono, fontSize: 10, color: A.mute, fontWeight: 700 }}>{unit}</span>}
-          </div>
-        </div>
       );
     }
 
@@ -1495,41 +1479,110 @@
             )}
           </div>
 
-          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8, padding: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingBottom: 12, borderBottom: `1px solid ${A.lineSoft}` }}>
+          <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: A.bgWarm, border: `1px solid ${A.line}`, borderRadius: 8, padding: '20px 24px 22px', position: 'relative', overflow: 'hidden' }}>
+
+            {/* Header row: RETURN ON INVESTMENT + FY 26 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
               <MonoLabel size={10.5} color={A.ink}>RETURN ON INVESTMENT</MonoLabel>
+              <MonoLabel size={9.5} color={A.muteSoft}>FY 26</MonoLabel>
             </div>
 
-            <div style={{ marginBottom: 20 }}>
-              {v.roi > 1 ? (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12, fontSize: 28, fontWeight: 600, color: A.ink, lineHeight: 1.2, fontStyle: 'italic', fontFamily: A.sans }}>
-                    <span>Pays for itself in</span>
-                    <span style={{ color: A.green, fontWeight: 700, fontStyle: 'normal' }}>{(() => {const months = (v.elAnn / (Math.abs(v.diff) / 12)); return months.toFixed(1);})()}</span>
-                    <span>months.</span>
-                  </div>
-                  <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
-                    After that, every ₹1 spent compounds at <strong style={{ color: A.ink, fontWeight: 600 }}>{v.roi.toFixed(1)}×</strong> — the rest of the year is pure return.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12, fontSize: 28, fontWeight: 600, color: A.ink, lineHeight: 1.2, fontStyle: 'italic', fontFamily: A.sans }}>
-                    <span>Does not</span>
-                    <span style={{ color: '#D32F2F', fontWeight: 700, fontStyle: 'normal' }}>break even</span>
-                    <span>this year.</span>
-                  </div>
-                  <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
-                    EquityList costs more in plan fees than it saves in manual ops at your current scale.
-                  </p>
-                </>
-              )}
-            </div>
+            {/* Stacked editorial headline (TWO separate block elements) */}
+            {v.roi > 1 ? (
+              <>
+                {/* Line 1: Setup phrase */}
+                <div style={{
+                  fontFamily: A.serif, fontSize: 18, fontWeight: 400, fontStyle: 'italic',
+                  color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
+                  marginBottom: 4,
+                }}>
+                  Pays for itself in
+                </div>
 
-            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'flex', gap: 20 }}>
-              <ROIMetricStat label="PAYBACK PERIOD" value={v.roi > 1 ? (v.elAnn / (Math.abs(v.diff) / 12)).toFixed(1) : '—'} unit={v.roi > 1 ? 'mo' : null} muted={v.roi <= 1} />
-              <span style={{ width: 1, background: A.lineSoft, alignSelf: 'stretch' }} />
-              <ROIMetricStat label="HOURS SAVED" value={v.hoursSaved} unit="hrs/yr" />
+                {/* Line 2: Big number */}
+                <div style={{
+                  fontFamily: A.sans, fontSize: 38, fontWeight: 600,
+                  lineHeight: 1, letterSpacing: -1.2, fontVariantNumeric: 'tabular-nums',
+                  marginBottom: 12,
+                }}>
+                  <span style={{
+                    color: A.green,
+                    borderBottom: `2px solid ${A.greenTint}`,
+                    paddingBottom: 1,
+                  }}>
+                    {(() => {
+                      const months = v.elAnn / (Math.abs(v.diff) / 12);
+                      return months < 1.5 ? Math.round(months * 4.3) + ' weeks' : months.toFixed(1) + ' months';
+                    })()}
+                  </span>
+                  <span style={{ color: A.ink, fontWeight: 500 }}>.</span>
+                </div>
+
+                {/* Supporting paragraph */}
+                <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0, marginBottom: 0 }}>
+                  After that, every ₹1 spent compounds at <strong style={{ color: A.inkSoft, fontWeight: 600 }}>{v.roi.toFixed(1)}×</strong> — the rest of the year is pure return.
+                </p>
+              </>
+            ) : (
+              <>
+                {/* Loss state: Single-line headline */}
+                <div style={{
+                  fontFamily: A.serif, fontSize: 18, fontWeight: 400, fontStyle: 'italic',
+                  color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
+                  marginBottom: 12,
+                }}>
+                  Does not break even this year.
+                </div>
+
+                {/* Supporting paragraph */}
+                <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0, marginBottom: 0 }}>
+                  EquityList costs more in plan fees than it saves in manual ops at your current scale.
+                </p>
+              </>
+            )}
+
+            {/* Divider rule */}
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${A.line}`, display: 'flex', gap: 20 }}>
+              {/* Payback Period stat */}
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1.4,
+                  textTransform: 'uppercase', color: A.mute,
+                  marginBottom: 3,
+                }}>PAYBACK PERIOD</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
+                  <span style={{
+                    fontFamily: A.sans, fontSize: 19, fontWeight: 700,
+                    color: v.roi > 1 ? A.ink : A.muteSoft,
+                    fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5, lineHeight: 1,
+                  }}>
+                    {v.roi > 1 ? (v.elAnn / (Math.abs(v.diff) / 12)).toFixed(1) : '—'}
+                  </span>
+                  {v.roi > 1 && <span style={{ fontFamily: A.mono, fontSize: 10, color: A.mute, fontWeight: 700 }}>mo</span>}
+                </div>
+              </div>
+
+              {/* Vertical hairline divider */}
+              <span style={{ width: 1, background: A.line, alignSelf: 'stretch' }} />
+
+              {/* Hours Saved stat */}
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1.4,
+                  textTransform: 'uppercase', color: A.mute,
+                  marginBottom: 3,
+                }}>HOURS SAVED</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
+                  <span style={{
+                    fontFamily: A.sans, fontSize: 19, fontWeight: 700,
+                    color: A.ink, fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: -0.5, lineHeight: 1,
+                  }}>
+                    {v.hoursSaved}
+                  </span>
+                  <span style={{ fontFamily: A.mono, fontSize: 10, color: A.mute, fontWeight: 700 }}>hrs/yr</span>
+                </div>
+              </div>
             </div>
           </div>
 
