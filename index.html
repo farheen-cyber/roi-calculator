@@ -562,11 +562,12 @@
                 width: '100%', boxSizing: 'border-box',
                 border: 'none', borderBottom: `1px solid ${disabled ? A.line : borderColor}`,
                 padding: '8px 0', outline: 'none',
-                background: 'transparent', fontFamily: A.sans, fontSize: 16, lineHeight: 1.4,
-                color: disabled ? A.mute : A.ink, fontVariantNumeric: 'tabular-nums',
+                background: disabled ? 'rgba(232, 230, 240, 0.5)' : 'transparent', fontFamily: A.sans, fontSize: 16, lineHeight: 1.4,
+                color: disabled ? 'rgba(159, 153, 175, 0.6)' : A.ink, fontVariantNumeric: 'tabular-nums',
                 caretColor: error ? A.redLight : 'auto',
                 display: 'block',
                 cursor: disabled ? 'not-allowed' : 'auto',
+                opacity: disabled ? 0.5 : 1,
               }}
               onFocus={(e) => e.currentTarget.style.borderBottomColor = error ? A.redLight : A.purple}
               onBlur={(e) => e.currentTarget.style.borderBottomColor = borderColor}
