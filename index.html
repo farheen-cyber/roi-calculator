@@ -1487,35 +1487,25 @@
               <MonoLabel size={9.5} color={A.muteSoft}>FY 26</MonoLabel>
             </div>
 
-            {/* Stacked editorial headline (TWO separate block elements) */}
+            {/* Headline */}
             {v.roi > 1 ? (
               <>
-                {/* Line 1: Setup phrase */}
                 <div style={{
-                  fontFamily: A.serif, fontSize: 18, fontWeight: 400, fontStyle: 'italic',
-                  color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
-                  marginBottom: 4,
-                }}>
-                  Pays for itself in
-                </div>
-
-                {/* Line 2: Big number */}
-                <div style={{
-                  fontFamily: A.sans, fontSize: 38, fontWeight: 600,
-                  lineHeight: 1, letterSpacing: -1.2, fontVariantNumeric: 'tabular-nums',
+                  fontFamily: A.sans, fontSize: 28, fontWeight: 600,
+                  color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
                   marginBottom: 12,
                 }}>
+                  Pays for itself in{' '}
                   <span style={{
                     color: A.green,
-                    borderBottom: `2px solid ${A.greenTint}`,
-                    paddingBottom: 1,
+                    fontVariantNumeric: 'tabular-nums',
                   }}>
                     {(() => {
                       const months = v.elAnn / (Math.abs(v.diff) / 12);
                       return months < 1.5 ? Math.round(months * 4.3) + ' weeks' : months.toFixed(1) + ' months';
                     })()}
                   </span>
-                  <span style={{ color: A.ink, fontWeight: 500 }}>.</span>
+                  .
                 </div>
 
                 {/* Supporting paragraph */}
@@ -1525,10 +1515,10 @@
               </>
             ) : (
               <>
-                {/* Loss state: Single-line headline */}
+                {/* Loss state headline */}
                 <div style={{
-                  fontFamily: A.serif, fontSize: 18, fontWeight: 400, fontStyle: 'italic',
-                  color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
+                  fontFamily: A.sans, fontSize: 28, fontWeight: 600,
+                  color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
                   marginBottom: 12,
                 }}>
                   Does not break even this year.
