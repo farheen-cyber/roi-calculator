@@ -526,7 +526,7 @@
       );
     }
 
-    function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText, onNumericError }) {
+    function FormField({ label, value, onChange, placeholder, type = 'text', required, suffix, error, helperText, onNumericError, disabled }) {
       const borderColor = error ? A.redLight : A.line;
       const labelColor = error ? A.redLight : A.mute;
       const handleChange = (e) => {
@@ -557,14 +557,16 @@
               onChange={handleChange}
               placeholder={placeholder}
               aria-invalid={error ? 'true' : 'false'}
+              disabled={disabled}
               style={{
                 width: '100%', boxSizing: 'border-box',
-                border: 'none', borderBottom: `1px solid ${borderColor}`,
+                border: 'none', borderBottom: `1px solid ${disabled ? A.line : borderColor}`,
                 padding: '8px 0', outline: 'none',
                 background: 'transparent', fontFamily: A.sans, fontSize: 16, lineHeight: 1.4,
-                color: A.ink, fontVariantNumeric: 'tabular-nums',
+                color: disabled ? A.mute : A.ink, fontVariantNumeric: 'tabular-nums',
                 caretColor: error ? A.redLight : 'auto',
                 display: 'block',
+                cursor: disabled ? 'not-allowed' : 'auto',
               }}
               onFocus={(e) => e.currentTarget.style.borderBottomColor = error ? A.redLight : A.purple}
               onBlur={(e) => e.currentTarget.style.borderBottomColor = borderColor}
