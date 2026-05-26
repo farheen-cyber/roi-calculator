@@ -520,9 +520,10 @@
                 width: '100%', boxSizing: 'border-box',
                 border: 'none', borderBottom: `1px solid ${borderColor}`,
                 padding: '8px 0', outline: 'none',
-                background: 'transparent', fontFamily: A.sans, fontSize: 16,
+                background: 'transparent', fontFamily: A.sans, fontSize: 16, lineHeight: 1.4,
                 color: A.ink, fontVariantNumeric: 'tabular-nums',
                 caretColor: error ? A.redLight : 'auto',
+                display: 'block',
               }}
               onFocus={(e) => e.currentTarget.style.borderBottomColor = error ? A.redLight : A.purple}
               onBlur={(e) => e.currentTarget.style.borderBottomColor = borderColor}
