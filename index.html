@@ -1200,7 +1200,7 @@
         {
           key: 'grant',
           label: 'Grant Admin',
-          formula: `${v.grHr || 1.5} hrs/grant × (${parseInt(formData?.grNewHire, 10) || 0} new hire + ${parseInt(formData?.grRefresh, 10) || 0} refresh) = ${totalGrantsPerYear} grants/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          formula: 'Administration of equity grants for new hires and refreshes.',
           value: `${opCurrencySymbol}${(v.grCost || 0).toLocaleString(opLocale)}`,
           pct: `${grantPct}%`,
           tip: null
@@ -1208,10 +1208,7 @@
         {
           key: 'compliance',
           label: 'Compliance',
-          formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
-          value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
-          pct: `${compliancePct}%`,
-          tip: (() => {
+          formula: (() => {
             const geo = formData?.geoInc?.toLowerCase() || 'india';
             const stage = (formData?.stage || 'seriesab').toLowerCase();
             const geoReports = {
@@ -1224,52 +1221,47 @@
             const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
             const moreReports = (stageOrder[stage] || 2) >= 2 ? 4 : 2;
             return `${specific}, Cap table summary, vesting reports, grant summary, and ${moreReports} more reports`;
-          })()
+          })(),
+          value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
+          pct: `${compliancePct}%`,
+          tip: null
         },
         {
           key: 'captable',
           label: 'Cap Table',
-          formula: `3h/mo base + ${Math.max(0, ((formData?.sh || 30) - 20) / 50).toFixed(2)} × 2 = ${(3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2).toFixed(1)}h/mo × 12 = ${Math.round((3 + Math.max(0, ((formData?.sh || 30) - 20) / 50) * 2) * 12)} hrs/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          formula: 'Maintenance of your current and fully diluted cap table, securities tracking, and transfer processing.',
           value: `${opCurrencySymbol}${(v.ctCost || 0).toLocaleString(opLocale)}`,
           pct: `${capTablePct}%`,
-          tip: 'Maintenance of your current and fully diluted cap table, securities tracking, and transfer processing.'
+          tip: null
         },
         ...(v.ctFundraisingCost > 0 ? [{
           key: 'fundraising-captable',
           label: 'Fundraising — Cap Table',
-          formula: `${v.ctFundraisingHours || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          formula: 'Time spent on scenario modeling, creating and updating securities, and option pool adjustments.',
           value: `${opCurrencySymbol}${(v.ctFundraisingCost || 0).toLocaleString(opLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.ctFundraisingCost / v.annCost) * 100) : 0}%`,
-          tip: 'Time spent on scenario modeling, creating and updating securities, and option pool adjustments.'
+          tip: null
         }] : []),
         ...(v.secFundraisingCost > 0 ? [{
           key: 'fundraising-secretarial',
           label: 'Fundraising — Secretarial & Board',
-          formula: `${v.secFundraisingRaw || 0} hrs/yr (${formatRound(v.fundraiseRound) || 'SEED'} round ${v.roundMultiplier || 1}× complexity with ${v.newShareholdersFromFundraise || 0} new shareholders) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.secRate || 0)}/hr`,
+          formula: 'Time spent on board and shareholder resolutions, documentation, and signature tracking.',
           value: `${opCurrencySymbol}${(v.secFundraisingCost || 0).toLocaleString(opLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.secFundraisingCost / v.annCost) * 100) : 0}%`,
-          tip: 'Time spent on board and shareholder resolutions, documentation, and signature tracking.'
+          tip: null
         }] : []),
         ...(v.methodExtCost > 0 ? [{
           key: 'retainer',
           label: 'Outsourced Administration Retainer',
-          formula: `Annual retainer for ${v.meth === 'outsourced' ? formData?.stage?.toUpperCase() || 'SERIES A/B' : 'N/A'} stage (external provider)`,
+          formula: 'Fixed annual fee to external law firm or CA for ongoing equity administration.',
           value: `${opCurrencySymbol}${(v.methodExtCost || 0).toLocaleString(opLocale)}`,
           pct: `${v.annCost > 0 ? Math.round((v.methodExtCost / v.annCost) * 100) : 0}%`,
-          tip: 'Fixed annual fee to external law firm or CA for ongoing equity administration.'
+          tip: null
         }] : []),
         ...(v.valuationCost > 0 ? [{
           key: 'valuation',
           label: 'Valuation Reports',
-          formula: (() => {
-            const freqStr = formData?.valuationFrequency === 'quarterly' ? '4 events/yr' : '1 event/yr';
-            const stagePricing = VALUATION_PRICING[formData?.valuationType]?.[formData?.stage];
-            const opCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
-            const costPerEvent = stagePricing ? stagePricing[opCurrency] : 0;
-            const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
-            const locale = { USD: 'en-US', INR: 'en-IN', GBP: 'en-GB', SGD: 'en-SG' }[opCurrency] || 'en-IN';
-            return `${freqStr} × ${currencySymbol}${costPerEvent.toLocaleString(locale)} per event`;
-          })(),
+          formula: formData?.valuationFrequency === 'quarterly' ? 'Independent valuation reports for equity accounting and 409A compliance, performed quarterly.' : 'Independent valuation reports for equity accounting and 409A compliance, performed annually.',
           value: (() => {
             const opCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
