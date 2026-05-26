@@ -195,9 +195,12 @@
       uk: 54
     };
 
+    // Workflow counts for fundraising (per PRD fundraising_workflows definition)
+    // Each workflow ≈ 2.5 hours (documentation, approvals, communications, meetings)
+    // Source: roi-calculator-prd.md lines 226-227
     const FUNDRAISING_WORKFLOWS = {
-      capTable: 3,
-      secretarial: 4
+      capTable: 3,    // Cap table updates, new shareholder onboarding, transfers
+      secretarial: 4  // Board meetings, shareholder approvals, governance coordination
     };
 
     const VALUATION_PRICING = {
@@ -378,21 +381,42 @@
       const grCost = grHrs * mult * rate;
       const cpCost = compHr * mult * rate;
 
-      const ctRaw = (3 + Math.max(0, (sh - 20) / 50) * 2) * 12;
+      // === CAP TABLE MAINTENANCE ===
+      // Base: 3 hours/month (reconciliation, board updates, record-keeping)
+      // Scaling: +2 hours/month for every 50 shareholders above 20
+      // Per PRD lines 210-220: Cap table complexity grows non-linearly with shareholder count
+      const CAP_TABLE_BASE_HOURS_PER_MONTH = 3;
+      const CAP_TABLE_SCALING_INCREMENT = 2; // hours/month per each 50 shareholders above 20
+      const ctShareholderScale = Math.max(0, (sh - 20) / 50);
+      const ctMonthlyHours = CAP_TABLE_BASE_HOURS_PER_MONTH + (ctShareholderScale * CAP_TABLE_SCALING_INCREMENT);
+      const ctRaw = ctMonthlyHours * 12; // annualize
       const ctHrs = ctRaw * mult;
       const ctCost = ctHrs * rate;
 
       const ROUND_COMPLEXITY = { preseed: 0.5, safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
       const roundMultiplier = planningToFundraise ? (ROUND_COMPLEXITY[fundraiseRound] || 1.0) : 0;
-      const ctFundraisingHours = planningToFundraise ? (FUNDRAISING_WORKFLOWS.capTable * 2.5 * roundMultiplier) : 0;
+
+      // === FUNDRAISING: CAP TABLE ===
+      // 3 workflows × 2.5 hours/workflow = 7.5 hours baseline
+      // Per PRD: "3 for cap table" workflows during fundraising
+      // "One workflow" = ~2.5 hours (documentation, approvals, shareholder communication)
+      const HOURS_PER_WORKFLOW = 2.5;
+      const ctFundraisingBaseHours = FUNDRAISING_WORKFLOWS.capTable * HOURS_PER_WORKFLOW; // 3 × 2.5 = 7.5
+      const ctFundraisingHours = planningToFundraise ? (ctFundraisingBaseHours * roundMultiplier) : 0;
       const ctFundraisingHrs = ctFundraisingHours * mult;
       const ctFundraisingCost = ctFundraisingHrs * rate;
 
       const secRate = STAGE_HOURLY_RATES[geoInc][stageKey].cs;
 
-      const secFundraisingWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
-      const secFundraisingHours = secFundraisingWorkflows * 2.5 * roundMultiplier;
+      // === FUNDRAISING: SECRETARIAL & BOARD ===
+      // 4 workflows × 2.5 hours/workflow = 10 hours baseline
+      // Per PRD: "4 for secretarial prep" workflows during fundraising
+      // Scaled by shareholder count (more shareholders = more communication/coordination)
+      const secFundraisingBaseWorkflows = planningToFundraise ? FUNDRAISING_WORKFLOWS.secretarial : 0;
+      const secFundraisingBaseHours = secFundraisingBaseWorkflows * HOURS_PER_WORKFLOW; // 4 × 2.5 = 10
+      const secFundraisingHours = secFundraisingBaseHours * roundMultiplier;
       const effectiveShareholders = planningToFundraise ? (sh + newShareholdersFromFundraise) : sh;
+      // Shareholder scaling: starts at 1.0 for ≤20 shareholders, increases 0.5% for every 100 shareholders above 20
       const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
       const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
       const secFundraisingHrs = secFundraisingRaw * mult;
