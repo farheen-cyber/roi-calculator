@@ -1211,7 +1211,20 @@
           formula: `${v.compHr || 72} hrs/yr (${Math.round((v.compHr || 72) / 12)}h/mo, ${formData?.geoInc?.toUpperCase() || 'INDIA'} statutory baseline) × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.cpCost || 0).toLocaleString(opLocale)}`,
           pct: `${compliancePct}%`,
-          tip: 'Statutory compliance reporting by geography — Ind AS 102/15 equity standards, shareholder registers (SH-6), cap table reports, board minutes, regulatory filings, and plan administration.'
+          tip: (() => {
+            const geo = formData?.geoInc?.toLowerCase() || 'india';
+            const stage = (formData?.stage || 'seriesab').toLowerCase();
+            const geoReports = {
+              india: 'Ind AS 102/15, SH-6 register',
+              us: 'ASC 718/820, Rule 701',
+              singapore: 'IFRS 2',
+              uk: 'IFRS 2'
+            };
+            const specific = geoReports[geo] || geoReports.india;
+            const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
+            const moreReports = (stageOrder[stage] || 2) >= 2 ? 4 : 2;
+            return `${specific}, Cap table summary, vesting reports, grant summary, and ${moreReports} more reports`;
+          })()
         },
         {
           key: 'captable',
