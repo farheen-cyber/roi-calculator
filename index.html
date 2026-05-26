@@ -1632,7 +1632,8 @@
         if (inputs?.planningToFundraise) {
           if (!inputs?.fundraiseRound) newErrors.fundraiseRound = 'Field required';
           const newShareholdersStr = String(inputs?.newShareholdersFromFundraise ?? '').trim();
-          if (!newShareholdersStr) newErrors.newShareholdersFromFundraise = 'Field required';
+          const newShareholdersNum = parseInt(newShareholdersStr, 10);
+          if (isNaN(newShareholdersNum) || newShareholdersNum <= 0) newErrors.newShareholdersFromFundraise = 'Field required';
         }
 
         // Validate valuation fields if valuation toggle is on
