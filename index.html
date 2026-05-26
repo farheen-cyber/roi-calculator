@@ -1261,7 +1261,7 @@
         ...(v.valuationCost > 0 ? [{
           key: 'valuation',
           label: 'Valuation Reports',
-          formula: formData?.valuationFrequency === 'quarterly' ? 'Independent valuation reports for equity accounting and 409A compliance, performed quarterly.' : 'Independent valuation reports for equity accounting and 409A compliance, performed annually.',
+          formula: 'Independent valuation reports for equity accounting.',
           value: (() => {
             const opCurrency = GEO_TO_CURRENCY[formData?.geoInc] || 'INR';
             const currencySymbol = CURRENCY_SYMBOLS[opCurrency] || '₹';
