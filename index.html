@@ -1484,7 +1484,10 @@
               <MonoLabel size={10.5} color={A.ink}>ROI</MonoLabel>
             </div>
             <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${A.lineSoft}` }}>
-              <MonoLabel size={10}>Your ROI with EquityList</MonoLabel>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <MonoLabel size={10}>Your ROI with EquityList</MonoLabel>
+                <InfoTip text="Ratio of annual savings to EquityList cost. Higher is better — how many times over the EquityList cost you save per year." />
+              </div>
               <div style={{ fontFamily: A.sans, fontSize: 18, fontWeight: 700, color: A.ink, letterSpacing: -0.4 }}>{v.roi}×</div>
             </div>
             <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
