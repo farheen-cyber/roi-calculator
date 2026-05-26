@@ -363,6 +363,9 @@
         const roles = ['founder', 'hr', 'finance', 'cs'];
         rate = 0;
         for (const role of roles) {
+          if (role === 'hr' && oh === 0 && parseInt(grNewHire, 10) === 0) {
+            continue;
+          }
           const fte = matrix[role] || 0;
           if (fte > 0) {
             const roleRate = STAGE_HOURLY_RATES[geoInc][stageKey][role];
