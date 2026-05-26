@@ -287,47 +287,95 @@
     const CURRENCY_SYMBOLS = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [v.code, v.symbol]));
     const GEO_TO_CURRENCY = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [k, v.code]));
 
-    // ============ DYNAMIC COMPLIANCE HOURS ============
+    // ============ DYNAMIC COMPLIANCE HOURS (TIERED BY REPORTS) ============
     function getDynamicComplianceHours(stage, shareholders, optionHolders, geoInc, newHireGrants = 0) {
-      const accountingByGeo = {
-        india: 40,
-        us: 38,
-        singapore: 24,
-        uk: 24
+      // Define report hours by geography
+      const REPORT_HOURS = {
+        india: {
+          tier1: {
+            'cap-table-summary': 8,
+            'transaction-ledger': 12
+          },
+          tier2: {
+            'equity-plan-overview': 2,
+            'grant-summary': 4,
+            'ind-as-102-15': 24,
+            'sh6-esop-register': 16,
+            'vesting-reports': 2
+          },
+          tier3: {
+            'exercise-reports': 2,
+            'surrender-summaries': 2
+          }
+        },
+        us: {
+          tier1: {
+            'cap-table-summary': 8,
+            'transaction-ledger': 12
+          },
+          tier2: {
+            'equity-plan-overview': 2,
+            'grant-summary': 4,
+            'asc-718-820': 32,
+            'rule-701-analysis': 6,
+            'vesting-reports': 2
+          },
+          tier3: {
+            'exercise-reports': 2,
+            'surrender-summaries': 2
+          }
+        },
+        singapore: {
+          tier1: {
+            'cap-table-summary': 8,
+            'transaction-ledger': 12
+          },
+          tier2: {
+            'equity-plan-overview': 2,
+            'grant-summary': 4,
+            'ifrs2': 24,
+            'vesting-reports': 2
+          },
+          tier3: {
+            'exercise-reports': 2,
+            'surrender-summaries': 2
+          }
+        },
+        uk: {
+          tier1: {
+            'cap-table-summary': 8,
+            'transaction-ledger': 12
+          },
+          tier2: {
+            'equity-plan-overview': 2,
+            'grant-summary': 4,
+            'ifrs2': 24,
+            'vesting-reports': 2
+          },
+          tier3: {
+            'exercise-reports': 2,
+            'surrender-summaries': 2
+          }
+        }
       };
 
-      const complexityFactor = {
-        preseed: 0.03,
-        seed: 0.05,
-        seriesab: 0.08,
-        seriesbc: 0.10,
-        seriesc: 0.15
-      };
-
-      const accountingScale = {
-        preseed: 0.25,
-        seed: 0.40,
-        seriesab: 0.60,
-        seriesbc: 0.80,
-        seriesc: 1.0
-      };
-
+      const geoReports = REPORT_HOURS[geoInc] || REPORT_HOURS.india;
       let hours = 0;
-      const factor = complexityFactor[stage];
 
-      // Scale from shareholder count
-      hours += shareholders * factor;
+      // TIER 1: Always required if you have shareholders
+      if (shareholders > 0) {
+        Object.values(geoReports.tier1).forEach(h => hours += h);
+      }
 
-      // Scale from option holder count (current + new hires) + accounting
-      // Include if you have option holders OR are issuing new hire grants
+      // TIER 2: Required if you have option holders or plan to issue grants
       if (optionHolders > 0 || newHireGrants > 0) {
-        // Both current and future option holders affect compliance
-        const totalOptionHolders = optionHolders + newHireGrants;
-        hours += totalOptionHolders * factor;
+        Object.values(geoReports.tier2).forEach(h => hours += h);
+      }
 
-        // Accounting scales by stage AND by option holder complexity (current only)
-        const accountingMultiplier = 1 + (optionHolders * 0.01);
-        hours += accountingByGeo[geoInc] * accountingScale[stage] * accountingMultiplier;
+      // TIER 3: Required if you have equity AND at Series A or later
+      const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
+      if ((optionHolders > 0 || newHireGrants > 0) && (stageOrder[stage] || 0) >= 2) {
+        Object.values(geoReports.tier3).forEach(h => hours += h);
       }
 
       return Math.round(hours);
