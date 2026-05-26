@@ -1486,20 +1486,29 @@
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
-                <span style={{ fontStyle: 'italic', fontSize: 20, color: A.ink }}>Every</span>
-                <span style={{ fontFamily: A.sans, fontSize: 28, fontWeight: 700, color: A.green }}>₹1</span>
-                <span style={{ fontSize: 20, color: A.ink }}>returns</span>
-                <span style={{ fontFamily: A.sans, fontSize: 28, fontWeight: 700, color: v.roi > 0 ? A.green : '#D32F2F', letterSpacing: -0.4 }}>₹{v.roi.toFixed(2)}</span>
-                <span style={{ fontSize: 20, color: A.ink }}>.</span>
-              </div>
-              <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
-                {v.roi > 1 ? (
-                  <>Recoups in {(() => {const months = Math.round((v.elAnn / (Math.abs(v.diff) / 12))); return months > 0 ? `${months} month${months !== 1 ? 's' : ''}` : 'less than 1 month';})()}. After that, every operation runs on autopilot.</>
-                ) : (
-                  <>Below break-even at your scale — EquityList costs more in plan fees than it saves in manual ops.</>
-                )}
-              </p>
+              {v.roi > 1 ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12, fontSize: 28, fontWeight: 700, color: A.ink, lineHeight: 1.2 }}>
+                    <span style={{ fontStyle: 'italic' }}>Pays for itself in</span>
+                    <span style={{ fontFamily: A.sans, color: A.green, fontStyle: 'normal' }}>{(() => {const months = (v.elAnn / (Math.abs(v.diff) / 12)); return months.toFixed(1);})()}</span>
+                    <span style={{ fontStyle: 'italic' }}>months.</span>
+                  </div>
+                  <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
+                    After that, every ₹1 spent compounds at <strong style={{ color: A.ink, fontWeight: 700 }}>{v.roi.toFixed(1)}×</strong> — the rest of the year is pure return.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12, fontSize: 28, fontWeight: 700, color: A.ink, lineHeight: 1.2 }}>
+                    <span style={{ fontStyle: 'italic' }}>Does not</span>
+                    <span style={{ fontStyle: 'italic', color: '#D32F2F', fontStyle: 'italic' }}>break even</span>
+                    <span style={{ fontStyle: 'italic' }}>this year.</span>
+                  </div>
+                  <p style={{ fontSize: 14, color: A.inkSoft, margin: 0, lineHeight: 1.5 }}>
+                    EquityList costs more in plan fees than it saves in manual ops at your current scale.
+                  </p>
+                </>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: 20, paddingTop: 12, borderTop: `1px solid ${A.lineSoft}` }}>
