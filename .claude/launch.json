@@ -2,11 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "static",
+      "name": "roi-calculator",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8000", "--directory", "/Users/farheenshaikh/Documents/roi-calculator"],
-      "port": 8000,
-      "autoPort": true
+      "runtimeArgs": ["-m", "http.server", "3000"],
+      "port": 3000
     }
   ]
 }

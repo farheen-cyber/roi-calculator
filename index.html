@@ -1158,11 +1158,12 @@
       const opCurrencySymbol = opCurrencyInfo.symbol;
       const opLocale = opCurrencyInfo.locale;
 
+      const totalGrantsPerYear = (parseInt(formData?.grNewHire, 10) || 0) + (parseInt(formData?.grRefresh, 10) || 0);
       const items = [
         {
           key: 'grant',
           label: 'Grant Admin',
-          formula: `${v.grHr || 1.5} hrs/grant × ${formData?.gr || 10} grants/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
+          formula: `${v.grHr || 1.5} hrs/grant × (${parseInt(formData?.grNewHire, 10) || 0} new hire + ${parseInt(formData?.grRefresh, 10) || 0} refresh) = ${totalGrantsPerYear} grants/yr × ${v.mult || 1} × ${opCurrencySymbol}${Math.round(v.rate || 0)}/hr`,
           value: `${opCurrencySymbol}${(v.grCost || 0).toLocaleString(opLocale)}`,
           pct: `${grantPct}%`,
           tip: null
@@ -1241,7 +1242,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <MonoLabel size={11} color={A.ink}>Live Estimate</MonoLabel>
                 <span style={{ width: 1, height: 14, background: A.line }} />
-                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, gr: formData?.gr, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise, fundraiseRound: formData?.fundraiseRound, newShareholdersFromFundraise: formData?.newShareholdersFromFundraise, valuationFrequency: formData?.valuationFrequency, valuationType: formData?.valuationType })} />
+                <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, grNewHire: formData?.grNewHire, grRefresh: formData?.grRefresh, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise, fundraiseRound: formData?.fundraiseRound, newShareholdersFromFundraise: formData?.newShareholdersFromFundraise, valuationFrequency: formData?.valuationFrequency, valuationType: formData?.valuationType })} />
               </div>
             </div>
             <div style={{ fontSize: 12.5, color: A.mute, marginTop: 6 }}>
@@ -1500,7 +1501,7 @@
                 <path d="M3 9l4-4 4 4"/>
               </svg>
             </div>
-            <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, gr: formData?.gr, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise, fundraiseRound: formData?.fundraiseRound, newShareholdersFromFundraise: formData?.newShareholdersFromFundraise, valuationFrequency: formData?.valuationFrequency, valuationType: formData?.valuationType })} />
+            <StatusChip mode={mode} onEdit={() => onRecalculate && onRecalculate({ sh: formData?.sh, oh: formData?.oh, grNewHire: formData?.grNewHire, grRefresh: formData?.grRefresh, geoInc: formData?.geoInc, geoOp: formData?.geoOp, stage: formData?.stage, meth: formData?.meth, planningToFundraise: formData?.planningToFundraise, fundraiseRound: formData?.fundraiseRound, newShareholdersFromFundraise: formData?.newShareholdersFromFundraise, valuationFrequency: formData?.valuationFrequency, valuationType: formData?.valuationType })} />
           </div>
 
           {/* Expanded section */}
@@ -1521,12 +1522,16 @@
         const defaultInputs = {
           sh: 30,
           oh: 15,
-          gr: 10,
+          grNewHire: 5,
+          grRefresh: 5,
           geoInc: 'india',
           geoOp: 'india',
           stage: 'seriesab',
           meth: 'in-house',
-          legalEntityName: ''
+          legalEntityName: '',
+          planningToFundraise: false,
+          valuationFrequency: null,
+          valuationType: null
         };
         return computeROI(defaultInputs);
       });
@@ -1565,11 +1570,13 @@
         // Validate numeric fields
         const sharesErr = validateField('shareholders', String(inputs?.sh || ''));
         const holdersErr = validateField('optionHolders', String(inputs?.oh || ''));
-        const grantsErr = validateField('grants', String(inputs?.gr || ''));
+        const newHireGrantsErr = validateField('grants', String(inputs?.grNewHire || ''));
+        const refreshGrantsErr = validateField('grants', String(inputs?.grRefresh || ''));
 
         if (sharesErr) newErrors.shareholders = sharesErr;
         if (holdersErr) newErrors.optionHolders = holdersErr;
-        if (grantsErr) newErrors.grants = grantsErr;
+        if (newHireGrantsErr) newErrors.newHireGrants = newHireGrantsErr;
+        if (refreshGrantsErr) newErrors.refreshGrants = refreshGrantsErr;
 
         // Validate fundraise fields if fundraising is enabled
         if (inputs?.planningToFundraise) {
@@ -1591,7 +1598,8 @@
             ...inputs,
             sh: parseInt(inputs.sh, 10),
             oh: parseInt(inputs.oh, 10),
-            gr: parseInt(inputs.gr, 10),
+            grNewHire: parseInt(inputs.grNewHire, 10),
+            grRefresh: parseInt(inputs.grRefresh, 10),
           };
           const calcs = computeROI(validatedInputs, overrides);
           setResults(calcs);
@@ -1612,13 +1620,13 @@
 
             // Track which specific fields have changed from last calculated values
             const newDirty = {};
-            const fields = ['sh', 'oh', 'gr', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
+            const fields = ['sh', 'oh', 'grNewHire', 'grRefresh', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
             fields.forEach(field => {
               // Convert numeric fields for comparison (form values are strings, formData values are integers)
               let currentVal = currentFormData[field];
               let previousVal = formData[field];
 
-              if (['sh', 'oh', 'gr', 'newShareholdersFromFundraise'].includes(field)) {
+              if (['sh', 'oh', 'grNewHire', 'grRefresh', 'newShareholdersFromFundraise'].includes(field)) {
                 currentVal = parseInt(currentVal, 10) || 0;
                 previousVal = parseInt(previousVal, 10) || 0;
               }
