@@ -463,6 +463,7 @@
         <div style={{
           fontFamily: A.mono, fontSize: size, fontWeight: 700, letterSpacing: 1.4,
           textTransform: 'uppercase', color: color || A.mute,
+          display: 'flex', alignItems: 'center', gap: 4,
           ...style,
         }}>{children}</div>
       );
@@ -909,8 +910,8 @@
             <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
               <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.shareholders ? 'Only numbers allowed' : errors?.shareholders} onNumericError={(hasError) => setNumericErrors({...numericErrors, shareholders: hasError})} />
               <FormField label={<>Option holders <InfoTip text="Employees and advisors with vested or unvested options outstanding." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.optionHolders ? 'Only numbers allowed' : errors?.optionHolders} onNumericError={(hasError) => setNumericErrors({...numericErrors, optionHolders: hasError})} />
-              <FormField label={<>New hire grants/year <InfoTip text="Employees newly hired with stock options annually — drives compliance overhead and stakeholder count." /></>} required value={newHireGrants} onChange={(v) => { setNewHireGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.newHireGrants ? 'Only numbers allowed' : errors?.newHireGrants} helperText={newHireGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, newHireGrants: hasError})} />
-              <FormField label={<>Refresh grants/year <InfoTip text="Equity refreshes and acceleration grants to existing option holders — drives grant overhead." /></>} required value={refreshGrants} onChange={(v) => { setRefreshGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.refreshGrants ? 'Only numbers allowed' : errors?.refreshGrants} helperText={refreshGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, refreshGrants: hasError})} />
+              <FormField label={<>New hire grants/yr <InfoTip text="Employees newly hired with stock options annually — drives compliance overhead and stakeholder count." /></>} required value={newHireGrants} onChange={(v) => { setNewHireGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.newHireGrants ? 'Only numbers allowed' : errors?.newHireGrants} helperText={newHireGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, newHireGrants: hasError})} />
+              <FormField label={<>Refresh grants/yr <InfoTip text="Equity refreshes and acceleration grants to existing option holders — drives grant overhead." /></>} required value={refreshGrants} onChange={(v) => { setRefreshGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.refreshGrants ? 'Only numbers allowed' : errors?.refreshGrants} helperText={refreshGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, refreshGrants: hasError})} />
             </div>
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
