@@ -1482,9 +1482,8 @@
           <div className={mode === 'stale' ? 'panel-body--stale' : ''} style={{ background: '#fff', border: `1px solid ${A.line}`, borderRadius: 8, padding: '18px', position: 'relative', overflow: 'hidden' }}>
 
             {/* Header row */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingBottom: 12, borderBottom: `1px solid ${A.lineSoft}` }}>
+            <div style={{ marginBottom: 20, paddingBottom: 12, borderBottom: `1px solid ${A.lineSoft}` }}>
               <MonoLabel size={10.5} color={A.ink}>RETURN ON INVESTMENT</MonoLabel>
-              <MonoLabel size={9.5} color={A.muteSoft}>FY 26</MonoLabel>
             </div>
 
             {/* Content with left accent bar */}
@@ -1542,31 +1541,9 @@
             </div>
 
             {/* Divider rule */}
-            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${A.line}`, display: 'flex', gap: 20 }}>
-              {/* Payback Period stat */}
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1.4,
-                  textTransform: 'uppercase', color: A.mute,
-                  marginBottom: 3,
-                }}>PAYBACK PERIOD</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
-                  <span style={{
-                    fontFamily: A.sans, fontSize: 19, fontWeight: 700,
-                    color: v.roi > 1 ? A.ink : A.muteSoft,
-                    fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5, lineHeight: 1,
-                  }}>
-                    {v.roi > 1 ? (v.elAnn / (Math.abs(v.diff) / 12)).toFixed(1) : '—'}
-                  </span>
-                  {v.roi > 1 && <span style={{ fontFamily: A.mono, fontSize: 10, color: A.mute, fontWeight: 700 }}>mo</span>}
-                </div>
-              </div>
-
-              {/* Vertical hairline divider */}
-              <span style={{ width: 1, background: A.line, alignSelf: 'stretch' }} />
-
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${A.line}` }}>
               {/* Hours Saved stat */}
-              <div style={{ flex: 1 }}>
+              <div>
                 <div style={{
                   fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1.4,
                   textTransform: 'uppercase', color: A.mute,
