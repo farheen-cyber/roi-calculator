@@ -97,7 +97,7 @@ Many users ask: "Why do I have to enter incorporation country AND operating coun
 - **Timing** (informational only): 3–6 months, 6–12 months (UI messaging, not calculations)
 - **Expected new shareholders**: Investors, SAFE conversions, option pool grants from the round
 
-**Why it's optional**: Not all companies are fundraising; this adds 7+ workflows for 2-3 months of the year
+**Why it's optional**: Not all companies are fundraising; this adds 6 workflows (3 cap table + 3 secretarial) for 2-3 months of the year
 
 **Impact on calculation**:
 - Adds `FUNDRAISING_WORKFLOWS.capTable` (3 workflows × 2.5 hrs = 7.5 hrs baseline)
