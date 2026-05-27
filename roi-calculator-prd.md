@@ -100,10 +100,21 @@ Many users ask: "Why do I have to enter incorporation country AND operating coun
 **Why it's optional**: Not all companies are fundraising; this adds 6 workflows (3 cap table + 3 secretarial) for 2-3 months of the year
 
 **Impact on calculation**:
-- Adds `FUNDRAISING_WORKFLOWS.capTable` (3 workflows × 2.5 hrs = 7.5 hrs baseline)
-- Adds `FUNDRAISING_WORKFLOWS.secretarial` (3 workflows × 2.5 hrs = 7.5 hrs baseline)
-- Both scaled by `ROUND_COMPLEXITY[fundraiseRound]` (0.5× for SAFE, 1.0× for Seed, 2.5× for Series C+)
-- Shareholder count increases by `newShareholdersFromFundraise` for cost calculations
+
+**Cap Table Workflows (3 × 2.5 hrs = 7.5 hrs baseline)**:
+1. Pre-round cap table modeling (dilution analysis, ownership scenarios)
+2. Security issuance updates (SAFE/stock creation, investor allocation)
+3. Post-close cap table reconciliation (true-up, stakeholder records, statutory filings)
+
+**Secretarial Workflows (3 × 2.5 hrs = 7.5 hrs baseline)**:
+1. Board approvals (fundraising resolutions, board meeting coordination)
+2. Shareholder approvals (written consents, voting, documentation)
+3. Documentation coordination (agreements, signatures, closing mechanics)
+
+**Scaling**:
+- Both cap table and secretarial workflows scaled by `ROUND_COMPLEXITY[fundraiseRound]` (0.5× for SAFE, 1.0× for Seed, 2.5× for Series C+)
+- Secretarial workflows additionally scaled by shareholder count: 1 + max(0, (shareholders - 20) / 100) × 0.5
+- Shareholder count increases by `newShareholdersFromFundraise` for cost calculations during fundraising
 
 #### Valuation Reports (Subsection D)
 **When enabled**: Company needs third-party valuations
