@@ -184,11 +184,18 @@ mult = {
 
 **The core insight**: Equity admin workload doesn't change instantly when you raise a round. It scales gradually with headcount and governance complexity.
 
-**What FTE means**: Full-Time Equivalent. The fraction of a person's time spent on equity administration.
-- **1.0** = 1 full-time person (40 hrs/week dedicated to equity)
-- **0.5** = Half-time (1 person at 50%, OR 2 people at 25% each)
-- **2.5** = 2.5 full-time people (could be 3 people at ~83% each, or 5 people at 50% each)
-- **0** = No person (role not needed at this stage)
+**What FTE means**: Full-Time Equivalent. This is a **cost allocation model**, not a time-tracking model. It represents "which roles are responsible for equity work and at what cost."
+
+- **1.0** = 1 person's full salary is attributed to equity work (doesn't mean they work 40 hrs/week ONLY on equity—they have many responsibilities)
+- **0.5** = Half a person's salary is attributed to equity work (person splits their time between equity and other ops, OR two people each split their time)
+- **2.5** = 2.5 people's salaries are attributed to equity work (various staffing combinations)
+- **0** = Role not needed at this stage
+
+**Important distinction**: 
+- Preseed founder at 1.0 FTE doesn't mean founder works 40 hrs/week only on equity
+- It means founder IS the responsible party for equity, and for cost modeling purposes, equity is a major responsibility
+- Founder actually works 60 hrs/week total: ~10 hrs equity, ~20 hrs product, ~15 hrs fundraising, ~15 hrs ops
+- The cost model says "grant admin work = 7.5 hours at founder's $113/hr rate = $847.50" (not "founder spends 7.5 hrs/week on equity")
 
 ```javascript
 const STAFFING_MATRIX = {
