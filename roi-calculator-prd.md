@@ -57,14 +57,19 @@ Many users ask: "Why do I have to enter incorporation country AND operating coun
   - CFO in India (₹4,000/hr) vs. US ($431/hr) reflects market salary differences
 
 **Operating geography** (`geo_op`):
-- Determines **which roles are needed onshore** (Can you outsource some work?)
-- Determines **currency for display** (Show costs in the user's local currency)
-- Does NOT affect calculation (all calculations use incorporation country rates)
+- **Currently NOT USED in calculations** — this is a design debt item
+- **Intended design**: Was meant to control currency for display (show costs in local spending currency)
+- **Actual behavior**: Even currency display uses `geoInc` (see code bug below)
 
-**Real example**: An India-incorporated startup operating in Singapore
-- Compliance requirements: Follow India's SH-6 rules (incorporation jurisdiction controls)
-- Labor costs: Use India hourly rates for internal staff (cheaper, can work remotely)
-- Display currency: Show in SGD (where they're spending money)
+**⚠️ CODE BUG**: `geoOp` is collected in the form but never used in the `calculate()` function. All operations (rates, pricing, currency) are determined by `geoInc` only.
+
+**Real example of current behavior**: An India-incorporated startup operating in Singapore
+- Compliance requirements: Follow India's SH-6 rules (incorporation jurisdiction controls) ✓
+- Labor costs: Use India hourly rates for internal staff ✓
+- **Display currency**: Shows in INR (geoInc) even though user operates in SGD ✗
+- **Expected currency**: Should show in SGD (geoOp) but doesn't
+
+**Next steps**: Either remove `geoOp` from the form (if not needed) or implement it fully to show costs in operating geography currency.
 
 ---
 
@@ -1092,13 +1097,23 @@ The ROI is **rounded to the nearest 0.1** (one decimal place) for display precis
 5. ✅ **Grant Admin Semantics**: Clarified option holders vs. new hire vs. refresh grants (Section 4.1)
 
 ### Open Issues
-1. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
 
-2. **Valuation Currency Bug**: Code line 435 uses `geoInc` for currency selection, but PRD v3.3 intended `geoOp` (display currency). This causes valuation costs to be calculated in incorporation currency instead of operating currency. **Needs code fix or clarification of intent.**
+1. **`geoOp` (Operating Geography) Not Implemented**: Code collects `geoOp` in the form (line 959) but never uses it anywhere in the `calculate()` function (lines 353–498). This is a design debt item.
+   - **Intent**: `geoOp` was meant to show costs in the user's local operating currency
+   - **Current behavior**: All costs shown in `geoInc` currency (incorporation geography)
+   - **Example impact**: India-incorporated startup operating in Singapore sees costs in INR instead of SGD
+   - **Fix options**:
+     - **Option A**: Remove `geoOp` input from form (simplify)
+     - **Option B**: Implement currency conversion using `geoOp` for display purposes only (all calculations stay in `geoInc`)
+   - **Effort**: Low (either remove field or add currency conversion to display layer)
 
-3. **Payback Period**: Previously calculated and displayed but removed from ROI card output (v3.5). Formula was: `paybackMonths = elAnn / (diff / 12)`. Should this metric be documented as historical or re-introduced?
+2. **Valuation Currency Bug**: Code line 438 uses `GEO_TO_CURRENCY[geoInc]` for valuation pricing lookup, but this is actually correct (pricing is by incorporation jurisdiction). However, if Option B above is chosen (implement `geoOp` for display), then valuation costs will need currency conversion for display. **Revisit after `geoOp` implementation decision.**
 
-4. **Stakeholders Calculation Design**: Including `grNewHire` in platform pricing (`min(sh + oh + grNewHire, 10000)`) inflates stakeholder count. Design decision: Should new hire grants count toward platform pricing, or only existing shareholders + option holders?
+3. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
+
+4. **Payback Period**: Previously calculated and displayed but removed from ROI card output (v3.5). Formula was: `paybackMonths = elAnn / (diff / 12)`. Should this metric be documented as historical or re-introduced?
+
+5. **Stakeholders Calculation Design**: Including `grNewHire` in platform pricing (`min(sh + oh + grNewHire, 10000)`) inflates stakeholder count. Design decision: Should new hire grants count toward platform pricing, or only existing shareholders + option holders?
 
 ---
 
