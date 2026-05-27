@@ -222,10 +222,28 @@ const STAFFING_MATRIX = {
 
 **Critical**: These are NOT "how many people you must hire." They're the **fraction of time equity admin consumes** from each role. 
 
-**Real examples**:
+**Real examples of staffing combinations**:
 - Series A/B Company Secretary (0.5 FTE): Could be 1 person spending 50% on equity + 50% on other ops work, OR 2 people each spending 25% on equity
 - Series C Finance (2.5 FTE): Could be 2 full-time people + 1 half-time person, OR 5 people each spending 50% on equity
 - Preseed Finance (0.0 FTE): No dedicated finance person; founder or accountant handles taxes/equity
+
+**How blended rates change across stages** (US example):
+
+| Stage | Staffing | Blended Rate Calculation | Total Rate |
+|-------|----------|--------------------------|------------|
+| **Preseed** | founder: 1.0 | (1.0 × $113) | **$113/hr** |
+| **Seed** | founder: 1.0, HR: 0.5, Finance: 0.5 | (1.0 × $113) + (0.5 × $63) + (0.5 × $69) | **$181/hr** |
+| **Series A/B** | founder: 0.8, HR: 1.0, Finance: 1.0, CS: 0.5 | (0.8 × $288) + (1.0 × $131) + (1.0 × $156) + (0.5 × $119) | **$577/hr** |
+| **Series B/C** | founder: 0.5, HR: 2.0, Finance: 2.0, CS: 1.0 | (0.5 × $356) + (2.0 × $169) + (2.0 × $200) + (1.0 × $150) | **$944/hr** |
+| **Series C+** | founder: 0.25, HR: 2.5, Finance: 2.5, CS: 1.5 | (0.25 × $431) + (2.5 × $219) + (2.5 × $250) + (1.5 × $200) | **$1,483/hr** |
+
+**What this means for cost**: The same 50 hours of equity work costs:
+- **Preseed**: 50 × $113 = $5,650
+- **Seed**: 50 × $181 = $9,050
+- **Series A/B**: 50 × $577 = $28,850
+- **Series C+**: 50 × $1,483 = $74,150
+
+Not because the work changed, but because at later stages, more senior people (and more of them) are involved in equity work.
 
 ---
 
