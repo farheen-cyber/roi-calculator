@@ -180,12 +180,15 @@
       uk: { preseed: 4500, seed: 8000, seriesab: 12000, seriesbc: 22000, seriesc: 40000 }
     };
 
+    // Redesigned to represent actual time allocation percentages (sum to 1.0 per stage)
+    // These values represent what % of each role's time is spent on equity work annually
+    // Calculated from Section 4 work hours: grant admin + compliance + cap table + fundraising
     const STAFFING_MATRIX = {
-      preseed: { founder: 1.0, hr: 0, finance: 0, cs: 0 },
-      seed: { founder: 1.0, hr: 0.5, finance: 0.5, cs: 0 },
-      seriesab: { founder: 0.8, hr: 1.0, finance: 1.0, cs: 0.5 },
-      seriesbc: { founder: 0.5, hr: 2.0, finance: 2.0, cs: 1.0 },
-      seriesc: { founder: 0.25, hr: 2.5, finance: 2.5, cs: 1.5 }
+      preseed: { founder: 1.0, hr: 0.0, finance: 0.0, cs: 0.0 },       // ~54 hrs: founder-only
+      seed: { founder: 0.5, hr: 0.25, finance: 0.25, cs: 0.0 },         // ~72 hrs: founder + light HR/Finance
+      seriesab: { founder: 0.15, hr: 0.25, finance: 0.35, cs: 0.25 },   // ~151 hrs: distributed team
+      seriesbc: { founder: 0.05, hr: 0.3, finance: 0.35, cs: 0.3 },     // ~225 hrs: scaled team
+      seriesc: { founder: 0.02, hr: 0.25, finance: 0.35, cs: 0.38 }     // ~342 hrs: mature teams
     };
 
     const COMPLIANCE = {

@@ -180,70 +180,57 @@ mult = {
 
 ---
 
-### 2.3 Stage-Based Staffing Matrix
+### 2.3 Stage-Based Staffing Matrix (Revised: Time Allocation Model)
 
-**The core insight**: Equity admin workload doesn't change instantly when you raise a round. It scales gradually with headcount and governance complexity.
+**CORRECTED from PRD v3.x**: The previous STAFFING_MATRIX was a **cost allocation model** with inflated FTE values. It has been redesigned to represent **actual time-on-equity percentages** that sum to 1.0 (100% of equity work effort).
 
-**What FTE means**: Full-Time Equivalent. This is a **cost allocation model**, not a time-tracking model. It represents "which roles are responsible for equity work and at what cost."
+**What changed**: 
+- **Old model**: FTE values summed to 3.3–6.75 across roles, creating inflated blended rates (₹4,151/hr instead of ₹1,172/hr for Series A/B). This implied 3–6 people working simultaneously on each hour of equity work.
+- **New model**: FTE values sum to 1.0 per stage. Each value represents "what % of that role's time is spent on equity work annually."
 
-- **1.0** = 1 person's full salary is attributed to equity work (doesn't mean they work 40 hrs/week ONLY on equity—they have many responsibilities)
-- **0.5** = Half a person's salary is attributed to equity work (person splits their time between equity and other ops, OR two people each split their time)
-- **2.5** = 2.5 people's salaries are attributed to equity work (various staffing combinations)
-- **0** = Role not needed at this stage
-
-**Important distinction**: 
-- Preseed founder at 1.0 FTE doesn't mean founder works 40 hrs/week only on equity
-- It means founder IS the responsible party for equity, and for cost modeling purposes, equity is a major responsibility
-- Founder actually works 60 hrs/week total: ~10 hrs equity, ~20 hrs product, ~15 hrs fundraising, ~15 hrs ops
-- The cost model says "grant admin work = 7.5 hours at founder's $113/hr rate = $847.50" (not "founder spends 7.5 hrs/week on equity")
+**What the new FTE values mean**:
+- **1.0** = This person spends 100% of their time on equity work (preseed founder, for example)
+- **0.35** = This person spends 35% of their time on equity, 65% on other responsibilities (typical for Finance at Series A/B)
+- **0.0** = This role is not involved in equity work at this stage
+- **All roles sum to 1.0** per stage = All equity work hours are fully accounted for (no double-counting)
 
 ```javascript
 const STAFFING_MATRIX = {
-  preseed:  { founder: 1.0,  hr: 0,    finance: 0,   cs: 0    },  // Solo founder; founder=100% time on equity
-  seed:     { founder: 1.0,  hr: 0.5,  finance: 0.5, cs: 0    },  // Founder+part-time finance/HR (0.5 each)
-  seriesab: { founder: 0.8,  hr: 1.0,  finance: 1.0, cs: 0.5  },  // Dedicated finance/HR; founder 80% time
-  seriesbc: { founder: 0.5,  hr: 2.0,  finance: 2.0, cs: 1.0  },  // Scaled team; founder 50% time
-  seriesc:  { founder: 0.25, hr: 2.5,  finance: 2.5, cs: 1.5  }   // Mature ops; founder 25% time only
+  preseed:  { founder: 1.0,   hr: 0.0,   finance: 0.0,   cs: 0.0   },  // ~54 hrs: founder-only
+  seed:     { founder: 0.5,   hr: 0.25,  finance: 0.25,  cs: 0.0   },  // ~72 hrs: founder + light HR/Finance
+  seriesab: { founder: 0.15,  hr: 0.25,  finance: 0.35,  cs: 0.25  },  // ~151 hrs: distributed team
+  seriesbc: { founder: 0.05,  hr: 0.3,   finance: 0.35,  cs: 0.3   },  // ~225 hrs: scaled team
+  seriesc:  { founder: 0.02,  hr: 0.25,  finance: 0.35,  cs: 0.38  }   // ~342 hrs: mature teams
 };
 ```
 
-**Role definitions**:
-- **Founder/CEO** (0.25–1.0 FTE): Equity oversight, board decisions, option approval, negotiation
-- **HR Lead** (0–2.5 FTE): Cap table maintenance, grant issuance, vesting administration, employee communications
-- **Finance/CFO** (0–2.5 FTE): Equity accounting (ASC 718, IND AS 102, IFRS 2), compliance reporting, tax compliance, valuations
-- **Company Secretary/Legal** (0–1.5 FTE): Board meetings, shareholder resolutions, statutory filings, regulatory compliance
-
-**Why it scales this way**:
-- **Preseed** (founder: 1.0): Solo founder does everything (cap table, board meetings, grant letters, regulatory filings). 100% of founder time goes to equity.
-- **Seed** (founder: 1.0, HR: 0.5, Finance: 0.5): Growth to 10–20 employees. Founder still leads but hiring part-time support. Finance person does 50% equity work. HR person does 50% equity work (other 50% = recruiting, ops).
-- **Series A/B** (founder: 0.8, HR: 1.0, Finance: 1.0, CS: 0.5): 30–80 employees. Dedicated HR and Finance roles (both full-time on equity). Founder reduced to 80% (board decisions, strategy). Company Secretary (0.5 FTE) handles governance.
-- **Series B/C** (founder: 0.5, HR: 2.0, Finance: 2.0, CS: 1.0): 100+ employees. Scaled teams. Founder 50% time on equity (other 50% = product, fundraising). Multiple HR/Finance specialists (2.0 FTE = could be 2 people at 100% or 4 at 50%).
-- **Series C+** (founder: 0.25, HR: 2.5, Finance: 2.5, CS: 1.5): 200+ employees. Mature structure. Founder 25% time (board-level only). Full equity teams. CS 1.5 FTE = could be 1 full-time + 1 part-time, or 3 people at 50% each.
-
-**Critical**: These are NOT "how many people you must hire." They're the **fraction of time equity admin consumes** from each role. 
+**Basis for these values**: Calculated from Section 4 work hours (grant admin + compliance + cap table + fundraising, summed per stage), then allocated to roles based on typical work breakdown:
+- **Founder**: Board decisions, option approvals, governance sign-offs (→ ~2–15% of equity hours by stage)
+- **HR**: Grant issuance, vesting tracking, employee communications (→ ~25–30% by stage)
+- **Finance**: Equity accounting, compliance reporting, valuations (→ ~25–38% by stage)
+- **CS/Legal**: Statutory filings, board resolutions, regulatory compliance (→ ~0–38% by stage)
 
 **Real examples of staffing combinations**:
-- Series A/B Company Secretary (0.5 FTE): Could be 1 person spending 50% on equity + 50% on other ops work, OR 2 people each spending 25% on equity
-- Series C Finance (2.5 FTE): Could be 2 full-time people + 1 half-time person, OR 5 people each spending 50% on equity
-- Preseed Finance (0.0 FTE): No dedicated finance person; founder or accountant handles taxes/equity
+- Series A/B Finance (0.35 FTE = 35% time): One Finance person spending 35% on equity + 65% on accounting/taxes, OR one part-time equity person + one part-time accounting person
+- Preseed Founder (1.0 FTE = 100% time): Solo founder with no other people; equity work is their primary responsibility
+- Series C+ CS (0.38 FTE = 38% time): One full-time legal/secretarial person spending 38% on equity + 62% on corporate governance, OR multiple people each spending ~38%
 
-**How blended rates change across stages** (US example):
+**How blended rates change across stages** (India, updated):
 
-| Stage | Staffing | Blended Rate Calculation | Total Rate |
-|-------|----------|--------------------------|------------|
-| **Preseed** | founder: 1.0 | (1.0 × $113) | **$113/hr** |
-| **Seed** | founder: 1.0, HR: 0.5, Finance: 0.5 | (1.0 × $113) + (0.5 × $63) + (0.5 × $69) | **$181/hr** |
-| **Series A/B** | founder: 0.8, HR: 1.0, Finance: 1.0, CS: 0.5 | (0.8 × $288) + (1.0 × $131) + (1.0 × $156) + (0.5 × $119) | **$577/hr** |
-| **Series B/C** | founder: 0.5, HR: 2.0, Finance: 2.0, CS: 1.0 | (0.5 × $356) + (2.0 × $169) + (2.0 × $200) + (1.0 × $150) | **$944/hr** |
-| **Series C+** | founder: 0.25, HR: 2.5, Finance: 2.5, CS: 1.5 | (0.25 × $431) + (2.5 × $219) + (2.5 × $250) + (1.5 × $200) | **$1,483/hr** |
+| Stage | Staffing Distribution | Blended Rate Calculation | Total Rate |
+|-------|----------------------|--------------------------|------------|
+| **Preseed** | founder: 1.0 | (1.0 × ₹100) | **₹100/hr** |
+| **Seed** | founder: 0.5, HR: 0.25, Finance: 0.25 | (0.5 × ₹100) + (0.25 × ₹60) + (0.25 × ₹75) | **₹84/hr** |
+| **Series A/B** | founder: 0.15, HR: 0.25, Finance: 0.35, CS: 0.25 | (0.15 × ₹1,875) + (0.25 × ₹1,025) + (0.35 × ₹1,188) + (0.25 × ₹875) | **₹1,172/hr** |
+| **Series B/C** | founder: 0.05, HR: 0.3, Finance: 0.35, CS: 0.3 | (0.05 × ₹1,875) + (0.3 × ₹1,025) + (0.35 × ₹1,188) + (0.3 × ₹875) | **₹1,056/hr** |
+| **Series C+** | founder: 0.02, HR: 0.25, Finance: 0.35, CS: 0.38 | (0.02 × ₹1,875) + (0.25 × ₹1,025) + (0.35 × ₹1,188) + (0.38 × ₹875) | **₹1,104/hr** |
 
-**What this means for cost**: The same 50 hours of equity work costs:
-- **Preseed**: 50 × $113 = $5,650
-- **Seed**: 50 × $181 = $9,050
-- **Series A/B**: 50 × $577 = $28,850
-- **Series C+**: 50 × $1,483 = $74,150
+**What this means for cost**: The same 30 hours of grant admin work (20 items × 1.5 hrs/item) costs:
+- **Series A/B (Old model)**: 30 × ₹4,151 = **₹124,515** ❌ (inflated)
+- **Series A/B (New model)**: 30 × ₹1,172 = **₹35,162** ✓ (realistic)
+- **Reduction**: 71.8% cost decrease by using realistic time allocation
 
-Not because the work changed, but because at later stages, more senior people (and more of them) are involved in equity work.
+**Why this matters**: The old model's inflated FTE values made equity admin appear 3–6x more expensive than it actually is, misleading companies into thinking outsourcing was the only viable option.
 
 ---
 
