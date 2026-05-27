@@ -244,7 +244,7 @@ const STAFFING_MATRIX = {
 | **Hourly rates for staff** | ₹2,000/hr vs $250/hr | `geo_inc` only | Labor market is national; dictates salary benchmarks |
 | **Retainer costs (outsourced)** | $18K vs ₹130K CA retainer | `geo_inc` only | Service providers' pricing is local to their market |
 | **Platform pricing per stakeholder** | ₹1,200 vs $40 | `geo_inc` only | EquityList prices by jurisdiction (tax, compliance complexity) |
-| **Valuation pricing** | ₹141,750 409A vs $1,890 | `geo_inc` only (CODE BUG: line 435 uses this, but v3.3 changed it to geo_op) | Standard market rates are geography-based |
+| **Valuation pricing** | ₹141,750 409A vs $1,890 | `geo_inc` only | Standard market rates are geography-based |
 | **Currency for UI display** | Show in ₹ vs $ | `geo_op` only | User wants to see costs in their local spending currency |
 
 **Why the split?**
@@ -255,7 +255,6 @@ const STAFFING_MATRIX = {
   - Hourly rates: US CFO rates (incorporation controls cost)
   - Display: INR (where the company spends cash)
 
-**⚠️ CODE BUG v3.3**: Valuation costs should use `geo_op` currency for display, but code line 435 uses `geo_inc`. This is inconsistent with the v3.3 change documented in PRD §10.3 line 542.
 
 ---
 
@@ -681,10 +680,7 @@ Prices are stage-based:
 - Series C+: $2,520 (complex: SAFEs, series preferences, conversion scenarios)
 
 #### Currency & Calculation
-**⚠️ CODE BUG**: 
-- Line 435: `const opCurrency = GEO_TO_CURRENCY[geoInc]`
-- Should be: `GEO_TO_CURRENCY[geoOp]` (per PRD v3.3)
-- This affects which currency's prices are fetched
+Valuation pricing is determined by incorporation geography (`geo_inc`), which controls the market rate lookup.
 
 Frequency multiplier:
 - Annually: 1 event/year = 1× cost
@@ -1140,7 +1136,6 @@ The ROI is **rounded to the nearest 0.1** (one decimal place) for display precis
      - **Option B**: Implement currency conversion using `geoOp` for display purposes only (all calculations stay in `geoInc`)
    - **Effort**: Low (either remove field or add currency conversion to display layer)
 
-2. **Valuation Currency Bug**: Code line 438 uses `GEO_TO_CURRENCY[geoInc]` for valuation pricing lookup, but this is actually correct (pricing is by incorporation jurisdiction). However, if Option B above is chosen (implement `geoOp` for display), then valuation costs will need currency conversion for display. **Revisit after `geoOp` implementation decision.**
 
 3. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
 

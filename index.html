@@ -1492,55 +1492,69 @@
             {/* Content with left accent bar */}
             <div style={{ display: 'flex', gap: 12 }}>
               {/* Left accent bar */}
-              <div style={{ width: 4, background: v.roi > 1 ? A.green : A.red, borderRadius: 2, flexShrink: 0 }} />
+              {(() => {
+                const hasSavings = v.diff > 0;
+                const paybackMonths = v.elAnn / (Math.abs(v.diff) / 12);
+                const year2Cumulative = (v.diff * 2) - v.elAnn;
 
-              <div style={{ flex: 1, marginBottom: 20 }}>
-                {/* Headline */}
-                {v.roi > 1 ? (
+                return (
                   <>
-                    <div style={{
-                      fontFamily: A.serif, fontSize: 22, fontWeight: 400, fontStyle: 'italic',
-                      color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
-                      marginBottom: 4,
-                    }}>
-                      Pays for itself in
-                    </div>
-                    <div style={{
-                      fontFamily: A.sans, fontSize: 32, fontWeight: 700,
-                      color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
-                      marginBottom: 12,
-                      fontVariantNumeric: 'tabular-nums',
-                    }}>
-                      {(() => {
-                        const months = v.elAnn / (Math.abs(v.diff) / 12);
-                        return months < 1.5 ? Math.round(months * 4.3) + ' weeks' : months.toFixed(1) + ' months';
-                      })()}
-                      .
-                    </div>
+                    <div style={{ width: 4, background: hasSavings ? A.green : A.red, borderRadius: 2, flexShrink: 0 }} />
 
-                    {/* Supporting paragraph */}
-                    <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
-                      After that, every ₹1 spent compounds at <strong style={{ color: A.inkSoft, fontWeight: 600 }}>{v.roi.toFixed(1)}×</strong> — the rest of the year is pure return.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    {/* Loss state headline */}
-                    <div style={{
-                      fontFamily: A.serif, fontSize: 22, fontWeight: 400, fontStyle: 'italic',
-                      color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
-                      marginBottom: 12,
-                    }}>
-                      Does not break even this year.
-                    </div>
+                    <div style={{ flex: 1, marginBottom: 20 }}>
+                      {/* Headline */}
+                      {hasSavings ? (
+                        <>
+                          <div style={{
+                            fontFamily: A.serif, fontSize: 22, fontWeight: 400, fontStyle: 'italic',
+                            color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
+                            marginBottom: 4,
+                          }}>
+                            Pays for itself in
+                          </div>
+                          <div style={{
+                            fontFamily: A.sans, fontSize: 32, fontWeight: 700,
+                            color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
+                            marginBottom: 12,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}>
+                            {paybackMonths.toFixed(1)} months
+                          </div>
 
-                    {/* Supporting paragraph */}
-                    <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
-                      EquityList costs more in plan fees than it saves in manual ops at your current scale.
-                    </p>
+                          {/* Supporting paragraph with context */}
+                          <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
+                            EquityList recovers ~{Math.round((Math.abs(v.diff) / v.elAnn) * 100)}% of its annual cost through admin savings alone.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          {/* Negative savings headline */}
+                          <div style={{
+                            fontFamily: A.serif, fontSize: 22, fontWeight: 400, fontStyle: 'italic',
+                            color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
+                            marginBottom: 4,
+                          }}>
+                            Additional cost
+                          </div>
+                          <div style={{
+                            fontFamily: A.sans, fontSize: 32, fontWeight: 700,
+                            color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
+                            marginBottom: 12,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}>
+                            {opCurrencySymbol}{Math.abs(v.diff).toLocaleString(opLocale)}/yr
+                          </div>
+
+                          {/* Supporting paragraph with context */}
+                          <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
+                            EquityList costs {opCurrencySymbol}{v.elAnn.toLocaleString(opLocale)}/year vs. {opCurrencySymbol}{(v.elAnn - v.diff).toLocaleString(opLocale)}/year for your current method. The value is in reduced risk, audit readiness, and compliance as you scale.
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </>
-                )}
-              </div>
+                );
+              })()}
             </div>
 
           </div>
