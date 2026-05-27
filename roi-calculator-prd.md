@@ -184,13 +184,19 @@ mult = {
 
 **The core insight**: Equity admin workload doesn't change instantly when you raise a round. It scales gradually with headcount and governance complexity.
 
+**What FTE means**: Full-Time Equivalent. The fraction of a person's time spent on equity administration.
+- **1.0** = 1 full-time person (40 hrs/week dedicated to equity)
+- **0.5** = Half-time (1 person at 50%, OR 2 people at 25% each)
+- **2.5** = 2.5 full-time people (could be 3 people at ~83% each, or 5 people at 50% each)
+- **0** = No person (role not needed at this stage)
+
 ```javascript
 const STAFFING_MATRIX = {
-  preseed:  { founder: 1.0,  hr: 0,    finance: 0,   cs: 0    },  // Solo founder
-  seed:     { founder: 1.0,  hr: 0.5,  finance: 0.5, cs: 0    },  // Founder + part-time finance/HR
-  seriesab: { founder: 0.8,  hr: 1.0,  finance: 1.0, cs: 0.5  },  // Dedicated finance/HR + founder oversight
-  seriesbc: { founder: 0.5,  hr: 2.0,  finance: 2.0, cs: 1.0  },  // Scaled team, founder strategic only
-  seriesc:  { founder: 0.25, hr: 2.5,  finance: 2.5, cs: 1.5  }   // Mature operations
+  preseed:  { founder: 1.0,  hr: 0,    finance: 0,   cs: 0    },  // Solo founder; founder=100% time on equity
+  seed:     { founder: 1.0,  hr: 0.5,  finance: 0.5, cs: 0    },  // Founder+part-time finance/HR (0.5 each)
+  seriesab: { founder: 0.8,  hr: 1.0,  finance: 1.0, cs: 0.5  },  // Dedicated finance/HR; founder 80% time
+  seriesbc: { founder: 0.5,  hr: 2.0,  finance: 2.0, cs: 1.0  },  // Scaled team; founder 50% time
+  seriesc:  { founder: 0.25, hr: 2.5,  finance: 2.5, cs: 1.5  }   // Mature ops; founder 25% time only
 };
 ```
 
@@ -201,14 +207,18 @@ const STAFFING_MATRIX = {
 - **Company Secretary/Legal** (0–1.5 FTE): Board meetings, shareholder resolutions, statutory filings, regulatory compliance
 
 **Why it scales this way**:
-- **Preseed**: Founder does everything (cap table, board meetings, grant letters, regulatory filings)
-- **Seed**: Growth to 10–20 employees. Founder can't handle it alone. Part-time finance/HR split equity admin.
-- **Series A/B**: 30–80 employees. Dedicated HR and Finance roles. Founder reduced to strategic decisions. Company Secretary (0.5 FTE) handles governance.
-- **Series B/C**: 100+ employees. Full finance/HR teams. Founder 0.5 FTE on equity strategy. CS 1.0 FTE on governance and board operations.
-- **Series C+**: 200+ employees. Mature structure. Multiple specialists. Founder 0.25 FTE (board-level only). CS 1.5 FTE (ongoing governance, regulatory).
+- **Preseed** (founder: 1.0): Solo founder does everything (cap table, board meetings, grant letters, regulatory filings). 100% of founder time goes to equity.
+- **Seed** (founder: 1.0, HR: 0.5, Finance: 0.5): Growth to 10–20 employees. Founder still leads but hiring part-time support. Finance person does 50% equity work. HR person does 50% equity work (other 50% = recruiting, ops).
+- **Series A/B** (founder: 0.8, HR: 1.0, Finance: 1.0, CS: 0.5): 30–80 employees. Dedicated HR and Finance roles (both full-time on equity). Founder reduced to 80% (board decisions, strategy). Company Secretary (0.5 FTE) handles governance.
+- **Series B/C** (founder: 0.5, HR: 2.0, Finance: 2.0, CS: 1.0): 100+ employees. Scaled teams. Founder 50% time on equity (other 50% = product, fundraising). Multiple HR/Finance specialists (2.0 FTE = could be 2 people at 100% or 4 at 50%).
+- **Series C+** (founder: 0.25, HR: 2.5, Finance: 2.5, CS: 1.5): 200+ employees. Mature structure. Founder 25% time (board-level only). Full equity teams. CS 1.5 FTE = could be 1 full-time + 1 part-time, or 3 people at 50% each.
 
-**Important**: These are NOT "how many people you must hire." They're the **fraction of time equity admin consumes** from each role. Example:
-- Series A/B Company Secretary: 0.5 FTE = 1 person spending 50% of their time on equity, OR 2 people spending 25% each on equity
+**Critical**: These are NOT "how many people you must hire." They're the **fraction of time equity admin consumes** from each role. 
+
+**Real examples**:
+- Series A/B Company Secretary (0.5 FTE): Could be 1 person spending 50% on equity + 50% on other ops work, OR 2 people each spending 25% on equity
+- Series C Finance (2.5 FTE): Could be 2 full-time people + 1 half-time person, OR 5 people each spending 50% on equity
+- Preseed Finance (0.0 FTE): No dedicated finance person; founder or accountant handles taxes/equity
 
 ---
 
