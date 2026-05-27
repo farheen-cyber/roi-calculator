@@ -798,18 +798,38 @@ Where `stakeholders = min(sh + oh + grNewHire, 10,000)`.
 ```
 diff = annCost - elAnn
 savings = abs(diff)
+recoveryPercentage = round((abs(diff) / elAnn) × 100)
 ```
 
 **Sign Convention** (IMPORTANT):
 - **diff > 0** (positive savings): `annCost > elAnn` → Your current method costs MORE than EquityList → **EquityList saves you money**
   - Example: Current spend ₹600K, EquityList costs ₹100K → diff = ₹500K → you save ₹500K/year
-  - Message: "You're overspending by ₹500K/year. Save that with EquityList."
+  - Message: "EquityList recovers ~92% of its annual cost through admin savings alone." (assuming 100K ÷ actual spend)
 
 - **diff < 0** (negative savings): `annCost < elAnn` → Your current method costs LESS than EquityList → **EquityList costs more**
   - Example: Current spend ₹50K, EquityList costs ₹100K → diff = -₹50K → you lose ₹50K/year
-  - Message: "Your current setup is cost-efficient. EquityList costs more for you."
+  - Message: "Your current setup is cost-efficient — for now. As you scale, risks increase..."
 
 - **diff = 0**: Breakeven (unlikely in practice)
+
+#### Supporting Text (Below Headline)
+
+When savings are positive, the supporting paragraph displays the **recovery percentage** — what portion of EquityList's annual cost is recovered through admin savings alone:
+
+**Formula**:
+```
+recoveryPercentage = round((Math.abs(diff) / elAnn) × 100)
+supportingText = `EquityList recovers ~${recoveryPercentage}% of its annual cost through admin savings alone.`
+```
+
+**Real examples**:
+- Admin savings ₹55,213, EquityList cost ₹60,000 → Recovery = 92% → "EquityList recovers ~92% of its annual cost through admin savings alone."
+- Admin savings $50,000, EquityList cost $40,000 → Recovery = 125% → "EquityList recovers ~125% of its annual cost through admin savings alone."
+
+**Why this metric?**
+- Emphasizes that the platform nearly pays for itself through internal time savings
+- Highlights the most compelling ROI driver (freed-up admin hours) without cluttering with Year 1 net costs or cumulative calculations
+- Contextualizes the savings amount relative to EquityList's pricing
 
 ### 7.2 Internal Effort (Hours Spent Today)
 
