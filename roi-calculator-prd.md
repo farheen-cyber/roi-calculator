@@ -484,7 +484,7 @@ ELSE:
 
 ---
 
-### 4.4 Secretarial & Board Operations Cost
+### 4.4 Secretarial & Board Operations Cost (Ignore)
 
 #### The Problem
 Companies must conduct governance activities:
