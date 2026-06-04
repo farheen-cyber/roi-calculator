@@ -443,8 +443,8 @@
       const secFundraisingHrs = secFundraisingRaw * mult;
       const secFundraisingCost = secFundraisingHrs * secRate;
 
-      let methodExtCost = 0;
-      if (meth === 'outsourced') {
+      let methodExtCost = overrides.methodExtCost || 0;
+      if (meth === 'outsourced' && !overrides.methodExtCost) {
         methodExtCost = STAGE_RETAINER[geoInc][stageKey];
       }
 
@@ -1405,59 +1405,125 @@
             {breakdownOpen && (
               <div style={{ padding: '12px 18px 18px', borderTop: `1px solid ${A.lineSoft}`, marginTop: 12 }}>
                 <MonoLabel size={10} color={A.ink} style={{ marginBottom: 12, display: 'block' }}>Assumptions</MonoLabel>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <MonoLabel size={10} color={A.inkSoft}>Blended hourly rate</MonoLabel>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>{opCurrencySymbol}</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.rate)}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^\d]/g, '');
-                          setEditedRate(val);
-                        }}
-                        style={{
-                          width: 72, textAlign: 'right',
-                          border: 'none', borderBottom: `1px solid ${A.line}`,
-                          padding: '4px 0', outline: 'none', background: 'transparent',
-                          fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
-                        }}
-                        onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
-                        onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
-                      />
-                      <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>{formatStage(v.stage)} MIX</span>
+
+                {/* IN-HOUSE METHOD */}
+                {formData?.meth === 'in-house' && (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <MonoLabel size={10} color={A.inkSoft}>Blended hourly rate</MonoLabel>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>{opCurrencySymbol}</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.rate)}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^\d]/g, '');
+                              setEditedRate(val);
+                            }}
+                            style={{
+                              width: 72, textAlign: 'right',
+                              border: 'none', borderBottom: `1px solid ${A.line}`,
+                              padding: '4px 0', outline: 'none', background: 'transparent',
+                              fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
+                            onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
+                          />
+                          <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>{formatStage(v.stage)} MIX</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-                  <MonoLabel size={10} color={A.inkSoft}>Total equity management hours</MonoLabel>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^\d]/g, '');
-                          setEditedHours(val);
-                        }}
-                        style={{
-                          width: 56, textAlign: 'right',
-                          border: 'none', borderBottom: `1px solid ${A.line}`,
-                          padding: '4px 0', outline: 'none', background: 'transparent',
-                          fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
-                        }}
-                        onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
-                        onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
-                      />
-                      <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>HRS/YR</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+                      <MonoLabel size={10} color={A.inkSoft}>Total equity management hours</MonoLabel>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^\d]/g, '');
+                              setEditedHours(val);
+                            }}
+                            style={{
+                              width: 56, textAlign: 'right',
+                              border: 'none', borderBottom: `1px solid ${A.line}`,
+                              padding: '4px 0', outline: 'none', background: 'transparent',
+                              fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
+                            onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
+                          />
+                          <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>HRS/YR</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
+
+                {/* OUTSOURCED RETAINER METHOD */}
+                {formData?.meth === 'outsourced' && (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <MonoLabel size={10} color={A.inkSoft}>Retainer cost</MonoLabel>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontFamily: A.mono, fontSize: 11, color: A.mute }}>{opCurrencySymbol}</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.methodExtCost)}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^\d]/g, '');
+                              setEditedRate(val);
+                            }}
+                            style={{
+                              width: 72, textAlign: 'right',
+                              border: 'none', borderBottom: `1px solid ${A.line}`,
+                              padding: '4px 0', outline: 'none', background: 'transparent',
+                              fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
+                            onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
+                          />
+                          <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}/YR</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+                      <MonoLabel size={10} color={A.inkSoft}>Internal effort hours</MonoLabel>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^\d]/g, '');
+                              setEditedHours(val);
+                            }}
+                            style={{
+                              width: 56, textAlign: 'right',
+                              border: 'none', borderBottom: `1px solid ${A.line}`,
+                              padding: '4px 0', outline: 'none', background: 'transparent',
+                              fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
+                            }}
+                            onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
+                            onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
+                          />
+                          <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>HRS/YR</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
                   <button
                     onClick={() => {
@@ -1475,16 +1541,24 @@
                   <button
                     onClick={() => {
                       const overrides = {};
-                      let hasChanges = false;
-                      if (editedRate !== null && editedRate !== '' && editedRate !== String(Math.round(v.rate))) {
-                        overrides.rate = parseInt(editedRate, 10);
-                        hasChanges = true;
+
+                      // If user edited rate, apply it based on method
+                      if (editedRate !== null && editedRate !== '') {
+                        const rateValue = parseInt(editedRate, 10);
+                        if (formData?.meth === 'outsourced') {
+                          overrides.methodExtCost = rateValue;
+                        } else {
+                          overrides.rate = rateValue;
+                        }
                       }
-                      if (editedHours !== null && editedHours !== '' && editedHours !== String(Math.round(v.manualHTotal))) {
+
+                      // If user edited hours, apply it
+                      if (editedHours !== null && editedHours !== '') {
                         overrides.manualHTotal = parseInt(editedHours, 10);
-                        hasChanges = true;
                       }
-                      if (hasChanges) {
+
+                      // Recalculate if any overrides were set
+                      if (Object.keys(overrides).length > 0) {
                         setLeavingStale(true);
                         onRecalculate && onRecalculate(recalcFormValues, overrides);
                       }
