@@ -450,11 +450,12 @@ These baselines are the foundation; the dynamic model scales them based on compa
 
 #### The Problem
 Every month, your cap table changes:
-- New employees join (stock options granted)
-- Employees leave (options expire, shares vest)
-- Board members update (investor changes)
-- Valuations change (affecting option pool calculations)
-- Someone must: reconcile transactions, update spreadsheets, notify stakeholders, verify accuracy
+- New investors join (board members, SAFE conversions, secondary sales)
+- Investor stakes shift (dilution from new rounds)
+- Valuations change (affecting option pool calculations and future dilution scenarios)
+- Someone must: reconcile transactions, update shareholder register, notify stakeholders, verify accuracy
+
+**Note**: Employee option issuance and vesting are tracked separately as grant administration (Section 4.1), not cap table maintenance.
 
 #### The Calculation
 ```
@@ -538,19 +539,22 @@ When raising capital, add structured workflows that require Company Secretary & 
    - Calculate pro-forma cap table with new securities
    - Why necessary: Founders and investors need to understand ownership impact before committing
 
-2. **Security Issuance Updates** (1h documentation + 0.75h coordination + 0.75h legal review = 2.5h)
+2. **Security Issuance Updates** (1.5h documentation + 1h coordination = 2.5h)
    - Create new stock class or security type if needed (preferred stock, new series)
    - Calculate investor share allocation based on investment amount and valuation
    - Update ESOP pool allocation or create new option grants for new stage
-   - Issue option letters or securities to investors
-   - Why necessary: Legal requirement to formally issue securities; investor protection; tax/compliance documentation
+   - Generate option letters for issuance
+   - Why necessary: Track new securities in cap table; investor protection; tax/compliance documentation
+   
+   **Note**: Legal review and formal issuance execution are handled by EquityList's services arm.
 
-3. **Post-Close Cap Table Reconciliation** (1h reconciliation + 0.75h documentation + 0.75h filing/distribution = 2.5h)
+3. **Post-Close Cap Table Reconciliation** (1h reconciliation + 1.5h documentation/distribution = 2.5h)
    - Reconcile actual closing numbers against pro-forma (cap table true-up)
    - Update cap table register with new shareholders and stake percentages
-   - Generate cap table summary for all stakeholders
-   - File required statutory updates (SH-4 in US, SH-6 in India, etc.)
-   - Why necessary: Maintain accurate official record; meet statutory requirements; provide stakeholders with final numbers
+   - Generate cap table summary for all stakeholders and distribute
+   - Why necessary: Maintain accurate official record; provide stakeholders with final numbers
+   
+   **Note**: Statutory filings (SH-4, SH-6, etc.) are handled separately by EquityList's services arm, not the platform, and are out of scope for this ROI calculation.
 
 **Secretarial & Board (3 workflows × 2.5 hrs = 7.5 hrs baseline)**:
 
@@ -558,23 +562,27 @@ When raising capital, add structured workflows that require Company Secretary & 
    - Prepare board resolutions authorizing the fundraising round
    - Send notices to all board members
    - Schedule and conduct board meeting (or circular resolution)
-   - Document board approvals and decisions
-   - File board minutes
-   - Why necessary: Legal requirement; investors require board approval; governs terms and authorization
+   - Document board approvals and decisions in cap table
+   - Why necessary: Investors require board approval; governs terms and authorization
+   
+   **Note**: Filing board minutes is handled by EquityList's services arm.
 
-2. **Shareholder Approvals** (1h documentation + 0.75h collection/coordination + 0.75h legal review = 2.5h)
+2. **Shareholder Approvals** (1h documentation + 1.5h collection/coordination = 2.5h)
    - Prepare written consents or shareholder resolution authorizing the round
-   - Distribute to all shareholders with explanation
-   - Collect signatures/approvals
-   - Maintain records of approvals
+   - Distribute to all shareholders with explanation via platform
+   - Collect signatures/approvals via platform
+   - Maintain records of approvals in cap table
    - Why necessary: Many companies require shareholder approval for capital raises; charter/bylaws requirements
+   
+   **Note**: Legal review of shareholder documentation is handled by EquityList's services arm.
 
-3. **Documentation Coordination** (1h agreement coordination + 1h signature collection + 0.5h closing mechanics = 2.5h)
-   - Coordinate stock purchase agreement (or SAFE) execution
-   - Collect investor signatures and investor documentation (accredited investor certifications, etc.)
-   - Manage closing mechanics (fund transfer, share delivery, etc.)
-   - Prepare closing documents and final cap table
-   - Why necessary: Legal documentation required for the investment; investor protection; audit trail
+3. **Documentation Coordination** (1.5h signature/document collection + 1h cap table finalization = 2.5h)
+   - Collect investor signatures and investor documentation (accredited investor certifications, cap table acknowledgments, etc.) via platform
+   - Store and maintain investor documentation records
+   - Update final cap table with closing results (investor stake percentages, security types, etc.)
+   - Why necessary: Maintain accurate closing records; investor protection; audit trail
+   
+   **Note**: Stock purchase agreement (or SAFE) preparation, execution coordination, and fund transfer mechanics are handled by EquityList's services arm.
 
 **Round Complexity Multiplier** (applied to both cap table and secretarial):
 - SAFE: 0.5× (simple document, minimal coordination)
@@ -823,8 +831,9 @@ supportingText = `EquityList recovers ~${recoveryPercentage}% of its annual cost
 ```
 
 **Real examples**:
-- Admin savings ₹55,213, EquityList cost ₹60,000 → Recovery = 92% → "EquityList recovers ~92% of its annual cost through admin savings alone."
+- Admin savings ₹55,200, EquityList cost ₹60,000 → Recovery = 92% → "EquityList recovers ~92% of its annual cost through admin savings alone."
 - Admin savings $50,000, EquityList cost $40,000 → Recovery = 125% → "EquityList recovers ~125% of its annual cost through admin savings alone."
+- Admin savings ₹500,000, EquityList cost ₹100,000 → Recovery = 500% → "EquityList recovers ~500% of its annual cost through admin savings alone."
 
 **Why this metric?**
 - Emphasizes that the platform nearly pays for itself through internal time savings
@@ -846,44 +855,27 @@ manualHTotal = (oh + grNewHire + grRefresh) × 1.5
 
 **Adjusted for your admin method**:
 ```
-hoursSaved = manualHTotal × mult
+internalHoursToday = manualHTotal × mult
 ```
 Where:
-- **In-house** (mult=1.0): Your team does 100% of the work → hoursSaved = manualHTotal
+- **In-house** (mult=1.0): Your team does 100% of the work → internalHoursToday = manualHTotal
   - Example: 500 hours/year of internal effort
   
-- **Outsourced** (mult=0.4): A CA/law firm does 60%, your team does 40% → hoursSaved = manualHTotal × 0.4
+- **Outsourced** (mult=0.4): A CA/law firm does 60%, your team does 40% → internalHoursToday = manualHTotal × 0.4
   - Example: 500 hours/year of manual work, but 60% outsourced → You still spend 200 hours/year internally (40%)
 
-**Important**: `hoursSaved` is poorly named. It's actually "internal hours YOU spend today" not "hours EquityList saves." With EquityList, this entire workload goes to near-zero.
+**Important**: This metric represents internal hours YOU CURRENTLY SPEND, not hours EquityList saves. With EquityList, this entire workload goes to near-zero, so switching saves 100% of these hours.
 
 ### 7.3 Time Saved %
 ```
-timeSavedPct = (hoursSaved / hoursToday) × 100
+timeSavedPct = (internalHoursToday / totalHoursBaseline) × 100
 ```
 
-With EquityList, all these hours → zero. If currently in-house and 1,000 hours/year, switching saves 100%.
-If outsourced and 400 hours/year, switching saves 100% of that 400.
+**What this means**: With EquityList, your internal hours go from `internalHoursToday` → zero. So you always save 100% of the internal hours you currently spend.
 
-### 7.4 ROI Multiple
-
-**Calculation**:
-```
-roi = round((abs(annCost - elAnn) / elAnn) × 10) / 10
-```
-
-The ROI is **rounded to the nearest 0.1** (one decimal place) for display precision.
-
-**Interpretation**:
-- **2.0**: Savings are 2.0× the cost of EquityList. Break-even period ≈ 6 months.
-  - Example: Save ₹200K/year, EquityList costs ₹100K → ROI = 2.0× → 6-month payback
-  
-- **0.5**: Savings are 0.5× the cost of EquityList. Break-even period ≈ 24 months (or loss scenario).
-  - Example: Save ₹50K/year, EquityList costs ₹100K → ROI = 0.5× → 24-month payback
-  
-- **0**: No savings (your current method costs same as or less than EquityList)
-
-**Edge case**: If elAnn = 0, roi defaults to 0 (no division by zero).
+**Examples**:
+- **In-house, 1,000 hours/year**: Switch to EquityList → Save 1,000 hours/year (100%)
+- **Outsourced, 400 hours/year internal**: Switch to EquityList → Save 400 hours/year (100% of your internal effort)
 
 ---
 

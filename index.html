@@ -355,6 +355,20 @@
     function computeROI(inputs, overrides = {}) {
       const { sh = 30, oh = 15, grNewHire = 5, grRefresh = 5, geoInc = 'india', geoOp = 'india', stage = 'seriesab', meth = 'in-house', planningToFundraise = false, fundraiseRound = 'seed', newShareholdersFromFundraise = 0, valuationFrequency = null, valuationType = null } = inputs;
 
+      // Validate geography and stage exist in data tables
+      const validGeos = Object.keys(STAGE_HOURLY_RATES);
+      const validStages = Object.keys(STAFFING_MATRIX);
+
+      if (!validGeos.includes(geoInc)) {
+        throw new Error(`Invalid geography: ${geoInc}. Must be one of: ${validGeos.join(', ')}`);
+      }
+      if (!validGeos.includes(geoOp)) {
+        throw new Error(`Invalid geography: ${geoOp}. Must be one of: ${validGeos.join(', ')}`);
+      }
+      if (!validStages.includes(stage)) {
+        throw new Error(`Invalid stage: ${stage}. Must be one of: ${validStages.join(', ')}`);
+      }
+
       let stageKey = stage;
       if (planningToFundraise && fundraiseRound !== 'safe' && fundraiseRound !== 'bridge') {
         stageKey = fundraiseRound;
@@ -968,7 +982,7 @@
           <FormSection number={2} title="Equity Structure" subtitle="Stakeholder volume scales your cap table reconciliation and grant overhead.">
             <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr 1fr' : '1fr 1fr 1fr 1fr', gap: oneColumn ? 16 : 24 }}>
               <FormField label={<>Shareholders <InfoTip text="Founders, investors, and any other equity holders on your cap table." /></>} required value={shareholders} onChange={(v) => { setShareholders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.shareholders ? 'Only numbers allowed' : errors?.shareholders} onNumericError={(hasError) => setNumericErrors({...numericErrors, shareholders: hasError})} />
-              <FormField label={<>Option holders <InfoTip text="Employees with stock options." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.optionHolders ? 'Only numbers allowed' : errors?.optionHolders} onNumericError={(hasError) => setNumericErrors({...numericErrors, optionHolders: hasError})} />
+              <FormField label={<>Option holders <InfoTip text="Employees with stock options." /></>} required value={optionHolders} onChange={(v) => { setOptionHolders(v); if (parseInt(v, 10) === 0) { setRefreshGrants('0'); } onInputChange && onInputChange(); }} type="number" error={numericErrors.optionHolders ? 'Only numbers allowed' : errors?.optionHolders} onNumericError={(hasError) => setNumericErrors({...numericErrors, optionHolders: hasError})} />
               <FormField label={<>Refresh grants/yr <InfoTip text="Projected equity refresh grants for existing option holders each year." /></>} required value={refreshGrants} onChange={(v) => { setRefreshGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.refreshGrants ? 'Only numbers allowed' : errors?.refreshGrants} helperText={refreshGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, refreshGrants: hasError})} disabled={parseInt(optionHolders, 10) <= 0} />
               <FormField label={<>New hire grants/yr <InfoTip text="Projected new hires receiving stock options each year." /></>} required value={newHireGrants} onChange={(v) => { setNewHireGrants(v); onInputChange && onInputChange(); }} type="number" error={numericErrors.newHireGrants ? 'Only numbers allowed' : errors?.newHireGrants} helperText={newHireGrantsHelper} onNumericError={(hasError) => setNumericErrors({...numericErrors, newHireGrants: hasError})} />
             </div>
@@ -1323,12 +1337,22 @@
           }}>
             <div style={{ position: 'absolute', top: 0, right: 0, width: 130, height: 130, background: `radial-gradient(circle at top right, ${v.diff < 0 ? 'rgba(192, 48, 33, 0.08)' : A.greenTint}, transparent 70%)`, pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}>
-              <MonoLabel size={9.5} color={A.mute} style={{ marginBottom: 6 }}>{v.diff < 0 ? 'Estimated cost increase' : 'Your potential savings'}</MonoLabel>
-              <div style={{
-                fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
-                color: v.diff < 0 ? A.red : A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
-              }}>{opCurrencySymbol}{(v.diff < 0 ? Math.abs(v.diff) : v.diff || 0).toLocaleString(opLocale)}</div>
-              <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
+              <MonoLabel size={9.5} color={A.mute} style={{ marginBottom: 6 }}>{v.diff < 0 ? 'Your current setup is cheaper today' : 'Your potential savings'}</MonoLabel>
+              {v.diff >= 0 && (
+                <div style={{
+                  fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
+                  color: A.green, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+                }}>{opCurrencySymbol}{(v.diff || 0).toLocaleString(opLocale)}</div>
+              )}
+              {v.diff < 0 && (
+                <div style={{
+                  fontFamily: A.sans, fontSize: compact ? 32 : 38, fontWeight: 600, letterSpacing: -1.2,
+                  color: A.red, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+                }}>{opCurrencySymbol}{Math.abs(v.diff).toLocaleString(opLocale)}</div>
+              )}
+              {v.diff >= 0 && (
+                <div style={{ marginTop: 8, fontSize: 12, color: A.mute }}>per year · {savingsPct}% reduction in equity-admin overhead</div>
+              )}
 
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${A.lineSoft}`, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
@@ -1393,26 +1417,20 @@
                         inputMode="numeric"
                         value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.rate)}
                         onChange={(e) => {
-                          if (e.target.value && /[^\d]/.test(e.target.value)) {
-                            setEditedRate(e.target.value);
-                          } else {
-                            setEditedRate(e.target.value.replace(/[^\d]/g, ''));
-                          }
+                          const val = e.target.value.replace(/[^\d]/g, '');
+                          setEditedRate(val);
                         }}
                         style={{
                           width: 72, textAlign: 'right',
-                          border: 'none', borderBottom: `1px solid ${editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.line}`,
+                          border: 'none', borderBottom: `1px solid ${A.line}`,
                           padding: '4px 0', outline: 'none', background: 'transparent',
                           fontFamily: A.sans, fontSize: 14, fontWeight: 600, color: A.ink, fontVariantNumeric: 'tabular-nums',
                         }}
-                        onFocus={(e) => e.currentTarget.style.borderBottomColor = editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.purple}
-                        onBlur={(e) => e.currentTarget.style.borderBottomColor = editedRate && /[^\d]/.test(editedRate) ? A.redLight : A.line}
+                        onFocus={(e) => e.currentTarget.style.borderBottomColor = A.purple}
+                        onBlur={(e) => e.currentTarget.style.borderBottomColor = A.line}
                       />
                       <span style={{ fontFamily: A.mono, fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: A.muteSoft }}>{formatStage(v.stage)} MIX</span>
                     </div>
-                    {editedRate && /[^\d]/.test(editedRate) && (
-                      <div style={{ fontSize: 11, color: A.redLight, fontFamily: A.mono, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Only numbers allowed</div>
-                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
@@ -1534,21 +1552,8 @@
                             color: A.mute, lineHeight: 1.2, letterSpacing: -0.2,
                             marginBottom: 4,
                           }}>
-                            Additional cost
+                            Your current setup is cheaper today.
                           </div>
-                          <div style={{
-                            fontFamily: A.sans, fontSize: 32, fontWeight: 700,
-                            color: A.ink, lineHeight: 1.2, letterSpacing: -0.6,
-                            marginBottom: 12,
-                            fontVariantNumeric: 'tabular-nums',
-                          }}>
-                            {opCurrencySymbol}{Math.abs(v.diff).toLocaleString(opLocale)}/yr
-                          </div>
-
-                          {/* Supporting paragraph with context */}
-                          <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
-                            EquityList costs {opCurrencySymbol}{v.elAnn.toLocaleString(opLocale)}/year vs. {opCurrencySymbol}{(v.elAnn - v.diff).toLocaleString(opLocale)}/year for your current method. The value is in reduced risk, audit readiness, and compliance as you scale.
-                          </p>
                         </>
                       )}
                     </div>
@@ -1728,11 +1733,18 @@
             grNewHire: parseInt(inputs.grNewHire, 10),
             grRefresh: parseInt(inputs.grRefresh, 10),
           };
-          const calcs = computeROI(validatedInputs, overrides);
-          setResults(calcs);
-          setFormData(validatedInputs);
-          setMode('live');
-          setDirtyInputs({});
+          try {
+            const calcs = computeROI(validatedInputs, overrides);
+            setResults(calcs);
+            setFormData(validatedInputs);
+            setMode('live');
+            setDirtyInputs({});
+            setErrors({});  // Clear any previous errors
+          } catch (error) {
+            // Show error to user instead of crashing
+            setErrors({ calculation: error.message });
+            setMode('error');
+          }
         }
       };
 
