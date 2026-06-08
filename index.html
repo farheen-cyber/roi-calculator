@@ -174,9 +174,9 @@
     };
 
     const STAGE_RETAINER = {
-      india: { preseed: 50000, seed: 80000, seriesab: 130000, seriesbc: 220000, seriesc: 350000 },
+      india: { preseed: 60000, seed: 90000, seriesab: 151000, seriesbc: 256000, seriesc: 407000 },
       us: { preseed: 6000, seed: 11000, seriesab: 18000, seriesbc: 35000, seriesc: 60000 },
-      singapore: { preseed: 7000, seed: 11000, seriesab: 15000, seriesbc: 28000, seriesc: 50000 },
+      singapore: { preseed: 10000, seed: 16000, seriesab: 21000, seriesbc: 40000, seriesc: 71000 },
       uk: { preseed: 4500, seed: 8000, seriesab: 12000, seriesbc: 22000, seriesc: 40000 }
     };
 
@@ -295,7 +295,7 @@
     const GEO_TO_CURRENCY = Object.fromEntries(Object.entries(GEO_CURRENCY_MAP).map(([k, v]) => [k, v.code]));
 
     // ============ DYNAMIC COMPLIANCE HOURS (TIERED BY REPORTS) ============
-    function getDynamicComplianceHours(stage, shareholders, optionHolders, geoInc, newHireGrants = 0) {
+    function getDynamicComplianceHours(stage, shareholders, optionHolders, geoInc, newHireGrants = 0, refreshGrants = 0) {
       // Stage scaling factors
       const stageScale = {
         preseed: 0.5,
@@ -306,7 +306,7 @@
       };
 
       const scale = stageScale[stage] || 1.0;
-      const totalGrants = newHireGrants + (parseInt(newHireGrants, 10) > 0 ? newHireGrants : 0); // placeholder for refresh grants later
+      const totalGrants = parseInt(newHireGrants, 10) + parseInt(refreshGrants, 10);
 
       // Helper function to calculate report hours with volume scaling
       const reportHours = (baseHrs, scalingFactor = 1) => baseHrs * scale * scalingFactor;
@@ -391,9 +391,9 @@
         }
       }
 
-      const mult = meth === 'in-house' ? 1 : 0.4;
+      const mult = meth === 'in-house' ? 1 : 0.2;
       const grHr = overrides.grHr || 1.5;
-      const compHr = overrides.compHr || getDynamicComplianceHours(stageKey, sh, oh, geoInc, grNewHire);
+      const compHr = overrides.compHr || getDynamicComplianceHours(stageKey, sh, oh, geoInc, grNewHire, grRefresh);
 
       const grNewHireNum = parseInt(grNewHire, 10);
       const grRefreshNum = parseInt(grRefresh, 10);
@@ -465,8 +465,16 @@
         }
       }
 
-      const annCost = grCost + cpCost + ctCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
-      const manualHTotal = overrides.manualHTotal || (totalGrantAdminWork * grHr + compHr + ctRaw + ctFundraisingHours + secFundraisingRaw);
+      let annCost = grCost + cpCost + ctCost + ctFundraisingCost + secFundraisingCost + methodExtCost + valuationCost;
+      const originalHTotal = totalGrantAdminWork * grHr + compHr + ctRaw + ctFundraisingHours + secFundraisingRaw;
+      const manualHTotal = overrides.manualHTotal || originalHTotal;
+
+      // If hours are overridden, adjust cost proportionally
+      if (overrides.manualHTotal && originalHTotal > 0) {
+        const hoursRatio = overrides.manualHTotal / originalHTotal;
+        annCost = Math.round(annCost * hoursRatio);
+      }
+
       const adjustedHTotal = manualHTotal * mult;
       const hoursToday = adjustedHTotal;
       const hoursSaved = hoursToday;
@@ -1407,7 +1415,7 @@
                 <MonoLabel size={10} color={A.ink} style={{ marginBottom: 12, display: 'block' }}>Assumptions</MonoLabel>
 
                 {/* IN-HOUSE METHOD */}
-                {formData?.meth === 'in-house' && (
+                {recalcFormValues?.meth === 'in-house' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1466,7 +1474,7 @@
                 )}
 
                 {/* OUTSOURCED RETAINER METHOD */}
-                {formData?.meth === 'outsourced' && (
+                {recalcFormValues?.meth === 'outsourced' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1545,7 +1553,7 @@
                       // If user edited rate, apply it based on method
                       if (editedRate !== null && editedRate !== '') {
                         const rateValue = parseInt(editedRate, 10);
-                        if (formData?.meth === 'outsourced') {
+                        if (recalcFormValues?.meth === 'outsourced') {
                           overrides.methodExtCost = rateValue;
                         } else {
                           overrides.rate = rateValue;
@@ -1586,7 +1594,7 @@
               {/* Left accent bar */}
               {(() => {
                 const hasSavings = v.diff > 0;
-                const paybackMonths = v.elAnn / (Math.abs(v.diff) / 12);
+                const paybackMonths = v.elAnn > 0 && Math.abs(v.diff) > 0 ? v.elAnn / (Math.abs(v.diff) / 12) : 0;
                 const year2Cumulative = (v.diff * 2) - v.elAnn;
 
                 return (
@@ -1615,7 +1623,7 @@
 
                           {/* Supporting paragraph with context */}
                           <p style={{ fontSize: 13, color: A.mute, lineHeight: 1.5, margin: 0 }}>
-                            EquityList recovers ~{Math.round((Math.abs(v.diff) / v.elAnn) * 100)}% of its annual cost through admin savings alone.
+                            EquityList recovers ~{v.elAnn > 0 ? Math.round((Math.abs(v.diff) / v.elAnn) * 100) : 0}% of its annual cost through admin savings alone.
                           </p>
                         </>
                       ) : (
@@ -1829,6 +1837,12 @@
           if (formData) {
             if (mode === 'live') {
               setMode('stale');
+            }
+
+            // Clear edited assumptions if method changed (prevent stale values showing when switching methods)
+            if (currentFormData.meth !== formData.meth) {
+              setEditedRate(null);
+              setEditedHours(null);
             }
 
             // Track which specific fields have changed from last calculated values

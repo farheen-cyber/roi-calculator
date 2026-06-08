@@ -163,20 +163,20 @@ stakeholders = min(sh + oh + grNewHire, 10,000)
 ```
 mult = {
   'in-house': 1.0      // 100% of work retained internally
-  'outsourced': 0.4    // 40% retained internally (60% outsourced to CA/Law)
+  'outsourced': 0.2    // 20% retained internally (80% outsourced to CA/Law)
 }
 ```
 
-**Why 0.4 for outsourced?**
+**Why 0.2 for outsourced?**
 - Outsourcing to a CA (Chartered Accountant) or law firm doesn't eliminate internal effort
 - Internal team still does: approval routing, coordination, compliance sign-off, documentation
-- Research shows: ~60% of work can be outsourced; ~40% is irreducible internal overhead
-- This 0.4 multiplier is applied to ALL hours (grants, compliance, cap table, secretarial)
+- Research shows: ~80% of work can be outsourced; ~20% is irreducible internal overhead
+- This 0.2 multiplier is applied to ALL hours (grants, compliance, cap table, secretarial)
 
 **Real example**:
 - In-house: Cap table reconciliation = 50 hours/year × 1.0 = 50 hours of internal effort
-- Outsourced: Cap table reconciliation = 50 hours/year × 0.4 = 20 hours internal (CA handles 30 hours)
-- Cost: In-house: 50 × $500/hr = $25,000 | Outsourced: (20 × $500) + $18K retainer = $28K
+- Outsourced: Cap table reconciliation = 50 hours/year × 0.2 = 10 hours internal (CA handles 40 hours)
+- Cost: In-house: 50 × $500/hr = $25,000 | Outsourced: (10 × $500) + $18K retainer = $23K
 
 ---
 
@@ -371,10 +371,11 @@ The **volume** of reporting scales with company size and complexity.
 - Transaction-level ownership ledger (3 hrs baseline, scaled by shareholder count)
 - *Why*: Regulators require current cap table snapshot for governance and tax purposes
 
-**TIER 2: Mandatory if option holders > 0 OR new hires > 0**
+**TIER 2: Mandatory if option holders > 0 OR new hires > 0 OR refresh grants > 0**
 - Equity plan & pool overview (1 hr baseline, fixed per tier)
 - Grant summary reports (1 hr baseline, scaled by grant volume)
 - Vesting reports (0.5 hrs baseline, scaled by option holder count)
+- **Why refresh grants trigger TIER 2**: Each refresh grant is a taxable event requiring documentation and reporting
 - **Geography-specific standards:**
   - **India**: IND AS 102/15 equity expense (4 hrs × option scaling) + SH-6 statutory register (4 hrs × option scaling)
   - **US**: ASC 718/820 equity expense (4 hrs × option scaling) + Rule 701 certification (6 hrs fixed)
@@ -630,12 +631,12 @@ Stage-based because service providers charge more for companies with more comple
 - Preseed startup: simpler cap table, fewer shareholders, fewer workflows → cheaper
 - Series C company: complex equity structure, many investors, regulatory complexity → expensive
 
-**India**: 
-- Preseed: ₹50,000/yr
-- Seed: ₹80,000/yr
-- Series A/B: ₹130,000/yr
-- Series B/C: ₹220,000/yr
-- Series C+: ₹350,000/yr
+**India** (Updated June 2026): 
+- Preseed: ₹60,000/yr
+- Seed: ₹90,000/yr
+- Series A/B: ₹151,000/yr
+- Series B/C: ₹256,000/yr
+- Series C+: ₹407,000/yr
 
 **US**: 
 - Preseed: $6,000/yr
@@ -644,12 +645,12 @@ Stage-based because service providers charge more for companies with more comple
 - Series B/C: $35,000/yr
 - Series C+: $60,000/yr
 
-**Singapore**: 
-- Preseed: S$7,000/yr
-- Seed: S$11,000/yr
-- Series A/B: S$15,000/yr
-- Series B/C: S$28,000/yr
-- Series C+: S$50,000/yr
+**Singapore** (Updated June 2026): 
+- Preseed: S$10,000/yr
+- Seed: S$16,000/yr
+- Series A/B: S$21,000/yr
+- Series B/C: S$40,000/yr
+- Series C+: S$71,000/yr
 
 **UK**: 
 - Preseed: £4,500/yr
@@ -864,6 +865,12 @@ Where:
 - **Outsourced** (mult=0.4): A CA/law firm does 60%, your team does 40% → internalHoursToday = manualHTotal × 0.4
   - Example: 500 hours/year of manual work, but 60% outsourced → You still spend 200 hours/year internally (40%)
 
+**User Override Capability**: Users can adjust the calculated hours in the "Breakdown" section to reflect their actual effort. When hours are overridden:
+```
+adjustedAnnualCost = (originalAnnualCost) × (overriddenHours / originalHours)
+```
+This proportional adjustment allows users to model scenarios like "what if we're more efficient?" or "what if we need extra help?"
+
 **Important**: This metric represents internal hours YOU CURRENTLY SPEND, not hours EquityList saves. With EquityList, this entire workload goes to near-zero, so switching saves 100% of these hours.
 
 ### 7.3 Time Saved %
@@ -1069,7 +1076,22 @@ timeSavedPct = (internalHoursToday / totalHoursBaseline) × 100
 
 ## SECTION 9: KEY CHANGES & VERSION HISTORY
 
-### Version 4.0 (Current: Complete Consolidation)
+### Version 4.1 (Current: June 2026 - Bug Fixes & Rate Updates)
+
+**Updates**:
+- ✅ **Retainer Rates Updated**: India preseed 60k (↑20%), seed 90k (↑12.5%), and all stages proportionally increased; Singapore preseed 10k (↑42.86%), all stages proportionally increased
+- ✅ **Refresh Grants Inclusion**: Now properly included in compliance hours calculations via `getDynamicComplianceHours()` function
+- ✅ **Hours Override Functionality**: Users can now adjust hours in breakdown, and cost automatically adjusts proportionally
+- ✅ **Edge Case Guards**: Added division-by-zero protections for payback months and recovery percentage calculations
+- ✅ **Assumptions Rendering**: Fixed input field visibility when opening breakdown section
+
+**Bug Fixes**:
+- Fixed method-aware assumptions inputs not displaying when opening breakdown
+- Fixed refresh grants parameter missing from compliance hours function
+- Fixed hours override not affecting cost calculation
+- Added safety guards for edge case calculations
+
+### Version 4.0 (Complete Consolidation)
 
 **Major change**: Consolidated all 15+ separate documentation files into this single PRD.
 
@@ -1148,12 +1170,44 @@ timeSavedPct = (internalHoursToday / totalHoursBaseline) × 100
      - **Option B**: Implement currency conversion using `geoOp` for display purposes only (all calculations stay in `geoInc`)
    - **Effort**: Low (either remove field or add currency conversion to display layer)
 
+2. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
 
-3. **Base Secretarial Workflows**: Code only implements fundraising-triggered workflows. Base governance workflows (non-fundraising board meetings, shareholder approvals, statutory filings) are omitted from calculation. Design decision: Should these be included as fixed or scaled costs?
+3. **Payback Period**: Previously calculated and displayed but removed from ROI card output (v3.5). Formula was: `paybackMonths = elAnn / (diff / 12)`. Should this metric be documented as historical or re-introduced?
 
-4. **Payback Period**: Previously calculated and displayed but removed from ROI card output (v3.5). Formula was: `paybackMonths = elAnn / (diff / 12)`. Should this metric be documented as historical or re-introduced?
+4. **Stakeholders Calculation Design**: Including `grNewHire` in platform pricing (`min(sh + oh + grNewHire, 10000)`) inflates stakeholder count. Design decision: Should new hire grants count toward platform pricing, or only existing shareholders + option holders?
 
-5. **Stakeholders Calculation Design**: Including `grNewHire` in platform pricing (`min(sh + oh + grNewHire, 10000)`) inflates stakeholder count. Design decision: Should new hire grants count toward platform pricing, or only existing shareholders + option holders?
+### Resolved Issues (v4.1)
+
+1. ✅ **Refresh Grants Not Included in Compliance Hours** (June 2026)
+   - **Issue**: `getDynamicComplianceHours()` function did not accept or use `refreshGrants` parameter
+   - **Impact**: Compliance hour calculations undercounted for companies with annual refresh grants
+   - **Fix**: Added `refreshGrants` parameter to function signature; now calculates `totalGrants = newHireGrants + refreshGrants` for volume scaling
+   - **Code**: index.html line 298, 309, 396
+
+2. ✅ **Hours Override Not Affecting Cost Calculation** (June 2026)
+   - **Issue**: When users edited "Total equity management hours" in breakdown, the cost remained unchanged
+   - **Impact**: Users couldn't model efficiency improvements or additional staffing needs
+   - **Fix**: Now applies proportional cost adjustment based on hours override ratio
+   - **Formula**: `adjustedCost = originalCost × (overriddenHours / originalHours)`
+   - **Code**: index.html lines 468-476
+
+3. ✅ **Division by Zero in Payback Months** (June 2026)
+   - **Issue**: When `diff = 0` (no savings), formula `elAnn / (diff / 12)` calculated Infinity
+   - **Impact**: Could display "Infinity months" in rare edge cases
+   - **Fix**: Added guard: `v.elAnn > 0 && Math.abs(v.diff) > 0 ? ... : 0`
+   - **Code**: index.html line 1589
+
+4. ✅ **Division by Zero in Recovery Percentage** (June 2026)
+   - **Issue**: When `elAnn = 0` (no EquityList cost, edge case), formula `(diff / elAnn) * 100` calculated Infinity
+   - **Impact**: Could display "Infinity %" when calculating recovery percentage
+   - **Fix**: Added guard: `v.elAnn > 0 ? Math.round(...) : 0`
+   - **Code**: index.html line 1618
+
+5. ✅ **Assumptions Input Fields Not Displaying** (June 2026)
+   - **Issue**: When opening breakdown, input fields for editing rate/retainer cost were invisible
+   - **Root Cause**: Conditional rendering checked `formData?.meth` (null until after calculation) instead of current form values
+   - **Fix**: Changed to check `recalcFormValues?.meth` which uses live form data
+   - **Code**: index.html lines 1410, 1469, 1548
 
 ---
 
@@ -1166,8 +1220,8 @@ timeSavedPct = (internalHoursToday / totalHoursBaseline) × 100
 - Cons: Opaque, not customizable
 - Selected: Blended (user doesn't need to tell us org chart)
 
-**Decision 2: Why 0.4 multiplier for outsourced (not 0.5)?**
-- Observation: CA firms handle ~60% of equity work, internal team retains ~40% (approval routing, coordination, compliance sign-off)
+**Decision 2: Why 0.2 multiplier for outsourced (not 0.3)?**
+- Observation: CA firms handle ~80% of equity work, internal team retains ~20% (approval routing, coordination, compliance sign-off)
 - This reflects real-world patterns across 50+ cap tables
 
 **Decision 3: Why stage-based rates (not fixed)?**
@@ -1207,15 +1261,16 @@ This PRD consolidates content from:
 | Section | Code Location | Lines | Formula |
 |---------|--------------|-------|---------|
 | 4.1 Grant Admin | index.html | 378-380 | `(oh + grNewHire + grRefresh) × 1.5 × mult × rate` |
-| 4.2 Compliance | index.html | 295-350 | Dynamic tiered model with stage/volume scaling |
+| 4.2 Compliance | index.html | 298, 309, 396 | Dynamic tiered model with stage/volume scaling; includes refreshGrants |
 | 4.3 Cap Table | index.html | 385-387 | `(3 + max(0,(sh-20)/50)×2) × 12 × mult × rate` |
 | 4.4 Secretarial | index.html | 410-427 | Fundraising workflows only; base workflows TBD |
-| 4.5 External | index.html | 388-389 | Fixed retainer by stage/geo |
+| 4.5 External | index.html | 446-449 | Fixed retainer by stage/geo; supports override |
 | 4.6 Valuation | index.html | 434-438 | Pricing lookup × frequency × 0.8 discount |
 | 5.0 Blended Rate | index.html | 364-375 | SUM(FTE × rate for each role) |
-| 7.1 Savings | index.html | 461 | `abs(annCost - elAnn)` |
-| 7.2 Hours | index.html | 452-455 | `manualHTotal × mult` |
-| 7.4 ROI | index.html | 464 | `round((absDiff / elAnn) × 10) / 10` |
+| 7.1 Savings | index.html | 486 | `abs(annCost - elAnn)` |
+| 7.2 Hours | index.html | 468-476 | `manualHTotal × mult`; applies proportional cost adjustment if hours overridden |
+| 7.4 ROI | index.html | 489 | `round((absDiff / elAnn) × 10) / 10` |
+| 7.2 Edge Cases | index.html | 1589, 1618 | Division by zero guards for payback and recovery % |
 
 ---
 
