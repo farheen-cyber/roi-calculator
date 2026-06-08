@@ -87,7 +87,7 @@ Many users ask: "Why do I have to enter incorporation country AND operating coun
 | **Option Holders** | `oh` | Integer 0–100,000; default 15 | Affects: grant admin hours, compliance reporting hours | Part of grant admin work + triggers equity-specific compliance reports |
 | **New Hire Grants/Year** | `grNewHire` | Integer 0–10,000; default 5 | Affects: grant administration hours, compliance reports, stakeholder pricing | Hours = newHireGrants × 1.5 hrs/grant; triggers tier 2 compliance |
 | **Refresh Grants/Year** | `grRefresh` | Integer 0–10,000; default 5 | Affects: grant admin hours (existing employees getting more shares) | Included in total grant admin work (oh + grNewHire + grRefresh) |
-| **Admin Method** | `meth` | Radio: In-house / Outsourced | Determines: cost model (blended rate vs. retainer), method multiplier | mult = 1.0 (in-house) or 0.4 (outsourced) |
+| **Admin Method** | `meth` | Radio: In-house / Outsourced | Determines: cost model (blended rate vs. retainer), method multiplier | mult = 1.0 (in-house) or 0.2 (outsourced) |
 
 ### Optional Enhancements
 
@@ -421,7 +421,7 @@ All hours multiplied by stage scaling factor:
   - SH-6: 4 × (1 + (25-5)/50) = 5.6 hours
 - **Total TIER 2**: 14.19 hours
 - **Stage scaling**: 1.0× (Series A/B) → Total ~20 hours
-- **Cost**: 20 × 0.4 (outsourced) × ₹1,025 (Series A HR rate) = ₹8,200/year
+- **Cost**: 10 × 0.2 (outsourced) × ₹1,025 (Series A HR rate) = ₹2,050/year
 
 #### Compliance Hours by Geography (Static Reference)
 
@@ -662,11 +662,11 @@ Stage-based because service providers charge more for companies with more comple
 #### How It Works
 - User selects "Outsourced (CA/Law Firm)"
 - System adds fixed retainer cost to annual expenses
-- Internal team still does 40% of work (mult=0.4), CA does 60%
-- Total cost = (internal hours × 0.4 × blended rate) + retainer
+- Internal team still does 20% of work (mult=0.2), CA does 80%
+- Total cost = (internal hours × 0.2 × blended rate) + retainer
 
 **Example**: Series A/B company in India, outsourced
-- Internal cap table hours: 60 hrs/year × 0.4 = 24 hrs × ₹1,025/hr = ₹24,600
+- Internal cap table hours: 60 hrs/year × 0.2 = 12 hrs × ₹1,025/hr = ₹12,300
 - CA retainer: ₹130,000/year
 - Total secretarial/cap table outsourced cost: ₹154,600/year (vs ₹58,500 if in-house)
 
@@ -862,8 +862,8 @@ Where:
 - **In-house** (mult=1.0): Your team does 100% of the work → internalHoursToday = manualHTotal
   - Example: 500 hours/year of internal effort
   
-- **Outsourced** (mult=0.4): A CA/law firm does 60%, your team does 40% → internalHoursToday = manualHTotal × 0.4
-  - Example: 500 hours/year of manual work, but 60% outsourced → You still spend 200 hours/year internally (40%)
+- **Outsourced** (mult=0.2): A CA/law firm does 80%, your team does 20% → internalHoursToday = manualHTotal × 0.2
+  - Example: 500 hours/year of manual work, but 80% outsourced → You still spend 100 hours/year internally (20%)
 
 **User Override Capability**: Users can adjust the calculated hours in the "Breakdown" section to reflect their actual effort. When hours are overridden:
 ```
@@ -948,7 +948,7 @@ timeSavedPct = (internalHoursToday / totalHoursBaseline) × 100
 
 **Calculations**:
 
-1. **Blended Hourly Rate** (for multiplied by 0.4):
+1. **Blended Hourly Rate** (multiplied by 0.2 for outsourced):
    - Founder: 0.8 × $288 = $230.40
    - HR: 1.0 × $131 = $131.00
    - Finance: 1.0 × $156 = $156.00
