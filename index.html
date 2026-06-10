@@ -182,11 +182,11 @@
 
     // Stage-adjusted baselines for retainer scaling (Approach 2)
     const STAKEHOLDER_BASELINES = {
-      preseed: 3,         // 10 ÷ 3 = 3.33 → rounded to 3
-      seed: 8,            // 25 ÷ 3 = 8.33 → rounded to 8
-      seriesab: 17,       // 50 ÷ 3 = 16.67 → rounded to 17
-      seriesbc: 33,       // 100 ÷ 3 = 33.33 → rounded to 33
-      seriesc: 223        // kept unchanged
+      preseed: 15,
+      seed: 37,
+      seriesab: 75,
+      seriesbc: 148,
+      seriesc: 223
     };
 
     const GRANT_BASELINES = {
@@ -481,8 +481,8 @@
         const stakeholderBaseline = STAKEHOLDER_BASELINES[stageKey];
         const grantBaseline = GRANT_BASELINES[stageKey];
 
-        const stakeholderFactor = 1 + Math.max(0, totalStakeholders - stakeholderBaseline) / 200;
-        const grantFactor = 1 + Math.max(0, grRefresh - grantBaseline) / 50;
+        const stakeholderFactor = 1 + Math.max(0, totalStakeholders - stakeholderBaseline) / 100;
+        const grantFactor = 1 + Math.max(0, grRefresh - grantBaseline) / 25;
         const fundraisingFactor = planningToFundraise ? 1.3 : 1.0;
 
         methodExtCost = Math.round(baseRetainer * stakeholderFactor * grantFactor * fundraisingFactor);
