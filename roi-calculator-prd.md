@@ -659,16 +659,63 @@ Stage-based because service providers charge more for companies with more comple
 - Series B/C: £22,000/yr
 - Series C+: £40,000/yr
 
-#### How It Works
-- User selects "Outsourced (CA/Law Firm)"
-- System adds fixed retainer cost to annual expenses
-- Internal team still does 20% of work (mult=0.2), CA does 80%
-- Total cost = (internal hours × 0.2 × blended rate) + retainer
+#### How It Works (Approach 2: Complexity-Based Scaling)
 
-**Example**: Series A/B company in India, outsourced
-- Internal cap table hours: 60 hrs/year × 0.2 = 12 hrs × ₹1,025/hr = ₹12,300
-- CA retainer: ₹130,000/year
-- Total secretarial/cap table outsourced cost: ₹154,600/year (vs ₹58,500 if in-house)
+**Base retainer calculation:**
+- User selects "Outsourced (CA/Law Firm)"
+- System starts with the base retainer for the company's stage and geography (see table above)
+- System **scales the retainer based on complexity** using three factors:
+  1. **Stakeholder complexity**: Number of shareholders + option holders + new hire grants/year
+  2. **Refresh grant activity**: Number of refresh grants per year
+  3. **Fundraising intensity**: Whether the company is actively fundraising
+
+**Scaling formula**:
+```
+Scaled Retainer = Base Retainer 
+                × (1 + max(0, totalStakeholders - STAKEHOLDER_BASELINE) / 200)
+                × (1 + max(0, refreshGrants - GRANT_BASELINE) / 50)
+                × (planningToFundraise ? 1.3 : 1.0)
+```
+
+**Where**:
+- `totalStakeholders = shareholders + optionHolders + newHireGrants`
+- `STAKEHOLDER_BASELINE` and `GRANT_BASELINE` depend on stage:
+
+| Stage | Stakeholder Baseline | Grant Baseline |
+|-------|----------------------|-----------------|
+| Pre-seed | 10 | 0 |
+| Seed | 25 | 2 |
+| Series A/B | 50 | 5 |
+| Series B/C | 100 | 10 |
+| Series C+ | 150 | 15 |
+
+**Rationale**:
+- Simple companies at their stage pay no scaling penalty (complexity is within expectations)
+- Complex companies with many stakeholders/grants pay more (higher CA workload)
+- Fundraising companies pay 30% premium (cap table updates, investor communications, approvals)
+
+**Total cost with outsourcing**:
+- Total cost = (internal hours × 0.2 × blended rate) + **scaled retainer**
+
+**Examples**:
+
+**Example 1: Simple Series A/B (US)**
+- Base retainer: $18,000
+- Shareholders: 50, Option Holders: 10, New Hires: 5, Refresh Grants: 2, Fundraising: No
+- Total Stakeholders: 65
+- Stakeholder Factor: 1 + max(0, 65 - 50) / 200 = 1.075
+- Grant Factor: 1 + max(0, 2 - 5) / 50 = 1.0
+- Fundraising Factor: 1.0
+- **Scaled Retainer**: $18,000 × 1.075 × 1.0 × 1.0 = **$19,350**
+
+**Example 2: Complex Series A/B (US)**
+- Base retainer: $18,000
+- Shareholders: 150, Option Holders: 40, New Hires: 10, Refresh Grants: 20, Fundraising: Yes
+- Total Stakeholders: 200
+- Stakeholder Factor: 1 + max(0, 200 - 50) / 200 = 1.75
+- Grant Factor: 1 + max(0, 20 - 5) / 50 = 1.3
+- Fundraising Factor: 1.3
+- **Scaled Retainer**: $18,000 × 1.75 × 1.3 × 1.3 = **$53,235**
 
 ---
 
