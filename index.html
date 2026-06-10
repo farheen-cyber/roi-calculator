@@ -765,10 +765,12 @@
           {options.map((o) => {
             const val = typeof o === 'string' ? o : o.value;
             const label = typeof o === 'string' ? o : o.label;
+            const disabled = typeof o === 'object' && o.disabled;
             const sel = value === val;
             return (
-              <button key={val} onClick={() => onChange(val)} style={{
-                padding: '6px 12px', borderRadius: 14, cursor: 'pointer',
+              <button key={val} onClick={() => !disabled && onChange(val)} style={{
+                padding: '6px 12px', borderRadius: 14,
+                cursor: disabled ? 'not-allowed' : 'pointer',
                 border: `1px solid ${sel ? A.purple : A.line}`,
                 background: sel ? A.purple : '#fff', color: sel ? '#fff' : A.inkSoft,
                 fontFamily: mono ? A.mono : A.sans,
@@ -776,6 +778,7 @@
                 letterSpacing: mono ? 0.6 : 0,
                 textTransform: mono ? 'uppercase' : 'none',
                 transition: 'all .15s',
+                opacity: disabled ? 0.35 : 1,
               }}>{label}</button>
             );
           })}
@@ -1043,7 +1046,16 @@
             <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: oneColumn ? 20 : 28 }}>
               <Dropdown label="Country of Incorporation" value={geoInc} required error={errors?.geoInc} options={[{ value: 'india', label: 'India' }, { value: 'us', label: 'United States' }, { value: 'singapore', label: 'Singapore' }, { value: 'uk', label: 'United Kingdom' }]} onChange={(v) => { setGeoInc(v); onInputChange && onInputChange(); }} />
               <Dropdown label="Country of Operation" value={geoOp} required error={errors?.geoOp} options={[{ value: 'india', label: 'India' }, { value: 'us', label: 'United States' }, { value: 'singapore', label: 'Singapore' }, { value: 'uk', label: 'United Kingdom' }]} onChange={(v) => { setGeoOp(v); onInputChange && onInputChange(); }} />
-              <Dropdown label="Current Stage" value={stage} required error={errors?.stage} options={[{ value: 'preseed', label: 'Pre-seed' }, { value: 'seed', label: 'Seed' }, { value: 'seriesab', label: 'Series A/B' }, { value: 'seriesbc', label: 'Series B/C' }, { value: 'seriesc', label: 'Series C+' }]} onChange={(v) => { setStage(v); onInputChange && onInputChange(); }} />
+              <Dropdown label="Current Stage" value={stage} required error={errors?.stage} options={[{ value: 'preseed', label: 'Pre-seed' }, { value: 'seed', label: 'Seed' }, { value: 'seriesab', label: 'Series A/B' }, { value: 'seriesbc', label: 'Series B/C' }, { value: 'seriesc', label: 'Series C+' }]} onChange={(v) => {
+                setStage(v);
+                const stageOrd = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
+                const rounds = ['preseed', 'seed', 'seriesab', 'seriesbc', 'seriesc'];
+                if ((stageOrd[fundraiseRound] ?? 99) <= (stageOrd[v] ?? -1)) {
+                  const nextRound = rounds.find(r => (stageOrd[r] ?? 99) > (stageOrd[v] ?? -1));
+                  if (nextRound) setFundraiseRound(nextRound);
+                }
+                onInputChange && onInputChange();
+              }} />
               <FormField label="Legal Entity Name" placeholder="e.g. Acme Corp Ltd." required value={legalEntity} onChange={(v) => { setLegalEntity(v); onInputChange && onInputChange(); }} error={errors?.legalEntityName} />
             </div>
           </FormSection>
@@ -1058,7 +1070,7 @@
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <SwitchCard on={fundraise} onChange={(v) => { setFundraise(v); onInputChange && onInputChange(); }} title="Planning to fundraise in the next 12 months?" subtitle="Helps us model upcoming governance & onboarding workflows.">
-                <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={setFundraiseRound} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} errors={errors} />
+                <FundraiseExpanded oneColumn={oneColumn} round={fundraiseRound} setRound={(v) => { setFundraiseRound(v); onInputChange && onInputChange(); }} currentStage={stage} shareholders={newShareholdersFromFundraise} setShareholders={setNewShareholdersFromFundraise} errors={errors} />
               </SwitchCard>
               <SwitchCard on={valuation} onChange={(v) => { setValuation(v); onInputChange && onInputChange(); }} title="Do you need valuation reports?" subtitle="Required for ESOP grant pricing, fundraising, and exit events.">
                 <ValuationExpanded oneColumn={oneColumn} stage={stage} geoInc={geoInc} freq={valFreq} setFreq={(f) => { setValFreq(f); onInputChange && onInputChange(); }} type={valType} setType={(t) => { setValType(t); onInputChange && onInputChange(); }} errors={errors} />
@@ -1138,21 +1150,28 @@
       );
     }
 
-    function FundraiseExpanded({ oneColumn, round, setRound, shareholders, setShareholders, errors }) {
+    function FundraiseExpanded({ oneColumn, round, setRound, currentStage, shareholders, setShareholders, errors }) {
       const [timing, setTiming] = useState('3–6 mo');
+      const stageOrder = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
+      const currentStageIdx = stageOrder[currentStage] ?? -1;
+      const allRounds = [
+        { value: 'preseed', label: 'Pre-seed' },
+        { value: 'seed', label: 'Seed' },
+        { value: 'seriesab', label: 'Series A/B' },
+        { value: 'seriesbc', label: 'Series B/C' },
+        { value: 'seriesc', label: 'Series C+' },
+      ];
+      const roundOptions = allRounds.map(r => ({
+        ...r,
+        disabled: (stageOrder[r.value] ?? 99) <= currentStageIdx,
+      }));
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: oneColumn ? '1fr' : '1fr 1fr', gap: 16 }}>
             <div>
               <MonoLabel>Round type</MonoLabel>
               <div style={{ marginTop: 8 }}>
-                <ChipSelect value={round} onChange={setRound} options={[
-                  { value: 'preseed', label: 'Pre-seed' },
-                  { value: 'seed', label: 'Seed' },
-                  { value: 'seriesab', label: 'Series A/B' },
-                  { value: 'seriesbc', label: 'Series B/C' },
-                  { value: 'seriesc', label: 'Series C+' }
-                ]} />
+                <ChipSelect value={round} onChange={setRound} options={roundOptions} />
               </div>
             </div>
             <div>
