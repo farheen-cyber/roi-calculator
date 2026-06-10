@@ -1085,7 +1085,12 @@
           <PrimaryBtn fullWidth size="lg" onClick={() => {
             const overrides = {};
             if (editedRate !== null && editedRate !== '') {
-              overrides.rate = parseInt(editedRate, 10);
+              const rateValue = parseInt(editedRate, 10);
+              if (adminMethod === 'outsourced') {
+                overrides.methodExtCost = rateValue;
+              } else {
+                overrides.rate = rateValue;
+              }
             }
             if (editedHours !== null && editedHours !== '') {
               overrides.manualHTotal = parseInt(editedHours, 10);
