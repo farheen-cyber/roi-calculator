@@ -1570,7 +1570,7 @@
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
+                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal * v.mult)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedHours(val);
