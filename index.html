@@ -180,6 +180,23 @@
       uk: { preseed: 4500, seed: 8000, seriesab: 12000, seriesbc: 22000, seriesc: 40000 }
     };
 
+    // Stage-adjusted baselines for retainer scaling (Approach 2)
+    const STAKEHOLDER_BASELINES = {
+      preseed: 10,
+      seed: 25,
+      seriesab: 50,
+      seriesbc: 100,
+      seriesc: 150
+    };
+
+    const GRANT_BASELINES = {
+      preseed: 0,
+      seed: 2,
+      seriesab: 5,
+      seriesbc: 10,
+      seriesc: 15
+    };
+
     // Redesigned to represent actual time allocation percentages (sum to 1.0 per stage)
     // These values represent what % of each role's time is spent on equity work annually
     // Calculated from Section 4 work hours: grant admin + compliance + cap table + fundraising
@@ -457,7 +474,18 @@
 
       let methodExtCost = overrides.methodExtCost || 0;
       if (meth === 'outsourced' && !overrides.methodExtCost) {
-        methodExtCost = STAGE_RETAINER[geoInc][stageKey];
+        const baseRetainer = STAGE_RETAINER[geoInc][stageKey];
+
+        // Scale retainer based on complexity (Approach 2)
+        const totalStakeholders = sh + oh + parseInt(grNewHire, 10);
+        const stakeholderBaseline = STAKEHOLDER_BASELINES[stageKey];
+        const grantBaseline = GRANT_BASELINES[stageKey];
+
+        const stakeholderFactor = 1 + Math.max(0, totalStakeholders - stakeholderBaseline) / 200;
+        const grantFactor = 1 + Math.max(0, grRefresh - grantBaseline) / 50;
+        const fundraisingFactor = planningToFundraise ? 1.3 : 1.0;
+
+        methodExtCost = Math.round(baseRetainer * stakeholderFactor * grantFactor * fundraisingFactor);
       }
 
       let valuationCost = 0;
