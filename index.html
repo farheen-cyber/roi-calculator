@@ -398,9 +398,18 @@
       const grNewHireNum = parseInt(grNewHire, 10);
       const grRefreshNum = parseInt(grRefresh, 10);
       const totalGrantAdminWork = oh + grNewHireNum + grRefreshNum;
-      const grHrs = totalGrantAdminWork * grHr;
+
+      // Calculate adjusted hour values (will be set properly after originalHTotal is computed)
+      // For now, default to original values
+      let adjustedGrHr = grHr;
+      let adjustedCompHr = compHr;
+      let adjustedCtRaw = 0;  // Will be set after ctRaw is calculated
+      let adjustedCtFundraisingHours = 0;  // Will be set after ctFundraisingHours is calculated
+      let adjustedSecFundraisingRaw = 0;  // Will be set after secFundraisingRaw is calculated
+
+      const grHrs = totalGrantAdminWork * adjustedGrHr;
       const grCost = grHrs * mult * rate;
-      const cpCost = compHr * mult * rate;
+      const cpCost = adjustedCompHr * mult * rate;
 
       // === CAP TABLE MAINTENANCE ===
       // Base: 3 hours/month (reconciliation, board updates, record-keeping)
@@ -411,7 +420,8 @@
       const ctShareholderScale = Math.max(0, (sh - 20) / 50);
       const ctMonthlyHours = sh > 0 ? CAP_TABLE_BASE_HOURS_PER_MONTH + (ctShareholderScale * CAP_TABLE_SCALING_INCREMENT) : 0;
       const ctRaw = ctMonthlyHours * 12; // annualize
-      const ctHrs = ctRaw * mult;
+      adjustedCtRaw = ctRaw;  // Will be overridden if hours are overridden
+      const ctHrs = adjustedCtRaw * mult;
       const ctCost = ctHrs * rate;
 
       const ROUND_COMPLEXITY = { preseed: 0.5, safe: 0.5, bridge: 0.75, seed: 1.0, seriesab: 1.5, seriesbc: 2.0, seriesc: 2.5 };
@@ -424,7 +434,8 @@
       const HOURS_PER_WORKFLOW = 2.5;
       const ctFundraisingBaseHours = FUNDRAISING_WORKFLOWS.capTable * HOURS_PER_WORKFLOW; // 3 × 2.5 = 7.5
       const ctFundraisingHours = planningToFundraise ? (ctFundraisingBaseHours * roundMultiplier) : 0;
-      const ctFundraisingHrs = ctFundraisingHours * mult;
+      adjustedCtFundraisingHours = ctFundraisingHours;  // Will be overridden if hours are overridden
+      const ctFundraisingHrs = adjustedCtFundraisingHours * mult;
       const ctFundraisingCost = ctFundraisingHrs * rate;
 
       const secRate = STAGE_HOURLY_RATES[geoInc][stageKey].cs;
@@ -440,7 +451,8 @@
       // Shareholder scaling: starts at 1.0 for ≤20 shareholders, increases 0.5% for every 100 shareholders above 20
       const secFundraisingScaling = 1 + Math.max(0, (effectiveShareholders - 20) / 100) * 0.5;
       const secFundraisingRaw = secFundraisingHours * secFundraisingScaling;
-      const secFundraisingHrs = secFundraisingRaw * mult;
+      adjustedSecFundraisingRaw = secFundraisingRaw;  // Will be overridden if hours are overridden
+      const secFundraisingHrs = adjustedSecFundraisingRaw * mult;
       const secFundraisingCost = secFundraisingHrs * secRate;
 
       let methodExtCost = overrides.methodExtCost || 0;
@@ -469,10 +481,29 @@
       const originalHTotal = totalGrantAdminWork * grHr + compHr + ctRaw + ctFundraisingHours + secFundraisingRaw;
       const manualHTotal = overrides.manualHTotal || originalHTotal;
 
-      // If hours are overridden, adjust cost proportionally
+      // If hours are overridden, recalculate adjusted hour values for each component
+      // This ensures fixed costs (like retainer) aren't scaled
       if (overrides.manualHTotal && originalHTotal > 0) {
-        const hoursRatio = overrides.manualHTotal / originalHTotal;
-        annCost = Math.round(annCost * hoursRatio);
+        const hoursRatio = manualHTotal / originalHTotal;
+        adjustedGrHr = grHr * hoursRatio;
+        adjustedCompHr = compHr * hoursRatio;
+        adjustedCtRaw = ctRaw * hoursRatio;
+        adjustedCtFundraisingHours = ctFundraisingHours * hoursRatio;
+        adjustedSecFundraisingRaw = secFundraisingRaw * hoursRatio;
+
+        // Recalculate all cost components with adjusted hours
+        const newGrHrs = totalGrantAdminWork * adjustedGrHr;
+        const newGrCost = newGrHrs * mult * rate;
+        const newCpCost = adjustedCompHr * mult * rate;
+        const newCtHrs = adjustedCtRaw * mult;
+        const newCtCost = newCtHrs * rate;
+        const newCtFundraisingHrs = adjustedCtFundraisingHours * mult;
+        const newCtFundraisingCost = newCtFundraisingHrs * rate;
+        const newSecFundraisingHrs = adjustedSecFundraisingRaw * mult;
+        const newSecFundraisingCost = newSecFundraisingHrs * secRate;
+
+        // Recalculate total cost with adjusted components (retainer stays fixed)
+        annCost = newGrCost + newCpCost + newCtCost + newCtFundraisingCost + newSecFundraisingCost + methodExtCost + valuationCost;
       }
 
       const adjustedHTotal = manualHTotal * mult;
@@ -1446,13 +1477,13 @@
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-                      <MonoLabel size={10} color={A.inkSoft}>Total equity management hours</MonoLabel>
+                      <MonoLabel size={10} color={A.inkSoft}>{recalcFormValues?.meth === 'outsourced' ? 'Internal effort hours' : 'Total equity management hours'}</MonoLabel>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal)}
+                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(recalcFormValues?.meth === 'outsourced' ? v.manualHTotal * v.mult : v.manualHTotal)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedHours(val);
@@ -1839,10 +1870,10 @@
               setMode('stale');
             }
 
-            // Clear edited assumptions if method changed (prevent stale values showing when switching methods)
+            // Clear edited rate if method changed, but preserve hours (displays will adapt to show method-aware values)
             if (currentFormData.meth !== formData.meth) {
               setEditedRate(null);
-              setEditedHours(null);
+              // Don't clear editedHours - the display logic handles showing the right context
             }
 
             // Track which specific fields have changed from last calculated values
