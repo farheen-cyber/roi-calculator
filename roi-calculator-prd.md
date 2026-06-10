@@ -1,8 +1,22 @@
-# EquityList ROI Calculator — Complete Technical Specification v4.0
+# EquityList ROI Calculator — Complete Technical Specification v4.1
 
-**Version**: 4.0 (Fully Consolidated & Comprehensive)  
-**Last Updated**: May 27, 2026  
+**Version**: 4.1 (Updated June 10, 2026)  
+**Last Updated**: June 10, 2026  
 **Purpose**: Single-source-of-truth technical documentation covering every calculation, assumption, design decision, and implementation detail for the ROI calculator. Consolidates all previous separate documentation files.
+
+### v4.1 Changes (June 10, 2026)
+
+**Retainer Scaling Baseline Adjustments** (Section 4.5):
+- Increased STAKEHOLDER_BASELINES by 50% across all stages, then additional 10% for growth stages (A/B, B/C, C+), then reduced growth stages by 10%:
+  - Pre-seed: 10 → 15 | Seed: 25 → 37 | Series A/B: 50 → 75 | Series B/C: 100 → 148 | Series C+: 150 → 223
+- Doubled GRANT_BASELINES across all stages (100% increase):
+  - Pre-seed: 0 → 0 | Seed: 2 → 6 | Series A/B: 5 → 16 | Series B/C: 10 → 34 | Series C+: 15 → 48
+- Impact: Companies now trigger retainer cost scaling at higher stakeholder/grant thresholds, making outsourced CA pricing more conservative
+
+**Base Retainer Rate Updates**:
+- **India**: Reduced Series A/B (₹151K → ₹130K), Series B/C (₹256K → ₹220K), Series C+ (₹407K → ₹350K)
+- **Singapore**: Reduced across all growth stages — Seed (S$16K → S$11K), Series A/B (S$21K → S$15K), Series B/C (S$40K → S$28K), Series C+ (S$71K → S$50K)
+- Impact: Lower base retainer costs for outsourced CA/law firm method in these geographies
 
 ---
 
@@ -631,12 +645,12 @@ Stage-based because service providers charge more for companies with more comple
 - Preseed startup: simpler cap table, fewer shareholders, fewer workflows → cheaper
 - Series C company: complex equity structure, many investors, regulatory complexity → expensive
 
-**India** (Updated June 2026): 
+**India** (Updated June 10, 2026): 
 - Preseed: ₹60,000/yr
 - Seed: ₹90,000/yr
-- Series A/B: ₹151,000/yr
-- Series B/C: ₹256,000/yr
-- Series C+: ₹407,000/yr
+- Series A/B: ₹130,000/yr
+- Series B/C: ₹220,000/yr
+- Series C+: ₹350,000/yr
 
 **US**: 
 - Preseed: $6,000/yr
@@ -645,12 +659,12 @@ Stage-based because service providers charge more for companies with more comple
 - Series B/C: $35,000/yr
 - Series C+: $60,000/yr
 
-**Singapore** (Updated June 2026): 
+**Singapore** (Updated June 10, 2026): 
 - Preseed: S$10,000/yr
-- Seed: S$16,000/yr
-- Series A/B: S$21,000/yr
-- Series B/C: S$40,000/yr
-- Series C+: S$71,000/yr
+- Seed: S$11,000/yr
+- Series A/B: S$15,000/yr
+- Series B/C: S$28,000/yr
+- Series C+: S$50,000/yr
 
 **UK**: 
 - Preseed: £4,500/yr
@@ -683,11 +697,11 @@ Scaled Retainer = Base Retainer
 
 | Stage | Stakeholder Baseline | Grant Baseline |
 |-------|----------------------|-----------------|
-| Pre-seed | 10 | 0 |
-| Seed | 25 | 2 |
-| Series A/B | 50 | 5 |
-| Series B/C | 100 | 10 |
-| Series C+ | 150 | 15 |
+| Pre-seed | 15 | 0 |
+| Seed | 37 | 6 |
+| Series A/B | 75 | 16 |
+| Series B/C | 148 | 34 |
+| Series C+ | 223 | 48 |
 
 **Rationale**:
 - Simple companies at their stage pay no scaling penalty (complexity is within expectations)
