@@ -1002,7 +1002,7 @@
       const [geoOp, setGeoOp] = useState('india');
       const [legalEntity, setLegalEntity] = useState('');
       const [fundraise, setFundraise] = useState(false);
-      const [fundraiseRound, setFundraiseRound] = useState('seed');
+      const [fundraiseRound, setFundraiseRound] = useState('seriesbc');
       const [newShareholdersFromFundraise, setNewShareholdersFromFundraise] = useState('0');
       const [valuation, setValuation] = useState(false);
       const [valFreq, setValFreq] = useState(null);
@@ -1052,7 +1052,7 @@
                 const rounds = ['preseed', 'seed', 'seriesab', 'seriesbc', 'seriesc'];
                 if ((stageOrd[fundraiseRound] ?? 99) <= (stageOrd[v] ?? -1)) {
                   const nextRound = rounds.find(r => (stageOrd[r] ?? 99) > (stageOrd[v] ?? -1));
-                  if (nextRound) setFundraiseRound(nextRound);
+                  setFundraiseRound(nextRound || 'seriesc');
                 }
                 onInputChange && onInputChange();
               }} />
@@ -1163,7 +1163,7 @@
       ];
       const roundOptions = allRounds.map(r => ({
         ...r,
-        disabled: (stageOrder[r.value] ?? 99) <= currentStageIdx,
+        disabled: (stageOrder[r.value] ?? 99) <= currentStageIdx && !(currentStage === 'seriesc' && r.value === 'seriesc'),
       }));
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
