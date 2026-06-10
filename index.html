@@ -1474,7 +1474,7 @@
                 <MonoLabel size={10} color={A.ink} style={{ marginBottom: 12, display: 'block' }}>Assumptions</MonoLabel>
 
                 {/* IN-HOUSE METHOD */}
-                {recalcFormValues?.meth === 'in-house' && (
+                {recalcFormValues?.meth === 'in-house' && mode !== 'sample' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1533,7 +1533,7 @@
                 )}
 
                 {/* OUTSOURCED RETAINER METHOD */}
-                {recalcFormValues?.meth === 'outsourced' && (
+                {recalcFormValues?.meth === 'outsourced' && mode !== 'sample' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
