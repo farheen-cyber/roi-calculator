@@ -1050,10 +1050,8 @@
                 setStage(v);
                 const stageOrd = { preseed: 0, seed: 1, seriesab: 2, seriesbc: 3, seriesc: 4 };
                 const rounds = ['preseed', 'seed', 'seriesab', 'seriesbc', 'seriesc'];
-                if ((stageOrd[fundraiseRound] ?? 99) <= (stageOrd[v] ?? -1)) {
-                  const nextRound = rounds.find(r => (stageOrd[r] ?? 99) > (stageOrd[v] ?? -1));
-                  setFundraiseRound(nextRound || 'seriesc');
-                }
+                const nextRound = rounds.find(r => (stageOrd[r] ?? 99) > (stageOrd[v] ?? -1));
+                setFundraiseRound(nextRound || 'seriesc');
                 onInputChange && onInputChange();
               }} />
               <FormField label="Legal Entity Name" placeholder="e.g. Acme Corp Ltd." required value={legalEntity} onChange={(v) => { setLegalEntity(v); onInputChange && onInputChange(); }} error={errors?.legalEntityName} />
