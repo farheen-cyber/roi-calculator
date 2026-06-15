@@ -1510,7 +1510,7 @@
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.rate)}
+                            value={editedRate !== null ? editedRate : Math.round(v.rate)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedRate(val);
@@ -1535,7 +1535,7 @@
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(recalcFormValues?.meth === 'outsourced' ? v.manualHTotal * v.mult : v.manualHTotal)}
+                            value={editedHours !== null ? editedHours : Math.round(recalcFormValues?.meth === 'outsourced' ? v.manualHTotal * v.mult : v.manualHTotal)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedHours(val);
@@ -1569,7 +1569,7 @@
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedRate !== null && editedRate !== '' ? editedRate : Math.round(v.methodExtCost)}
+                            value={editedRate !== null ? editedRate : Math.round(v.methodExtCost)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedRate(val);
@@ -1594,7 +1594,7 @@
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedHours !== null && editedHours !== '' ? editedHours : Math.round(v.manualHTotal * v.mult)}
+                            value={editedHours !== null ? editedHours : Math.round(v.manualHTotal * v.mult)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedHours(val);
@@ -1618,8 +1618,8 @@
                 <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
                   <button
                     onClick={() => {
-                      setEditedRate('');
-                      setEditedHours('');
+                      setEditedRate(null);
+                      setEditedHours(null);
                       setLeavingStale(true);
                       onRecalculate && onRecalculate(recalcFormValues, {});
                     }}
@@ -1630,7 +1630,9 @@
                     Reset
                   </button>
                   <button
+                    disabled={editedRate === '' || editedHours === ''}
                     onClick={() => {
+                      if (editedRate === '' || editedHours === '') return;
                       const overrides = {};
 
                       // If user edited rate, apply it based on method
@@ -1654,13 +1656,18 @@
                         onRecalculate && onRecalculate(recalcFormValues, overrides);
                       }
                     }}
-                    style={{ flex: 1, padding: '10px 16px', background: A.purple, color: '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'background .15s' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = A.purple2; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = A.purple; }}
+                    style={{ flex: 1, padding: '10px 16px', background: (editedRate === '' || editedHours === '') ? A.line : A.purple, color: (editedRate === '' || editedHours === '') ? A.muteSoft : '#fff', border: 'none', borderRadius: 6, fontFamily: A.sans, fontSize: 14, fontWeight: 600, cursor: (editedRate === '' || editedHours === '') ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
+                    onMouseEnter={(e) => { if (!(editedRate === '' || editedHours === '')) e.currentTarget.style.background = A.purple2; }}
+                    onMouseLeave={(e) => { if (!(editedRate === '' || editedHours === '')) e.currentTarget.style.background = A.purple; }}
                   >
                     Apply
                   </button>
                 </div>
+                {(editedRate === '' || editedHours === '') && (
+                  <div style={{ fontSize: 11, color: A.muteSoft, marginTop: 8 }}>
+                    Enter a value in each field to apply.
+                  </div>
+                )}
               </div>
             )}
           </div>
