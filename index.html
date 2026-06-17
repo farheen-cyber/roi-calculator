@@ -1927,34 +1927,60 @@
           setCurrentFormValues(currentFormData);
 
           if (formData) {
-            if (mode === 'live') {
-              setMode('stale');
-            }
+            // Check if only the method changed (or primarily method)
+            const methodChanged = currentFormData.meth !== formData.meth;
 
-            // Clear edited rate if method changed, but preserve hours (displays will adapt to show method-aware values)
-            if (currentFormData.meth !== formData.meth) {
+            if (methodChanged) {
+              // Live-recalculate when method changes to show correct retainer cost immediately
               setEditedRate(null);
-              // Don't clear editedHours - the display logic handles showing the right context
+              setEditedHours(null);
+
+              // Create validated inputs for recalculation
+              const validatedInputs = {
+                ...currentFormData,
+                sh: parseInt(currentFormData.sh, 10),
+                oh: parseInt(currentFormData.oh, 10),
+                grNewHire: parseInt(currentFormData.grNewHire, 10),
+                grRefresh: parseInt(currentFormData.grRefresh, 10),
+              };
+
+              try {
+                const calcs = computeROI(validatedInputs);
+                setResults(calcs);
+                setFormData(validatedInputs);
+                setMode('live');
+                setDirtyInputs({});
+              } catch (error) {
+                // If calculation fails, fall back to stale mode
+                if (mode === 'live') {
+                  setMode('stale');
+                }
+              }
+            } else {
+              // For non-method changes, set to stale mode
+              if (mode === 'live') {
+                setMode('stale');
+              }
+
+              // Track which specific fields have changed from last calculated values
+              const newDirty = {};
+              const fields = ['sh', 'oh', 'grNewHire', 'grRefresh', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
+              fields.forEach(field => {
+                // Convert numeric fields for comparison (form values are strings, formData values are integers)
+                let currentVal = currentFormData[field];
+                let previousVal = formData[field];
+
+                if (['sh', 'oh', 'grNewHire', 'grRefresh', 'newShareholdersFromFundraise'].includes(field)) {
+                  currentVal = parseInt(currentVal, 10) || 0;
+                  previousVal = parseInt(previousVal, 10) || 0;
+                }
+
+                if (currentVal !== previousVal) {
+                  newDirty[field] = true;
+                }
+              });
+              setDirtyInputs(newDirty);
             }
-
-            // Track which specific fields have changed from last calculated values
-            const newDirty = {};
-            const fields = ['sh', 'oh', 'grNewHire', 'grRefresh', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
-            fields.forEach(field => {
-              // Convert numeric fields for comparison (form values are strings, formData values are integers)
-              let currentVal = currentFormData[field];
-              let previousVal = formData[field];
-
-              if (['sh', 'oh', 'grNewHire', 'grRefresh', 'newShareholdersFromFundraise'].includes(field)) {
-                currentVal = parseInt(currentVal, 10) || 0;
-                previousVal = parseInt(previousVal, 10) || 0;
-              }
-
-              if (currentVal !== previousVal) {
-                newDirty[field] = true;
-              }
-            });
-            setDirtyInputs(newDirty);
           }
         }
       };
