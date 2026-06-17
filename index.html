@@ -1822,24 +1822,22 @@
     }
 
     function ScreenA({ width, height }) {
-      const [formData, setFormData] = useState(null);
-      const [results, setResults] = useState(() => {
-        const defaultInputs = {
-          sh: 30,
-          oh: 15,
-          grNewHire: 5,
-          grRefresh: 5,
-          geoInc: 'india',
-          geoOp: 'india',
-          stage: 'seriesab',
-          meth: 'in-house',
-          legalEntityName: '',
-          planningToFundraise: false,
-          valuationFrequency: null,
-          valuationType: null
-        };
-        return computeROI(defaultInputs);
-      });
+      const defaultInputs = {
+        sh: 30,
+        oh: 15,
+        grNewHire: 5,
+        grRefresh: 5,
+        geoInc: 'india',
+        geoOp: 'india',
+        stage: 'seriesab',
+        meth: 'in-house',
+        legalEntityName: '',
+        planningToFundraise: false,
+        valuationFrequency: null,
+        valuationType: null
+      };
+      const [formData, setFormData] = useState(defaultInputs);
+      const [results, setResults] = useState(() => computeROI(defaultInputs));
       const [mode, setMode] = useState('sample');
       const [errors, setErrors] = useState({});
       const [dirtyInputs, setDirtyInputs] = useState({});
@@ -1946,11 +1944,13 @@
 
               try {
                 const calcs = computeROI(validatedInputs);
+                console.log('Method changed recalculation:', { oldMethod: formData.meth, newMethod: validatedInputs.meth, methodExtCost: calcs.methodExtCost });
                 setResults(calcs);
                 setFormData(validatedInputs);
                 setMode('live');
                 setDirtyInputs({});
               } catch (error) {
+                console.error('Method change recalculation failed:', error);
                 // If calculation fails, fall back to stale mode
                 if (mode === 'live') {
                   setMode('stale');
