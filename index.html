@@ -1498,7 +1498,7 @@
                 <MonoLabel size={10} color={A.ink} style={{ marginBottom: 12, display: 'block' }}>Assumptions</MonoLabel>
 
                 {/* IN-HOUSE METHOD */}
-                {recalcFormValues?.meth === 'in-house' && (
+                {v.meth === 'in-house' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1529,13 +1529,13 @@
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-                      <MonoLabel size={10} color={A.inkSoft}>{recalcFormValues?.meth === 'outsourced' ? 'Internal effort hours' : 'Total equity management hours'}</MonoLabel>
+                      <MonoLabel size={10} color={A.inkSoft}>{v.meth === 'outsourced' ? 'Internal effort hours' : 'Total equity management hours'}</MonoLabel>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <input
                             type="text"
                             inputMode="numeric"
-                            value={editedHours !== null ? editedHours : Math.round(recalcFormValues?.meth === 'outsourced' ? v.manualHTotal * v.mult : v.manualHTotal)}
+                            value={editedHours !== null ? editedHours : Math.round(v.meth === 'outsourced' ? v.manualHTotal * v.mult : v.manualHTotal)}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^\d]/g, '');
                               setEditedHours(val);
@@ -1557,7 +1557,7 @@
                 )}
 
                 {/* OUTSOURCED RETAINER METHOD */}
-                {recalcFormValues?.meth === 'outsourced' && (
+                {v.meth === 'outsourced' && (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1638,7 +1638,7 @@
                       // If user edited rate, apply it based on method
                       if (editedRate !== null && editedRate !== '') {
                         const rateValue = parseInt(editedRate, 10);
-                        if (recalcFormValues?.meth === 'outsourced') {
+                        if (v.meth === 'outsourced') {
                           overrides.methodExtCost = rateValue;
                         } else {
                           overrides.rate = rateValue;
@@ -1925,61 +1925,34 @@
           setCurrentFormValues(currentFormData);
 
           if (formData) {
-            // Check if only the method changed (or primarily method)
-            const methodChanged = currentFormData.meth !== formData.meth;
+            // Track which specific fields have changed from last calculated values
+            const newDirty = {};
+            const fields = ['sh', 'oh', 'grNewHire', 'grRefresh', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
+            fields.forEach(field => {
+              // Convert numeric fields for comparison (form values are strings, formData values are integers)
+              let currentVal = currentFormData[field];
+              let previousVal = formData[field];
 
-            if (methodChanged) {
-              // Live-recalculate when method changes to show correct retainer cost immediately
+              if (['sh', 'oh', 'grNewHire', 'grRefresh', 'newShareholdersFromFundraise'].includes(field)) {
+                currentVal = parseInt(currentVal, 10) || 0;
+                previousVal = parseInt(previousVal, 10) || 0;
+              }
+
+              if (currentVal !== previousVal) {
+                newDirty[field] = true;
+              }
+            });
+            setDirtyInputs(newDirty);
+
+            // Only blur/go stale if something actually changed (avoids blurring on initial mount)
+            if (Object.keys(newDirty).length > 0 && (mode === 'live' || mode === 'sample')) {
+              setMode('stale');
+            }
+
+            // Clear edited rate/hours if method changed (they don't carry across methods)
+            if (currentFormData.meth !== formData.meth) {
               setEditedRate(null);
               setEditedHours(null);
-
-              // Create validated inputs for recalculation
-              const validatedInputs = {
-                ...currentFormData,
-                sh: parseInt(currentFormData.sh, 10),
-                oh: parseInt(currentFormData.oh, 10),
-                grNewHire: parseInt(currentFormData.grNewHire, 10),
-                grRefresh: parseInt(currentFormData.grRefresh, 10),
-              };
-
-              try {
-                const calcs = computeROI(validatedInputs);
-                console.log('Method changed recalculation:', { oldMethod: formData.meth, newMethod: validatedInputs.meth, methodExtCost: calcs.methodExtCost });
-                setResults(calcs);
-                setFormData(validatedInputs);
-                setMode('live');
-                setDirtyInputs({});
-              } catch (error) {
-                console.error('Method change recalculation failed:', error);
-                // If calculation fails, fall back to stale mode
-                if (mode === 'live') {
-                  setMode('stale');
-                }
-              }
-            } else {
-              // For non-method changes, set to stale mode
-              if (mode === 'live') {
-                setMode('stale');
-              }
-
-              // Track which specific fields have changed from last calculated values
-              const newDirty = {};
-              const fields = ['sh', 'oh', 'grNewHire', 'grRefresh', 'geoInc', 'geoOp', 'stage', 'meth', 'planningToFundraise', 'fundraiseRound', 'newShareholdersFromFundraise', 'valuationFrequency', 'valuationType'];
-              fields.forEach(field => {
-                // Convert numeric fields for comparison (form values are strings, formData values are integers)
-                let currentVal = currentFormData[field];
-                let previousVal = formData[field];
-
-                if (['sh', 'oh', 'grNewHire', 'grRefresh', 'newShareholdersFromFundraise'].includes(field)) {
-                  currentVal = parseInt(currentVal, 10) || 0;
-                  previousVal = parseInt(previousVal, 10) || 0;
-                }
-
-                if (currentVal !== previousVal) {
-                  newDirty[field] = true;
-                }
-              });
-              setDirtyInputs(newDirty);
             }
           }
         }
